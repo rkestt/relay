@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { title, map_id, site_id, description, tags, image_url, hotspots } =
+    const { title, map_id, site_id, description, tags, image_url, hotspots, images } =
       body;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -53,7 +53,11 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!image_url || typeof image_url !== "string") {
+    const imageUrl = Array.isArray(images) && images.length > 0
+      ? images[0]
+      : image_url;
+
+    if (!imageUrl || typeof imageUrl !== "string") {
       return NextResponse.json(
         { error: "image_url is required" },
         { status: 400 },
@@ -68,7 +72,7 @@ export async function POST(request: Request) {
         map_id,
         site_id,
         description: description || null,
-        image_url,
+        image_url: imageUrl,
         status: "pending",
         created_by: user.id,
       })
@@ -111,6 +115,7 @@ export async function POST(request: Request) {
             x_percent: number;
             y_percent: number;
             label?: string;
+            image_id?: string;
           } =>
             typeof h === "object" &&
             h !== null &&
@@ -122,6 +127,7 @@ export async function POST(request: Request) {
           x_percent: h.x_percent,
           y_percent: h.y_percent,
           label: h.label || null,
+          image_id: h.image_id || null,
         }));
 
       if (hotspotRows.length > 0) {
@@ -133,6 +139,25 @@ export async function POST(request: Request) {
           logger.error("API", "Failed to insert hotspots", hotspotError);
           // Non-fatal
         }
+      }
+    }
+
+    // -- Insert images ----------------------------------------------------
+    const strategyImages = images as string[] | undefined;
+    if (Array.isArray(strategyImages) && strategyImages.length > 0) {
+      const imageRows = strategyImages.map((url, index) => ({
+        strategy_id: strategy.id,
+        image_url: url,
+        sort_order: index,
+      }));
+
+      const { error: imageError } = await supabase
+        .from("strategy_images")
+        .insert(imageRows);
+
+      if (imageError) {
+        logger.error("API", "Failed to insert images", imageError);
+        // Non-fatal — strategy already created
       }
     }
 
@@ -254,7 +279,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*)",
+        "id, title, description, image_url, status, map_id, site_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);

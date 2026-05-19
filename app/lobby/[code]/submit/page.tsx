@@ -76,8 +76,8 @@ export default function SubmitStrategyPage({
   const [description, setDescription] = useState("");
   const [tagsInput, setTagsInput] = useState("");
 
-  const [rawFile, setRawFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [rawFiles, setRawFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const [hotspots, setHotspots] = useState<HotspotItem[]>([]);
 
@@ -144,35 +144,53 @@ export default function SubmitStrategyPage({
   // ── Handle file selection ─────────────────────────
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0] ?? null;
-      if (!file) return;
+      const files = Array.from(e.target.files ?? []);
+      if (files.length === 0) return;
 
       const validTypes = ["image/png", "image/jpeg", "image/webp", "image/avif"];
-      if (!validTypes.includes(file.type)) {
-        logger.warn("SubmitPage", "Invalid file type", { type: file.type });
-        setError("Please select a PNG, JPEG, WebP, or AVIF image.");
+      for (const file of files) {
+        if (!validTypes.includes(file.type)) {
+          logger.warn("SubmitPage", "Invalid file type", { type: file.type });
+          setError("Please select PNG, JPEG, WebP, or AVIF images.");
+          return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          logger.warn("SubmitPage", "File too large", { size: file.size });
+          setError("Each image must be under 20 MB.");
+          return;
+        }
+      }
+
+      if (rawFiles.length + files.length > 5) {
+        setError("Maximum 5 images per strategy.");
         return;
       }
 
-      if (file.size > 20 * 1024 * 1024) {
-        logger.warn("SubmitPage", "File too large", { size: file.size });
-        setError("Image must be under 20 MB.");
-        return;
-      }
-
-      logger.debug("SubmitPage", "File selected", { name: file.name, size: file.size, type: file.type });
+      logger.debug("SubmitPage", "Files selected", { count: files.length });
       setError(null);
-      setRawFile(file);
+      setRawFiles((prev) => [...prev, ...files]);
 
-      const reader = new FileReader();
-      reader.onload = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+      const newPreviews: string[] = [];
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newPreviews.push(reader.result as string);
+          if (newPreviews.length === files.length) {
+            setImagePreviews((prev) => [...prev, ...newPreviews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
 
-      // Reset input so selecting the same file re-triggers onChange
       if (fileInputRef.current) fileInputRef.current.value = "";
     },
-    [],
+    [rawFiles.length],
   );
+
+  const handleRemoveImage = useCallback((index: number) => {
+    setRawFiles((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  }, []);
 
   const handlePlaceHotspot = useCallback((x: number, y: number) => {
     setHotspots((prev) => [
@@ -203,8 +221,8 @@ export default function SubmitStrategyPage({
       setError("Please select a site.");
       return;
     }
-    if (!rawFile) {
-      setError("Please upload a screenshot image.");
+    if (rawFiles.length === 0) {
+      setError("Please upload at least one screenshot image.");
       return;
     }
     if (!userId) {
@@ -217,8 +235,12 @@ export default function SubmitStrategyPage({
     setSubmitting(true);
 
     try {
-      const compressed = await compressImage(rawFile);
-      const imageUrl = await uploadImage(compressed, userId);
+      const imageUrls: string[] = [];
+      for (const file of rawFiles) {
+        const compressed = await compressImage(file);
+        const url = await uploadImage(compressed, userId);
+        imageUrls.push(url);
+      }
 
       const tags = tagsInput
         .split(",")
@@ -234,7 +256,7 @@ export default function SubmitStrategyPage({
           site_id: selectedSiteId,
           description: description.trim() || undefined,
           tags,
-          image_url: imageUrl,
+          images: imageUrls,
           hotspots: hotspots.map((h) => ({
             x_percent: h.x_percent,
             y_percent: h.y_percent,
@@ -256,7 +278,7 @@ export default function SubmitStrategyPage({
     } finally {
       setSubmitting(false);
     }
-  }, [title, selectedMapId, selectedSiteId, rawFile, userId, tagsInput, description, hotspots]);
+  }, [title, selectedMapId, selectedSiteId, rawFiles, userId, tagsInput, description, hotspots]);
 
   // ── Redirect after success ────────────────────────
   useEffect(() => {
@@ -543,9 +565,52 @@ export default function SubmitStrategyPage({
           {/* ── Image Upload ──────────────────────────── */}
           <section className="flex flex-col gap-2">
             <label className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-neutral-500 uppercase">
-              Screenshot
+              Screenshots
               <span className="text-red-400">*</span>
+              {imagePreviews.length > 0 && (
+                <span className="ml-1 text-amber-400 font-normal tracking-normal">
+                  ({imagePreviews.length}/5)
+                </span>
+              )}
             </label>
+
+            {imagePreviews.length > 0 && (
+              <div className="grid grid-cols-2 gap-3">
+                {imagePreviews.map((preview, i) => (
+                  <div key={i} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={preview}
+                      alt={`Preview ${i + 1}`}
+                      className="w-full h-32 object-cover rounded-xl"
+                    />
+                    {i === 0 && (
+                      <span className="absolute top-2 left-2 px-2 py-1 bg-amber-500 text-neutral-950 text-xs font-bold rounded">
+                        Cover
+                      </span>
+                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage(i);
+                      }}
+                      className="absolute top-2 right-2 p-1 bg-neutral-900/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div
               onClick={() => fileInputRef.current?.click()}
               onKeyDown={(e) => {
@@ -555,57 +620,42 @@ export default function SubmitStrategyPage({
               }}
               role="button"
               tabIndex={0}
-              aria-label="Upload screenshot"
+              aria-label="Upload screenshots"
               className={cn(
                 "relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 transition-all duration-200 cursor-pointer",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30",
                 "active:scale-[0.99]",
-                imagePreview
+                imagePreviews.length > 0
                   ? "border-neutral-700 bg-neutral-900"
                   : "border-neutral-800 bg-neutral-950 hover:border-neutral-600"
               )}
             >
-              {imagePreview ? (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="max-h-48 rounded-xl object-contain"
-                  />
-                  <p className="text-xs text-neutral-500 font-medium">
-                    Tap to change image
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="w-12 h-12 rounded-2xl border border-neutral-800 bg-neutral-900 flex items-center justify-center">
-                    <svg
-                      className="w-6 h-6 text-neutral-600"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="M21 15l-5-5L5 21" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-neutral-500 font-semibold">
-                    Upload screenshot
-                  </p>
-                  <p className="text-xs text-neutral-600">
-                    PNG, JPEG, WebP or AVIF (max 20 MB)
-                  </p>
-                </>
-              )}
+              <div className="w-12 h-12 rounded-2xl border border-neutral-800 bg-neutral-900 flex items-center justify-center">
+                <svg
+                  className="w-6 h-6 text-neutral-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="M21 15l-5-5L5 21" />
+                </svg>
+              </div>
+              <p className="text-sm text-neutral-500 font-semibold">
+                {imagePreviews.length > 0 ? "Add more images" : "Upload screenshots"}
+              </p>
+              <p className="text-xs text-neutral-600">
+                PNG, JPEG, WebP or AVIF (max 20 MB each, up to 5 images)
+              </p>
             </div>
             <input
               ref={fileInputRef}
               type="file"
+              multiple
               accept="image/png,image/jpeg,image/webp,image/avif"
               className="hidden"
               onChange={handleFileSelect}

@@ -87,7 +87,8 @@ export interface StrategyTemplate {
   site_id: string | null;
   title: string;
   description: string | null;
-  image_url: string;
+  image_url: string;  // primary image (backward compat)
+  images?: StrategyImage[];  // all images
   status: "pending" | "approved" | "rejected";
   created_by: string | null;
   created_at: string;
@@ -99,9 +100,19 @@ export interface StrategyTag {
   tag: string;
 }
 
+export interface StrategyImage {
+  id: string;
+  strategy_id: string;
+  image_url: string;
+  sort_order: number;
+  caption: string | null;
+  created_at: string;
+}
+
 export interface StrategyHotspot {
   id: string;
   strategy_id: string;
+  image_id: string | null;  // FK to strategy_images, NULL = primary image
   x_percent: number;
   y_percent: number;
   label: string | null;

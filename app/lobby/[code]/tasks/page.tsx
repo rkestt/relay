@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { MapViewer } from "@/components/maps/MapViewer";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
-import type { StrategyTemplate, StrategyHotspot, TaskAssignment } from "@/types";
+import type { StrategyTemplate, StrategyHotspot, StrategyImage, TaskAssignment } from "@/types";
 
 interface AssignedTask {
   assignment: TaskAssignment & {
@@ -35,6 +35,7 @@ export default function TasksPage({
   const [tasks, setTasks] = useState<AssignedTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
 
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
@@ -158,6 +159,26 @@ export default function TasksPage({
     if (!lobbyId) return;
     loadTasks(lobbyId);
   }, [lastEventAt, lastSync, lobbyId, loadTasks]);
+
+  // ── Image & hotspot helpers ──────────────────────────
+  function getStrategyImages(strategy: StrategyTemplate): string[] {
+    if (strategy.images && strategy.images.length > 0) {
+      return strategy.images
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((img) => img.image_url);
+    }
+    return [strategy.image_url];
+  }
+
+  function getHotspotsForImage(
+    hotspots: StrategyHotspot[],
+    imageIndex: number,
+    images: StrategyImage[]
+  ): StrategyHotspot[] {
+    if (images.length === 0) return hotspots; // fallback: tutti gli hotspot
+    const imageId = images[imageIndex]?.id;
+    return hotspots.filter((h) => h.image_id === imageId || h.image_id === null);
+  }
 
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
@@ -320,6 +341,17 @@ export default function TasksPage({
               );
             }
 
+            const strategy = assignment.strategy;
+            const strategyImages = getStrategyImages(strategy);
+            const currentImageIdx = activeImageIndex[strategy.id] ?? 0;
+            const safeIdx = Math.min(currentImageIdx, strategyImages.length - 1);
+            const currentImageUrl = strategyImages[safeIdx];
+            const currentHotspots = getHotspotsForImage(
+              hotspots,
+              safeIdx,
+              strategy.images ?? []
+            );
+
             return (
               <div
                 key={assignment.id}
@@ -328,43 +360,32 @@ export default function TasksPage({
               >
                 {/* Strategy header */}
                 <div className="px-5 pt-5 pb-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1.5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex flex-col gap-1.5 min-w-0">
                       <div className="flex items-center gap-2">
                         {/* Step indicator */}
-                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400 shrink-0">
                           {index + 1}
                         </span>
-                        <h2 className="text-base font-bold text-neutral-50">
-                          {assignment.strategy.title}
+                        <h2 className="text-base font-bold text-neutral-50 truncate">
+                          {strategy.title}
                         </h2>
                       </div>
-                      {assignment.strategy.description && (
+                      {strategy.description && (
                         <p className="text-sm text-neutral-400 leading-relaxed">
-                          {assignment.strategy.description}
+                          {strategy.description}
                         </p>
                       )}
                     </div>
-                    {/* Screenshot */}
-                    {assignment.strategy.image_url && (
-                      <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-neutral-800 border border-neutral-700">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={assignment.strategy.image_url}
-                          alt="Strategy screenshot"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
 
-                {/* Map with hotspots */}
-                {assignment.strategy.image_url && hotspots.length > 0 && (
-                  <div className="px-5 pb-5">
+                {/* Carousel image + hotspots */}
+                {currentImageUrl && (
+                  <div className="px-5 pb-2">
                     <MapViewer
-                      imageUrl={assignment.strategy.image_url}
-                      hotspots={hotspots.map((h) => ({
+                      imageUrl={currentImageUrl}
+                      hotspots={currentHotspots.map((h) => ({
                         x_percent: h.x_percent,
                         y_percent: h.y_percent,
                         label: h.label ?? "",
@@ -373,8 +394,25 @@ export default function TasksPage({
                   </div>
                 )}
 
-                {/* Fallback if no map image */}
-                {(!assignment.strategy.image_url || hotspots.length === 0) && (
+                {/* Dot indicators */}
+                {strategyImages.length > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-1 pb-5">
+                    {strategyImages.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() =>
+                          setActiveImageIndex((prev) => ({ ...prev, [strategy.id]: i }))
+                        }
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          safeIdx === i ? "bg-amber-500 w-4" : "bg-neutral-600"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {/* Fallback if no images at all */}
+                {!currentImageUrl && (
                   <div className="px-5 pb-5">
                     <div className="aspect-video rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center gap-2">
                       <svg
