@@ -3,9 +3,9 @@
 ## Next Steps (Ready to Execute)
 
 ### 1. Supabase Configuration
-- [ ] Get `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from project settings
-- [ ] Update `.env.local` with real credentials
-- [ ] Run migrations via Supabase SQL Editor or CLI:
+- [x] Get `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from project settings
+- [x] Update `.env.local` with real credentials
+- [x] Run migrations via Supabase CLI:
   ```
   1. supabase/migrations/00001_setup_schema.sql
   2. supabase/migrations/00002_rls_policies.sql
@@ -25,16 +25,22 @@
 - [ ] Test webhook by submitting a strategy
 
 ### 3. Git & GitHub
-- [ ] Initialize git repo (`git init`)
-- [ ] Create `.gitignore` (node_modules, .env.local, .next)
-- [ ] Create GitHub repository
-- [ ] Push initial commit
+- [x] Initialize git repo (`git init`)
+- [x] Create `.gitignore` (node_modules, .env.local, .next)
+- [x] Create GitHub repository (https://github.com/rkestt/r6hub)
+- [x] Push initial commit
 
 ### 4. Deploy
-- [ ] Link GitHub repo to Vercel
-- [ ] Add all environment variables in Vercel dashboard
-- [ ] Deploy and verify build passes
-- [ ] Test live deployment
+- [x] Link GitHub repo to Vercel
+- [x] Deploy to Vercel
+- [x] Add environment variables in Vercel dashboard
+- [x] Test live deployment
+
+**Status**: App live and running at https://r6hub-peach.vercel.app
+- Homepage loads correctly
+- Supabase connection: configured
+- Discord webhook: configured
+- Environment variables: set on Vercel
 
 ## Blocked (Requires User Action)
 

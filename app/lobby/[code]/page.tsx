@@ -7,7 +7,10 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import type { LobbyMember, Profile } from "@/types";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
@@ -21,7 +24,7 @@ interface LobbyState {
   members: (LobbyMember & {
     profiles: Profile | null;
   })[];
-  currentRound: { id: string; round_number: number } | null;
+  currentRound: { id: string; round_number: number; team_side: "attacker" | "defender" | null } | null;
   selections: unknown[];
   bans: {
     id: string;
@@ -49,6 +52,7 @@ export default function LobbyPage({
 
   // Resolve params
   useEffect(() => {
+    logger.info("LobbyPage", "LobbyPage mount");
     params.then(({ code: c }) => setCode(c));
   }, [params]);
 
@@ -60,7 +64,8 @@ export default function LobbyPage({
     });
   }, []);
 
-  const fetchLobbyState = useCallback(async (roomCode: string) => {
+  const loadLobby = useCallback(async (roomCode: string) => {
+    logger.debug("LobbyPage", "loadLobby start", { roomCode });
     const supabase = createBrowserClient();
 
     const { data: lobby } = await supabase
@@ -70,6 +75,7 @@ export default function LobbyPage({
       .single();
 
     if (!lobby) {
+      logger.warn("LobbyPage", "loadLobby error - lobby not found", { roomCode });
       setError("Lobby not found.");
       setLoading(false);
       return;
@@ -78,60 +84,76 @@ export default function LobbyPage({
     setLobbyId(lobby.id);
     storeSetLobbyId(lobby.id);
     storeSetLobbyCode(roomCode);
-    setIsLeader(currentUserId === lobby.leader_id);
 
     localStorage.setItem(ROOM_CODE_KEY, roomCode);
+  }, [storeSetLobbyId, storeSetLobbyCode]);
 
-    const res = await fetch(`/api/lobby/${lobby.id}/state`);
+  const refreshState = useCallback(async (lid: string) => {
+    logger.debug("LobbyPage", "refreshState start", { lobbyId: lid });
+    const res = await fetch(`/api/lobby/${lid}/state`);
     if (!res.ok) {
       const data = await res.json();
       throw new Error(data.error ?? "Failed to fetch lobby state");
     }
     const data: LobbyState = await res.json();
+    logger.info("LobbyPage", "refreshState ok", { lobbyId: lid, members: data.members.length });
     setState(data);
-    setIsLeader(currentUserId === lobby.leader_id);
     setLoading(false);
-  }, [currentUserId, storeSetLobbyId, storeSetLobbyCode, setIsLeader]);
+  }, []);
 
   useEffect(() => {
     if (!code || !currentUserId) return;
-    fetchLobbyState(code);
-  }, [code, currentUserId, fetchLobbyState]);
+    loadLobby(code);
+  }, [code, currentUserId, loadLobby]);
 
-  // Poll for updates every 3s
+  const { lastEventAt } = useLobbyRealtime(lobbyId);
+  const { lastSync } = useHeartbeat(lobbyId);
+
   useEffect(() => {
-    if (!code || !lobbyId) return;
-    const interval = setInterval(() => fetchLobbyState(code), 3000);
-    return () => clearInterval(interval);
-  }, [code, lobbyId, fetchLobbyState]);
+    if (lobbyId && (lastEventAt || lastSync)) {
+      refreshState(lobbyId);
+    }
+  }, [lobbyId, lastEventAt, lastSync]);
+
+  useEffect(() => {
+    if (state?.lobby && currentUserId) {
+      setIsLeader(currentUserId === state.lobby.leader_id);
+    }
+  }, [currentUserId, state?.lobby?.leader_id, setIsLeader]);
 
   const handleLeave = useCallback(async () => {
     if (!lobbyId) return;
     if (!confirm("Leave this lobby?")) return;
+    logger.info("LobbyPage", "Leave lobby", { lobbyId });
     try {
       await fetch(`/api/lobby/${lobbyId}/leave`, { method: "POST" });
       localStorage.removeItem(ROOM_CODE_KEY);
       router.push("/");
-    } catch {
+    } catch (err) {
+      logger.error("LobbyPage", "Leave lobby failed", err);
       setError("Failed to leave lobby");
     }
   }, [lobbyId, router]);
 
   const handleNewRound = useCallback(async () => {
     if (!lobbyId) return;
+    logger.info("LobbyPage", "New round click", { lobbyId });
     try {
       const res = await fetch(`/api/lobby/${lobbyId}/new-round`, { method: "POST" });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
       }
-      await fetchLobbyState(code);
+      logger.debug("LobbyPage", "New round successful, refetching state");
+      await refreshState(lobbyId);
     } catch (err) {
+      logger.error("LobbyPage", "New round failed", err);
       setError(err instanceof Error ? err.message : "Failed to start new round");
     }
-  }, [lobbyId, code, fetchLobbyState]);
+  }, [lobbyId, refreshState]);
 
   const handleSetBans = () => {
+    logger.info("LobbyPage", "Set bans click", { code });
     router.push(`/lobby/${code}/bans`);
   };
 
@@ -221,9 +243,21 @@ export default function LobbyPage({
             </span>
           </div>
           {state.currentRound ? (
-            <span className="text-xs text-neutral-600">
-              Round {state.currentRound.round_number}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-neutral-600">
+                Round {state.currentRound.round_number}
+              </span>
+              {state.currentRound.team_side && (
+                <span className={cn(
+                  "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded",
+                  state.currentRound.team_side === "attacker"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "bg-sky-500/20 text-sky-400"
+                )}>
+                  {state.currentRound.team_side}
+                </span>
+              )}
+            </div>
           ) : (
             <span className="text-xs text-neutral-600">Waiting for round…</span>
           )}
@@ -511,7 +545,10 @@ export default function LobbyPage({
               "transition-all duration-200",
               "shadow-[0_0_24px_-4px_rgba(240,240,240,0.12)]"
             )}
-            onClick={() => router.push(`/lobby/${code}/select`)}
+            onClick={() => {
+              logger.info("LobbyPage", "Select operator click", { code });
+              router.push(`/lobby/${code}/select`);
+            }}
           >
             Select Operator
           </Button>

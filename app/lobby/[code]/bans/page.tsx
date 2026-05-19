@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
+import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import type { Operator, OperatorTag, LobbyBan } from "@/types";
 
 interface LobbyBanWithOperator extends LobbyBan {
@@ -13,6 +16,7 @@ interface LobbyBanWithOperator extends LobbyBan {
 
 interface LobbyState {
   lobby: { id: string; room_code: string; leader_id: string };
+  currentRound: { id: string; round_number: number; team_side: "attacker" | "defender" | null } | null;
   bans: LobbyBanWithOperator[];
 }
 
@@ -28,11 +32,13 @@ export default function BansPage({
   const [operators, setOperators] = useState<Operator[]>([]);
   const [operatorTags, setOperatorTags] = useState<OperatorTag[]>([]);
   const [bans, setBans] = useState<LobbyBanWithOperator[]>([]);
+  const [currentRound, setCurrentRound] = useState<{ round_number: number; team_side: "attacker" | "defender" | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [banning, setBanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    logger.info("BansPage", "BansPage mount");
     params.then(({ code: c }) => setCode(c));
   }, [params]);
 
@@ -43,6 +49,7 @@ export default function BansPage({
       supabase.from("operators").select("*").then(({ data }) => data ?? []),
       supabase.from("operator_tags").select("*").then(({ data }) => data ?? []),
     ]).then(([opsData, tagsData]) => {
+      logger.debug("BansPage", "Operators and tags loaded", { operators: opsData.length, tags: tagsData.length });
       setOperators(opsData as Operator[]);
       setOperatorTags(tagsData as OperatorTag[]);
     });
@@ -53,6 +60,7 @@ export default function BansPage({
     if (!code) return;
 
     const load = async () => {
+      logger.debug("BansPage", "Fetch bans start", { code });
       try {
         const supabase = createBrowserClient();
         const { data: userData } = await supabase.auth.getUser();
@@ -65,6 +73,7 @@ export default function BansPage({
           .single();
 
         if (!lobby) {
+          logger.warn("BansPage", "Lobby not found", { code });
           setError("Lobby not found");
           setLoading(false);
           return;
@@ -76,8 +85,11 @@ export default function BansPage({
         const res = await fetch(`/api/lobby/${lobby.id}/state`);
         if (!res.ok) throw new Error("Failed to fetch state");
         const data: LobbyState = await res.json();
+        logger.info("BansPage", "Bans fetched", { banCount: data.bans.length });
         setBans(data.bans);
-      } catch {
+        setCurrentRound(data.currentRound);
+      } catch (err) {
+        logger.error("BansPage", "Failed to load bans", err);
         setError("Failed to load bans");
       } finally {
         setLoading(false);
@@ -87,11 +99,36 @@ export default function BansPage({
     load();
   }, [code]);
 
+  // ── Refresh bans from server ────────────────────────────
+  const refreshBans = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/lobby/${id}/state`);
+      if (res.ok) {
+        const data: LobbyState = await res.json();
+        setBans(data.bans);
+        setCurrentRound(data.currentRound);
+        logger.debug("BansPage", "Bans refreshed via sync", { banCount: data.bans.length });
+      }
+    } catch {
+      // silent fail during refresh
+    }
+  }, []);
+
+  const { lastEventAt } = useLobbyRealtime(lobbyId);
+  const { lastSync } = useHeartbeat(lobbyId);
+
+  // Refresh bans when realtime or heartbeat detects changes
+  useEffect(() => {
+    if (!lobbyId || (!lastEventAt && !lastSync)) return;
+    refreshBans(lobbyId);
+  }, [lobbyId, lastEventAt, lastSync, refreshBans]);
+
   const bannedOperatorIds = new Set(bans.map((b) => b.operator_id));
 
   const handleBan = useCallback(
     async (operatorId: string, side: "attacker" | "defender") => {
       if (!lobbyId) return;
+      logger.info("BansPage", "Toggle ban", { operatorId, side, lobbyId });
       setBanning(true);
       setError(null);
       try {
@@ -104,6 +141,7 @@ export default function BansPage({
           const data = await res.json();
           throw new Error(data.error ?? "Failed to ban operator");
         }
+        logger.debug("BansPage", "Ban saved, refreshing bans");
         // Refresh bans
         const stateRes = await fetch(`/api/lobby/${lobbyId}/state`);
         if (stateRes.ok) {
@@ -111,6 +149,7 @@ export default function BansPage({
           setBans(data.bans);
         }
       } catch (err) {
+        logger.error("BansPage", "Ban failed", err);
         setError(err instanceof Error ? err.message : "Failed to ban operator");
       } finally {
         setBanning(false);
@@ -134,7 +173,19 @@ export default function BansPage({
       <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
         <div>
           <h1 className="text-base font-semibold text-neutral-50">Set Bans</h1>
-          <p className="text-xs text-neutral-500">Room {code}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-neutral-500">Room {code}</p>
+            {currentRound && (
+              <span className={cn(
+                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded",
+                currentRound.team_side === "attacker"
+                  ? "bg-amber-500/20 text-amber-400"
+                  : "bg-sky-500/20 text-sky-400"
+              )}>
+                Round {currentRound.round_number} — {currentRound.team_side ?? "?"}
+              </span>
+            )}
+          </div>
         </div>
         <Button
           variant="ghost"

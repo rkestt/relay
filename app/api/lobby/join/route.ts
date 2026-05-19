@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
     }
 
     const normalizedCode = room_code.trim().toUpperCase();
+    logger.info("API", "POST /api/lobby/join start", { room_code: normalizedCode });
 
     // -- Look up lobby by room_code -------------------------------------
     const { data: lobby, error: lobbyError } = await supabase
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
         !("code" in memberError) ||
         (memberError as { code: string }).code !== "23505"
       ) {
-        console.error("Failed to join lobby:", memberError);
+        logger.error("API", "Failed to join lobby", memberError);
         return NextResponse.json(
           { error: "Failed to join lobby" },
           { status: 500 },
@@ -72,11 +74,12 @@ export async function POST(request: Request) {
       }
     }
 
+    logger.debug("API", "POST /api/lobby/join success", { lobbyId: lobby.id, roomCode: lobby.room_code });
     return NextResponse.json({
       lobby: { id: lobby.id, room_code: lobby.room_code },
     });
   } catch (error) {
-    console.error("Lobby join unexpected error:", error);
+    logger.error("API", "Lobby join unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

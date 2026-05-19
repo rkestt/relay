@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
 
@@ -12,36 +13,49 @@ export default function HomePage() {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [roomCode, setRoomCode] = useState("");
   const [rejoinCode, setRejoinCode] = useState<string | null>(null);
+  const [startingSide, setStartingSide] = useState<"attacker" | "defender">("attacker");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Check localStorage on mount for existing room_code
   useEffect(() => {
+    logger.info("Landing", "Landing mount");
     const stored = localStorage.getItem(ROOM_CODE_KEY);
-    if (stored) setRejoinCode(stored);
+    if (stored) {
+      logger.info("Landing", "Rejoin code found in storage", { code: stored });
+      setRejoinCode(stored);
+    }
   }, []);
 
   const handleCreate = useCallback(async () => {
+    logger.info("Landing", "Create lobby click", { startingSide });
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/lobby", { method: "POST" });
+      const res = await fetch("/api/lobby", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ starting_side: startingSide }),
+      });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error ?? "Failed to create lobby");
       }
       const { lobby } = await res.json();
+      logger.info("Landing", "Lobby created", { room_code: lobby.room_code, startingSide: lobby.starting_side });
       localStorage.setItem(ROOM_CODE_KEY, lobby.room_code);
       router.push(`/lobby/${lobby.room_code}`);
     } catch (err) {
+      logger.error("Landing", "Create lobby failed", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, startingSide]);
 
   const handleJoin = useCallback(async () => {
     if (!roomCode.trim()) return;
+    logger.info("Landing", "Join lobby click", { code: roomCode.trim().toUpperCase() });
     setLoading(true);
     setError(null);
     try {
@@ -55,9 +69,11 @@ export default function HomePage() {
         throw new Error(data.error ?? "Failed to join lobby");
       }
       const { lobby } = await res.json();
+      logger.info("Landing", "Lobby joined", { room_code: lobby.room_code });
       localStorage.setItem(ROOM_CODE_KEY, lobby.room_code);
       router.push(`/lobby/${lobby.room_code}`);
     } catch (err) {
+      logger.error("Landing", "Join lobby failed", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
@@ -66,6 +82,7 @@ export default function HomePage() {
 
   const handleRejoin = useCallback(async () => {
     if (!rejoinCode) return;
+    logger.info("Landing", "Rejoin", { code: rejoinCode });
     setLoading(true);
     setError(null);
     try {
@@ -81,8 +98,10 @@ export default function HomePage() {
         throw new Error(data.error ?? "Failed to rejoin lobby");
       }
       const { lobby } = await res.json();
+      logger.info("Landing", "Rejoin successful", { room_code: lobby.room_code });
       router.push(`/lobby/${lobby.room_code}`);
     } catch (err) {
+      logger.error("Landing", "Rejoin failed", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
@@ -127,6 +146,39 @@ export default function HomePage() {
 
         {/* ── CTA Buttons ──────────────────────────────── */}
         <div className="flex flex-col gap-3 w-full max-w-xs animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
+
+          {/* Starting side selector */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold tracking-wider text-neutral-500 uppercase text-center">
+              Your team starts as
+            </span>
+            <div className="flex rounded-xl bg-neutral-900 border border-neutral-800 p-1">
+              <button
+                type="button"
+                onClick={() => setStartingSide("attacker")}
+                className={cn(
+                  "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
+                  startingSide === "attacker"
+                    ? "bg-amber-500 text-neutral-950 shadow-lg"
+                    : "text-neutral-400 hover:text-neutral-200"
+                )}
+              >
+                Attacker
+              </button>
+              <button
+                type="button"
+                onClick={() => setStartingSide("defender")}
+                className={cn(
+                  "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
+                  startingSide === "defender"
+                    ? "bg-sky-500 text-neutral-950 shadow-lg"
+                    : "text-neutral-400 hover:text-neutral-200"
+                )}
+              >
+                Defender
+              </button>
+            </div>
+          </div>
 
           {/* Create lobby — primary amber action */}
           <Button
@@ -176,6 +228,7 @@ export default function HomePage() {
               "active:scale-[0.98] transition-all duration-200"
             )}
             onClick={() => {
+              logger.info("Landing", "Join modal opened");
               setShowJoinModal(true);
               setRoomCode("");
               setError(null);

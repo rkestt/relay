@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
 
     const { title, map_id, site_id, description, tags, image_url, hotspots } =
       body;
+
+    logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
 
     if (!title || typeof title !== "string") {
       return NextResponse.json(
@@ -73,7 +76,7 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError || !strategy) {
-      console.error("Failed to insert strategy:", insertError);
+      logger.error("API", "Failed to insert strategy", insertError);
       return NextResponse.json(
         { error: "Failed to create strategy" },
         { status: 500 },
@@ -92,7 +95,7 @@ export async function POST(request: Request) {
           .insert(tagRows);
 
         if (tagError) {
-          console.error("Failed to insert tags:", tagError);
+          logger.error("API", "Failed to insert tags", tagError);
           // Non-fatal — strategy already created
         }
       }
@@ -127,7 +130,7 @@ export async function POST(request: Request) {
           .insert(hotspotRows);
 
         if (hotspotError) {
-          console.error("Failed to insert hotspots:", hotspotError);
+          logger.error("API", "Failed to insert hotspots", hotspotError);
           // Non-fatal
         }
       }
@@ -163,8 +166,9 @@ export async function POST(request: Request) {
           });
 
         if (queueError) {
-          console.error(
-            "Failed to insert validation queue entry:",
+          logger.error(
+            "API",
+            "Failed to insert validation queue entry",
             queueError,
           );
         } else {
@@ -214,17 +218,18 @@ export async function POST(request: Request) {
           body: JSON.stringify({ embeds: [embed] }),
         });
       } catch (webhookError) {
-        console.error("Failed to call Discord webhook:", webhookError);
+        logger.error("API", "Failed to call Discord webhook", webhookError);
         // Non-fatal
       }
     }
 
+    logger.debug("API", "POST /api/strategies success", { strategyId: strategy.id, status: strategy.status });
     return NextResponse.json(
       { strategy: { id: strategy.id, status: strategy.status } },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Strategy creation unexpected error:", error);
+    logger.error("API", "Strategy creation unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -244,6 +249,8 @@ export async function GET(request: Request) {
     const site_id = searchParams.get("site_id");
     const status = searchParams.get("status") || "approved";
 
+    logger.info("API", "GET /api/strategies start", { map_id, site_id, status });
+
     let query = supabase
       .from("strategy_templates")
       .select(
@@ -259,16 +266,17 @@ export async function GET(request: Request) {
     });
 
     if (error) {
-      console.error("Failed to fetch strategies:", error);
+      logger.error("API", "Failed to fetch strategies", error);
       return NextResponse.json(
         { error: "Failed to fetch strategies" },
         { status: 500 },
       );
     }
 
+    logger.debug("API", "GET /api/strategies response", { strategyCount: strategies?.length ?? 0 });
     return NextResponse.json({ strategies: strategies ?? [] });
   } catch (error) {
-    console.error("Strategy fetch unexpected error:", error);
+    logger.error("API", "Strategy fetch unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // 30-character alphabet excluding 0, O, 1, I, l
@@ -15,9 +16,18 @@ function generateRoomCode(): string {
   return code;
 }
 
-export async function POST() {
+function getTeamSide(startingSide: "attacker" | "defender", roundNumber: number): "attacker" | "defender" {
+  // In R6S ranked, sides alternate every round
+  // Round 1: starting_side, Round 2: opposite, Round 3: starting_side, etc.
+  const isOdd = roundNumber % 2 === 1;
+  if (isOdd) return startingSide;
+  return startingSide === "attacker" ? "defender" : "attacker";
+}
+
+export async function POST(request: Request) {
   try {
     const supabase = await createClient();
+    logger.info("API", "POST /api/lobby start");
 
     // -- Authenticate ---------------------------------------------------
     const {
@@ -28,6 +38,38 @@ export async function POST() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // -- Ensure profile exists (FK constraint on lobbies.leader_id) -----
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      logger.warn("API", "Profile missing for authenticated user, auto-creating", { userId: user.id });
+      const { error: createProfileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          username: user.user_metadata?.username ?? `guest-${user.id.slice(0, 8)}`,
+          avatar_url: user.user_metadata?.avatar_url ?? null,
+        });
+
+      if (createProfileError) {
+        logger.error("API", "Failed to auto-create profile", createProfileError, { userId: user.id });
+        return NextResponse.json({ error: "Failed to initialize user profile" }, { status: 500 });
+      }
+    }
+
+    // -- Parse body for starting_side -----------------------------------
+    let body: { starting_side?: unknown } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // body is optional; default will be attacker
+    }
+    const startingSide = body.starting_side === "defender" ? "defender" : "attacker";
+
     // -- Generate room code with retries on unique collision -------------
     let lastError: unknown;
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -35,9 +77,18 @@ export async function POST() {
 
       const { data: lobby, error: insertError } = await supabase
         .from("lobbies")
-        .insert({ room_code: roomCode, leader_id: user.id })
-        .select("id, room_code, leader_id")
+        .insert({ room_code: roomCode, leader_id: user.id, starting_side: startingSide })
+        .select("id, room_code, leader_id, starting_side")
         .single();
+
+      if (insertError) {
+        logger.warn("API", `Lobby insert attempt ${attempt + 1}/${MAX_RETRIES} failed`, {
+          code: (insertError as { code?: string }).code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+        });
+      }
 
       if (!insertError && lobby) {
         // -- Insert creator into lobby_members ---------------------------
@@ -48,13 +99,35 @@ export async function POST() {
         if (memberError) {
           // Rollback: delete the lobby if adding the member fails
           await supabase.from("lobbies").delete().eq("id", lobby.id);
-          console.error("Failed to add creator to lobby_members:", memberError);
+          logger.error("API", "Failed to add creator to lobby_members", memberError);
           return NextResponse.json(
             { error: "Failed to join lobby" },
             { status: 500 },
           );
         }
 
+        // -- Create initial round (round 1) ------------------------------
+        const { error: roundError } = await supabase
+          .from("rounds")
+          .insert({
+            lobby_id: lobby.id,
+            round_number: 1,
+            status: "active",
+            team_side: getTeamSide(startingSide, 1),
+          });
+
+        if (roundError) {
+          // Rollback: delete lobby and member if round creation fails
+          await supabase.from("lobby_members").delete().eq("lobby_id", lobby.id);
+          await supabase.from("lobbies").delete().eq("id", lobby.id);
+          logger.error("API", "Failed to create initial round", roundError);
+          return NextResponse.json(
+            { error: "Failed to initialize lobby" },
+            { status: 500 },
+          );
+        }
+
+        logger.debug("API", "POST /api/lobby success", { lobbyId: lobby.id, roomCode: lobby.room_code, startingSide });
         return NextResponse.json({ lobby }, { status: 201 });
       }
 
@@ -70,13 +143,16 @@ export async function POST() {
       }
     }
 
-    console.error("Lobby creation error after retries:", lastError);
+    logger.error("API", "Lobby creation error after retries", lastError, {
+      code: (lastError as { code?: string })?.code,
+      message: (lastError as { message?: string })?.message,
+    });
     return NextResponse.json(
       { error: "Failed to create lobby. Please try again." },
       { status: 500 },
     );
   } catch (error) {
-    console.error("Lobby creation unexpected error:", error);
+    logger.error("API", "Lobby creation unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

@@ -40,6 +40,7 @@ export interface Lobby {
   room_code: string;
   leader_id: string;
   status: "active" | "closed";
+  starting_side: "attacker" | "defender" | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,6 +57,7 @@ export interface Round {
   lobby_id: string;
   round_number: number;
   status: "active" | "completed";
+  team_side: "attacker" | "defender" | null;
   created_at: string;
 }
 

@@ -3,9 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
+import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map, Site, Operator, OperatorTag } from "@/types";
 
@@ -14,7 +17,7 @@ type SelectionStep = "map" | "site" | "operator";
 interface LobbyState {
   lobby: { id: string; room_code: string; leader_id: string };
   members: { user_id: string; profiles: { username: string } | null }[];
-  currentRound: { id: string; round_number: number } | null;
+  currentRound: { id: string; round_number: number; team_side: "attacker" | "defender" | null } | null;
   selections: {
     user_id: string;
     map_id: string | null;
@@ -46,7 +49,24 @@ export default function SelectPage({
   const [locking, setLocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { lastEventAt } = useLobbyRealtime(lobbyId);
+  const { lastSync } = useHeartbeat(lobbyId);
+
+  const refreshLobbyState = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/lobby/${id}/state`);
+      if (res.ok) {
+        const data: LobbyState = await res.json();
+        setLobbyState(data);
+        logger.debug("SelectPage", "Lobby state refreshed", { members: data.members.length, selections: data.selections.length });
+      }
+    } catch {
+      // silent fail during refresh
+    }
+  }, []);
+
   useEffect(() => {
+    logger.info("SelectPage", "SelectPage mount");
     params.then(({ code: c }) => setCode(c));
   }, [params]);
 
@@ -58,6 +78,7 @@ export default function SelectPage({
       supabase.from("operators").select("*").then(({ data }) => data ?? []),
       supabase.from("operator_tags").select("*").then(({ data }) => data ?? []),
     ]).then(([mapsData, opsData, tagsData]) => {
+      logger.debug("SelectPage", "Reference data loaded", { maps: mapsData.length, operators: opsData.length, tags: tagsData.length });
       setMaps(mapsData as Map[]);
       setOperators(opsData as Operator[]);
       setOperatorTags(tagsData as OperatorTag[]);
@@ -69,6 +90,7 @@ export default function SelectPage({
     if (!code) return;
 
     const load = async () => {
+      logger.debug("SelectPage", "Fetch lobby state start", { code });
       try {
         const supabase = createBrowserClient();
         const { data: lobby } = await supabase
@@ -78,20 +100,17 @@ export default function SelectPage({
           .single();
 
         if (!lobby) {
+          logger.warn("SelectPage", "Lobby not found", { code });
           setError("Lobby not found");
           setLoading(false);
           return;
         }
 
         setLobbyId(lobby.id);
-
-        const res = await fetch(`/api/lobby/${lobby.id}/state`);
-        if (!res.ok) {
-          throw new Error("Failed to fetch lobby state");
-        }
-        const data: LobbyState = await res.json();
-        setLobbyState(data);
-      } catch {
+        await refreshLobbyState(lobby.id);
+        logger.info("SelectPage", "Lobby state loaded for initial");
+      } catch (err) {
+        logger.error("SelectPage", "Failed to load lobby", err);
         setError("Failed to load lobby");
       } finally {
         setLoading(false);
@@ -99,24 +118,13 @@ export default function SelectPage({
     };
 
     load();
-  }, [code]);
+  }, [code, refreshLobbyState]);
 
-  // Poll lobby state for other selections
+  // Refresh lobby state on realtime events or heartbeat
   useEffect(() => {
-    if (!lobbyId) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/lobby/${lobbyId}/state`);
-        if (res.ok) {
-          const data: LobbyState = await res.json();
-          setLobbyState(data);
-        }
-      } catch {
-        // silent fail during polling
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [lobbyId]);
+    if (!lobbyId || (!lastEventAt && !lastSync)) return;
+    refreshLobbyState(lobbyId);
+  }, [lobbyId, lastEventAt, lastSync, refreshLobbyState]);
 
   // Filter sites by selected map
   useEffect(() => {
@@ -134,6 +142,7 @@ export default function SelectPage({
 
   const handleLockIn = useCallback(async () => {
     if (!lobbyId) return;
+    logger.info("SelectPage", "Lock selection click", { selectedMapId, selectedSiteId, selectedOperatorId });
     setLocking(true);
     setError(null);
     try {
@@ -152,8 +161,10 @@ export default function SelectPage({
         throw new Error(data.error ?? "Failed to lock selection");
       }
 
+      logger.info("SelectPage", "Selection locked, navigating to tasks");
       router.push(`/lobby/${code}/tasks`);
     } catch (err) {
+      logger.error("SelectPage", "Lock selection failed", err);
       setError(err instanceof Error ? err.message : "Failed to lock selection");
     } finally {
       setLocking(false);
@@ -278,6 +289,16 @@ export default function SelectPage({
         <span className="ml-3 text-sm font-semibold text-neutral-200 capitalize">
           {step === "map" ? "Choose Map" : step === "site" ? "Choose Site" : "Choose Operator"}
         </span>
+        {lobbyState?.currentRound?.team_side && (
+          <span className={cn(
+            "ml-auto text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded-lg",
+            lobbyState.currentRound.team_side === "attacker"
+              ? "bg-amber-500/20 text-amber-400"
+              : "bg-sky-500/20 text-sky-400"
+          )}>
+            {lobbyState.currentRound.team_side}
+          </span>
+        )}
       </header>
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
@@ -297,6 +318,7 @@ export default function SelectPage({
                   <button
                     key={map.id}
                     onClick={() => {
+                      logger.info("SelectPage", "Map selected", { mapId: map.id, mapName: map.name });
                       setSelectedMapId(map.id);
                       setSelectedSiteId(null);
                       setStep("site");
@@ -340,7 +362,10 @@ export default function SelectPage({
         {step === "site" && (
           <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-right-2 duration-300">
             <button
-              onClick={() => setStep("map")}
+              onClick={() => {
+                logger.info("SelectPage", "Back to maps");
+                setStep("map");
+              }}
               className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 transition-all duration-200 active:scale-95"
             >
               <svg
@@ -369,6 +394,7 @@ export default function SelectPage({
                   <button
                     key={site.id}
                     onClick={() => {
+                      logger.info("SelectPage", "Site selected", { siteId: site.id, siteName: site.name });
                       setSelectedSiteId(site.id);
                       setStep("operator");
                     }}
@@ -411,7 +437,10 @@ export default function SelectPage({
         {step === "operator" && (
           <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-right-2 duration-300">
             <button
-              onClick={() => setStep("site")}
+              onClick={() => {
+                logger.info("SelectPage", "Back to sites");
+                setStep("site");
+              }}
               className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 transition-all duration-200 active:scale-95"
             >
               <svg
@@ -428,7 +457,8 @@ export default function SelectPage({
               Back to Sites
             </button>
 
-            {/* Attackers */}
+            {/* Attackers — shown when team is attacker or no round set */}
+            {(!lobbyState?.currentRound?.team_side || lobbyState.currentRound.team_side === "attacker") && (
             <div>
               <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-red-400 uppercase mb-3">
                 <svg
@@ -453,7 +483,12 @@ export default function SelectPage({
                     return (
                       <button
                         key={op.id}
-                        onClick={() => !banned && setSelectedOperatorId(op.id)}
+                        onClick={() => {
+                          if (!banned) {
+                            logger.info("SelectPage", "Operator selected (attacker)", { operatorId: op.id, operatorName: op.name });
+                            setSelectedOperatorId(op.id);
+                          }
+                        }}
                         disabled={banned}
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
@@ -505,8 +540,10 @@ export default function SelectPage({
                   })}
               </div>
             </div>
+            )}
 
-            {/* Defenders */}
+            {/* Defenders — shown when team is defender or no round set */}
+            {(!lobbyState?.currentRound?.team_side || lobbyState.currentRound.team_side === "defender") && (
             <div>
               <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-blue-400 uppercase mb-3">
                 <svg
@@ -531,7 +568,12 @@ export default function SelectPage({
                     return (
                       <button
                         key={op.id}
-                        onClick={() => !banned && setSelectedOperatorId(op.id)}
+                        onClick={() => {
+                          if (!banned) {
+                            logger.info("SelectPage", "Operator selected (defender)", { operatorId: op.id, operatorName: op.name });
+                            setSelectedOperatorId(op.id);
+                          }
+                        }}
                         disabled={banned}
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
@@ -583,6 +625,7 @@ export default function SelectPage({
                   })}
               </div>
             </div>
+            )}
           </div>
         )}
 

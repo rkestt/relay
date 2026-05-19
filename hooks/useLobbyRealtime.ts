@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { logger } from "@/lib/logger";
 import { useLobbyStore } from "@/stores/lobbyStore";
 import type { LobbyBan, LobbyMember, LobbySelection, Round } from "@/types";
 
@@ -21,13 +22,20 @@ const MAX_RECONNECT_DELAY = 30_000; // 30 seconds
  * Handles reconnect with exponential backoff.
  */
 export function useLobbyRealtime(lobbyId: string | null) {
-  const supabase = useRef(createBrowserClient()).current;
+  const supabaseRef = useRef<ReturnType<typeof createBrowserClient> | null>(null);
+  if (!supabaseRef.current) {
+    supabaseRef.current = createBrowserClient();
+  }
+  const supabase = supabaseRef.current;
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lobbyIdRef = useRef(lobbyId);
   lobbyIdRef.current = lobbyId;
+
+  const lastEventAtRef = useRef<number | null>(null);
+  const [lastEventAt, setLastEventAt] = useState<number | null>(null);
 
   // ── Stable store action references ──
   const setConnectionStatus = useLobbyStore((s) => s.setConnectionStatus);
@@ -65,6 +73,8 @@ export function useLobbyRealtime(lobbyId: string | null) {
       );
       retryCountRef.current += 1;
 
+      logger.info("useLobbyRealtime", "scheduleReconnect", { delay, attempt: retryCountRef.current });
+
       retryTimerRef.current = setTimeout(() => {
         subscribe();
       }, delay);
@@ -73,6 +83,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
     // ── subscribe ────────────────────────────────────────────
 
     const subscribe = () => {
+      logger.info("useLobbyRealtime", "subscribe", { lobbyId: id });
       // clean any previous channel / timer before re-subscribing
       cleanupPrevious();
 
@@ -95,9 +106,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_members INSERT", { new: payload.new });
           if (payload.new) {
             upsertMember(payload.new as LobbyMember);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -110,9 +123,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_members DELETE", { old: payload.old });
           if (payload.old) {
             removeMember((payload.old as LobbyMember).user_id);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -126,9 +141,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_selections INSERT", { new: payload.new });
           if (payload.new) {
             upsertSelection(payload.new as LobbySelection);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -141,9 +158,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_selections UPDATE", { new: payload.new, old: payload.old });
           if (payload.new) {
             upsertSelection(payload.new as LobbySelection);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -157,9 +176,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_bans INSERT", { new: payload.new });
           if (payload.new) {
             addBan(payload.new as LobbyBan);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -172,9 +193,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "lobby_bans DELETE", { old: payload.old });
           if (payload.old) {
             removeBan((payload.old as LobbyBan).id);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -188,9 +211,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "rounds INSERT", { new: payload.new });
           if (payload.new) {
             upsertRound(payload.new as Round);
           }
+          setLastEventAt(Date.now());
         },
       );
 
@@ -203,21 +228,26 @@ export function useLobbyRealtime(lobbyId: string | null) {
           filter: `lobby_id=eq.${id}`,
         },
         (payload) => {
+          logger.debug("useLobbyRealtime", "rounds UPDATE", { new: payload.new, old: payload.old });
           if (payload.new) {
             upsertRound(payload.new as Round);
           }
+          setLastEventAt(Date.now());
         },
       );
 
       // ── subscribe & track status ────────────────────────────
       channel.subscribe((status) => {
         if (status === "SUBSCRIBED") {
+          logger.info("useLobbyRealtime", "SUBSCRIBED", { lobbyId: id });
           retryCountRef.current = 0;
           setConnectionStatus("connected");
         } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+          logger.warn("useLobbyRealtime", `Channel ${status}`, { lobbyId: id });
           setConnectionStatus("error");
           scheduleReconnect();
         } else if (status === "CLOSED") {
+          logger.info("useLobbyRealtime", "CLOSED", { lobbyId: id });
           setConnectionStatus("disconnected");
         }
       });
@@ -237,5 +267,5 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
   const connectionStatus = useLobbyStore((s) => s.connectionStatus);
 
-  return { connectionStatus };
+  return { connectionStatus, lastEventAt };
 }

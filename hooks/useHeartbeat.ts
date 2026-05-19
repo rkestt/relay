@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { logger } from "@/lib/logger";
 import { useLobbyStore } from "@/stores/lobbyStore";
 import type { LobbyBan, LobbyMember, LobbySelection, Round } from "@/types";
 
@@ -46,13 +47,21 @@ export function useHeartbeat(lobbyId: string | null) {
     if (!id || pausedRef.current) return;
 
     try {
+      logger.info("useHeartbeat", "sync start", { lobbyId: id });
+
       const res = await fetch(`/api/lobby/${id}/state`);
       if (!res.ok) {
-        console.warn("[useHeartbeat] state fetch failed", res.status);
+        logger.warn("useHeartbeat", "state fetch failed", { status: res.status });
         return;
       }
 
       const data: LobbyStateResponse = await res.json();
+
+      logger.debug("useHeartbeat", "sync data received", {
+        lobbyId: data.lobby.id,
+        membersCount: data.members.length,
+        roundNumber: data.currentRound?.round_number ?? null,
+      });
 
       // Server is authoritative – replace store state
       setLobbyId(data.lobby.id);
@@ -83,14 +92,17 @@ export function useHeartbeat(lobbyId: string | null) {
       setConnectionStatus("connected");
 
       setLastSync(Date.now());
+
+      logger.info("useHeartbeat", "sync ok");
     } catch (err) {
-      console.error("[useHeartbeat] sync error", err);
+      logger.error("useHeartbeat", "sync error", err);
     }
   };
 
   // ── interval management ────────────────────────────────────
 
   const startInterval = () => {
+    logger.info("useHeartbeat", "startInterval", { lobbyId: lobbyIdRef.current });
     stopInterval();
     if (!lobbyIdRef.current) return;
 
@@ -100,6 +112,7 @@ export function useHeartbeat(lobbyId: string | null) {
   };
 
   const stopInterval = () => {
+    logger.info("useHeartbeat", "stopInterval");
     if (intervalRef.current !== null) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -118,7 +131,7 @@ export function useHeartbeat(lobbyId: string | null) {
       } else {
         pausedRef.current = false;
         // Immediate sync when coming back, then resume interval
-        sync().then(() => startInterval());
+        sync().finally(() => startInterval());
       }
     };
 

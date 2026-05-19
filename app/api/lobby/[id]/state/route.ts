@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -18,6 +19,7 @@ export async function GET(
     }
 
     const { id } = await params;
+    logger.info("API", "GET /api/lobby/[id]/state start", { lobbyId: id });
 
     // -- Fetch lobby (RLS verifies user is a member or leader) ----------
     const { data: lobby, error: lobbyError } = await supabase
@@ -68,6 +70,13 @@ export async function GET(
       bans = bansData ?? [];
     }
 
+    logger.debug("API", "GET /api/lobby/[id]/state response", {
+      lobbyId: id,
+      memberCount: members?.length ?? 0,
+      hasCurrentRound: !!currentRound,
+      selectionCount: selections.length,
+      banCount: bans.length,
+    });
     return NextResponse.json({
       lobby,
       members: members ?? [],
@@ -76,7 +85,7 @@ export async function GET(
       bans,
     });
   } catch (error) {
-    console.error("Lobby state error:", error);
+    logger.error("API", "Lobby state error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

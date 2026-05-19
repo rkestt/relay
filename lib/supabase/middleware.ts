@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const publicPaths = [
-  "/",
   "/login",
   "/signup",
   "/auth/callback",
@@ -12,6 +11,8 @@ const publicPaths = [
   "/icons",
   "/maps",
   "/api/validate",
+  "/validate",
+  "/manifest.json",
 ];
 
 function isPublicPath(pathname: string): boolean {
@@ -44,17 +45,22 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  const { pathname } = request.nextUrl;
+
+  // Allow public paths and static assets through without auth check
+  if (isPublicPath(pathname)) {
+    return supabaseResponse;
+  }
+
+  // API routes handle their own auth — do not refresh session here
+  if (pathname.startsWith("/api/")) {
+    return supabaseResponse;
+  }
+
   // Refresh session — do not run between middleware and routes
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
-
-  // Allow public paths and static assets through
-  if (isPublicPath(pathname)) {
-    return supabaseResponse;
-  }
 
   // No user — redirect to login
   if (!user) {

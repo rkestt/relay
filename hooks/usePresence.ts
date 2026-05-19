@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logger } from "@/lib/logger";
 import { useLobbyStore } from "@/stores/lobbyStore";
 
 /**
@@ -18,11 +19,13 @@ export function usePresence(): { isOnline: boolean } {
 
   useEffect(() => {
     const handleOnline = () => {
+      logger.info("usePresence", "online");
       setIsOnline(true);
       setConnectionStatus("connecting");
     };
 
     const handleOffline = () => {
+      logger.info("usePresence", "offline");
       setIsOnline(false);
       setConnectionStatus("disconnected");
     };

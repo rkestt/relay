@@ -15,6 +15,6 @@ export const config = {
      * - /icons/* (PWA icons)
      * - /maps/* (map images)
      */
-    "/((?!_next/static|_next/image|favicon.ico|icons/|maps/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|icons/|maps/|manifest.json).*)"
   ],
 };

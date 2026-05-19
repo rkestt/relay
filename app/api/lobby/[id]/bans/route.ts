@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -21,6 +22,7 @@ export async function GET(
     }
 
     const { id } = await params;
+    logger.info("API", "GET /api/lobby/[id]/bans start", { lobbyId: id });
 
     const { data: bans, error } = await supabase
       .from("lobby_bans")
@@ -28,16 +30,17 @@ export async function GET(
       .eq("lobby_id", id);
 
     if (error) {
-      console.error("Failed to fetch bans:", error);
+      logger.error("API", "Failed to fetch bans", error);
       return NextResponse.json(
         { error: "Failed to fetch bans" },
         { status: 500 },
       );
     }
 
+    logger.debug("API", "GET /api/lobby/[id]/bans response", { lobbyId: id, banCount: bans?.length ?? 0 });
     return NextResponse.json({ bans: bans ?? [] });
   } catch (error) {
-    console.error("Bans GET unexpected error:", error);
+    logger.error("API", "Bans GET unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
@@ -66,6 +69,7 @@ export async function POST(
     }
 
     const { id } = await params;
+    logger.info("API", "POST /api/lobby/[id]/bans start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
     let body: { operator_id?: unknown; side?: unknown };
@@ -79,6 +83,8 @@ export async function POST(
     }
 
     const { operator_id, side } = body;
+    logger.info("API", "POST /api/lobby/[id]/bans body", { lobbyId: id, operator_id, side });
+
     if (
       !operator_id ||
       typeof operator_id !== "string" ||
@@ -151,16 +157,17 @@ export async function POST(
         );
       }
 
-      console.error("Failed to insert ban:", insertError);
+      logger.error("API", "Failed to insert ban", insertError);
       return NextResponse.json(
         { error: "Failed to create ban" },
         { status: 500 },
       );
     }
 
+    logger.debug("API", "POST /api/lobby/[id]/bans success", { lobbyId: id, operator_id, side, banId: ban.id });
     return NextResponse.json({ ban }, { status: 201 });
   } catch (error) {
-    console.error("Bans POST unexpected error:", error);
+    logger.error("API", "Bans POST unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

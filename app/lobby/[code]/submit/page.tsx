@@ -6,6 +6,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { logger } from "@/lib/logger";
 import { Badge } from "@/components/ui/badge";
 import { MapViewer } from "@/components/maps/MapViewer";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -90,6 +91,7 @@ export default function SubmitStrategyPage({
 
   // ── Resolve params ─────────────────────────────────
   useEffect(() => {
+    logger.info("SubmitPage", "SubmitPage mount");
     params.then(({ code: c }) => setCode(c));
   }, [params]);
 
@@ -97,7 +99,10 @@ export default function SubmitStrategyPage({
   useEffect(() => {
     const supabase = createBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUserId(data.user.id);
+      if (data.user) {
+        logger.debug("SubmitPage", "User authenticated", { userId: data.user.id });
+        setUserId(data.user.id);
+      }
     });
   }, []);
 
@@ -108,6 +113,7 @@ export default function SubmitStrategyPage({
       .from("maps")
       .select("*")
       .then(({ data }) => {
+        logger.debug("SubmitPage", "Maps loaded", { count: data?.length ?? 0 });
         setMaps((data ?? []) as Map[]);
         setLoading(false);
       });
@@ -120,12 +126,14 @@ export default function SubmitStrategyPage({
       setSelectedSiteId("");
       return;
     }
+    logger.debug("SubmitPage", "Loading sites for map", { selectedMapId });
     const supabase = createBrowserClient();
     supabase
       .from("sites")
       .select("*")
       .eq("map_id", selectedMapId)
       .then(({ data }) => {
+        logger.debug("SubmitPage", "Sites loaded", { count: data?.length ?? 0 });
         setSites((data ?? []) as Site[]);
         setSelectedSiteId("");
       });
@@ -141,21 +149,27 @@ export default function SubmitStrategyPage({
 
       const validTypes = ["image/png", "image/jpeg", "image/webp", "image/avif"];
       if (!validTypes.includes(file.type)) {
+        logger.warn("SubmitPage", "Invalid file type", { type: file.type });
         setError("Please select a PNG, JPEG, WebP, or AVIF image.");
         return;
       }
 
       if (file.size > 20 * 1024 * 1024) {
+        logger.warn("SubmitPage", "File too large", { size: file.size });
         setError("Image must be under 20 MB.");
         return;
       }
 
+      logger.debug("SubmitPage", "File selected", { name: file.name, size: file.size, type: file.type });
       setError(null);
       setRawFile(file);
 
       const reader = new FileReader();
       reader.onload = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
+
+      // Reset input so selecting the same file re-triggers onChange
+      if (fileInputRef.current) fileInputRef.current.value = "";
     },
     [],
   );
@@ -198,6 +212,7 @@ export default function SubmitStrategyPage({
       return;
     }
 
+    logger.info("SubmitPage", "Submit strategy click", { title: title.trim(), selectedMapId, selectedSiteId, hotspotCount: hotspots.length });
     setError(null);
     setSubmitting(true);
 
@@ -233,8 +248,10 @@ export default function SubmitStrategyPage({
         throw new Error(data.error ?? "Failed to submit strategy");
       }
 
+      logger.info("SubmitPage", "Strategy submitted successfully");
       setSuccess(true);
     } catch (err) {
+      logger.error("SubmitPage", "Strategy submit failed", err);
       setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setSubmitting(false);
@@ -367,7 +384,10 @@ export default function SubmitStrategyPage({
               id="title"
               placeholder="e.g. Bank Default Plant"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                logger.debug("SubmitPage", "Title changed", { length: e.target.value.length });
+                setTitle(e.target.value);
+              }}
               maxLength={120}
               className={cn(
                 "h-12 rounded-xl",
@@ -391,7 +411,10 @@ export default function SubmitStrategyPage({
             <select
               id="map"
               value={selectedMapId}
-              onChange={(e) => setSelectedMapId(e.target.value)}
+              onChange={(e) => {
+                logger.debug("SubmitPage", "Map selection changed", { mapId: e.target.value });
+                setSelectedMapId(e.target.value);
+              }}
               className={cn(
                 "flex h-12 w-full rounded-xl border-2 px-3 py-2 text-sm transition-all duration-200",
                 "bg-neutral-900 border-neutral-800 text-neutral-200",
@@ -422,7 +445,10 @@ export default function SubmitStrategyPage({
             <select
               id="site"
               value={selectedSiteId}
-              onChange={(e) => setSelectedSiteId(e.target.value)}
+              onChange={(e) => {
+                logger.debug("SubmitPage", "Site selection changed", { siteId: e.target.value });
+                setSelectedSiteId(e.target.value);
+              }}
               disabled={!selectedMapId || sites.length === 0}
               className={cn(
                 "flex h-12 w-full rounded-xl border-2 px-3 py-2 text-sm transition-all duration-200",

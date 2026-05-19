@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -23,6 +24,7 @@ export async function POST(
     }
 
     const { id } = await params;
+    logger.info("API", "POST /api/lobby/[id]/lock-selection start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
     let body: {
@@ -60,6 +62,8 @@ export async function POST(
         { status: 400 },
       );
     }
+
+    logger.info("API", "POST /api/lobby/[id]/lock-selection body", { lobbyId: id, map_id, site_id, operator_id });
 
     // At least one field must be provided
     if (!map_id && !site_id && !operator_id) {
@@ -112,16 +116,17 @@ export async function POST(
       .single();
 
     if (upsertError) {
-      console.error("Failed to upsert selection:", upsertError);
+      logger.error("API", "Failed to upsert selection", upsertError);
       return NextResponse.json(
         { error: "Failed to save selection" },
         { status: 500 },
       );
     }
 
+    logger.debug("API", "POST /api/lobby/[id]/lock-selection success", { lobbyId: id, selection });
     return NextResponse.json({ selection });
   } catch (error) {
-    console.error("Lock-selection POST unexpected error:", error);
+    logger.error("API", "Lock-selection POST unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

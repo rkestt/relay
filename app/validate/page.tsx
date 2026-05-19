@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, Suspense, useCallback } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 
 // ──────────────────────────────────────────────
 // Strip HTML tags from a string
@@ -33,12 +34,13 @@ function ValidateContent() {
   const router = useRouter();
   const [state, setState] = useState<ValidateState>({ status: "loading" });
 
-  const handleValidation = useCallback(async () => {
+  useEffect(() => {
     const token = searchParams.get("token");
     const strategyId = searchParams.get("strategyId");
     const action = searchParams.get("action");
 
     if (!token || !strategyId || !action) {
+      logger.warn("ValidatePage", "Validation mount - missing params", { token: !!token, strategyId: !!strategyId, action: !!action });
       setState({
         status: "error",
         title: "Invalid Request",
@@ -47,31 +49,35 @@ function ValidateContent() {
       return;
     }
 
-    try {
-      const res = await fetch(
-        `/api/validate?token=${encodeURIComponent(token)}&strategyId=${encodeURIComponent(strategyId)}&action=${encodeURIComponent(action)}`,
-      );
+    logger.info("ValidatePage", "Validation mount", { strategyId, action });
 
-      const html = await res.text();
-      const { title, message } = parseHtmlResponse(html);
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/validate?token=${encodeURIComponent(token)}&strategyId=${encodeURIComponent(strategyId)}&action=${encodeURIComponent(action)}`,
+        );
 
-      if (res.ok) {
-        setState({ status: "success", title, message });
-      } else {
-        setState({ status: "error", title, message });
+        const html = await res.text();
+        const { title, message } = parseHtmlResponse(html);
+
+        if (res.ok) {
+          logger.info("ValidatePage", "Validation result", { status: "success", title, message });
+          setState({ status: "success", title, message });
+        } else {
+          logger.info("ValidatePage", "Validation result", { status: "error", title, message });
+          setState({ status: "error", title, message });
+        }
+      } catch (err) {
+        logger.error("ValidatePage", "Validation request failed", err);
+        setState({
+          status: "error",
+          title: "Connection Error",
+          message: "Failed to reach the validation server. Please try again.",
+        });
       }
-    } catch {
-      setState({
-        status: "error",
-        title: "Connection Error",
-        message: "Failed to reach the validation server. Please try again.",
-      });
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    handleValidation();
-  }, [handleValidation]);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Loading ──────────────────────────────
   if (state.status === "loading") {

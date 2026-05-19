@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { logger } from "@/lib/logger";
 import type {
   LobbyMember,
   LobbySelection,
@@ -65,16 +66,29 @@ const initialState = {
 export const useLobbyStore = create<LobbyState>()((set) => ({
   ...initialState,
 
-  setLobbyId: (id) => set({ lobbyId: id }),
+  setLobbyId: (id) => {
+    logger.debug("lobbyStore", "setLobbyId", { id });
+    set({ lobbyId: id });
+  },
 
-  setLobbyCode: (code) => set({ lobbyCode: code }),
+  setLobbyCode: (code) => {
+    logger.debug("lobbyStore", "setLobbyCode", { code });
+    set({ lobbyCode: code });
+  },
 
-  setIsLeader: (isLeader) => set({ isLeader }),
+  setIsLeader: (isLeader) => {
+    logger.debug("lobbyStore", "setIsLeader", { isLeader });
+    set({ isLeader });
+  },
 
-  setMembers: (members) => set({ members }),
+  setMembers: (members) => {
+    logger.debug("lobbyStore", "setMembers", { count: members.length });
+    set({ members });
+  },
 
-  upsertMember: (member) =>
-    set((state) => {
+  upsertMember: (member) => {
+    logger.debug("lobbyStore", "upsertMember", { user_id: member.user_id });
+    return set((state) => {
       const idx = state.members.findIndex((m) => m.user_id === member.user_id);
       if (idx >= 0) {
         const updated = [...state.members];
@@ -82,28 +96,43 @@ export const useLobbyStore = create<LobbyState>()((set) => ({
         return { members: updated };
       }
       return { members: [...state.members, member] };
-    }),
+    });
+  },
 
-  removeMember: (userId) =>
-    set((state) => ({
+  removeMember: (userId) => {
+    logger.debug("lobbyStore", "removeMember", { userId });
+    return set((state) => ({
       members: state.members.filter((m) => m.user_id !== userId),
-    })),
+    }));
+  },
 
-  setMemberProfile: (userId, profile) =>
-    set((state) => {
+  setMemberProfile: (userId, profile) => {
+    logger.debug("lobbyStore", "setMemberProfile", { userId, username: profile.username });
+    return set((state) => {
       const next = new Map(state.memberProfiles);
       next.set(userId, profile);
       return { memberProfiles: next };
-    }),
+    });
+  },
 
-  setCurrentRound: (round) => set({ currentRound: round }),
+  setCurrentRound: (round) => {
+    logger.debug("lobbyStore", "setCurrentRound", { roundId: round?.id ?? null });
+    set({ currentRound: round });
+  },
 
-  setRounds: (rounds) => set({ rounds }),
+  setRounds: (rounds) => {
+    logger.debug("lobbyStore", "setRounds", { count: rounds.length });
+    set({ rounds });
+  },
 
-  setSelections: (selections) => set({ selections }),
+  setSelections: (selections) => {
+    logger.debug("lobbyStore", "setSelections", { count: selections.length });
+    set({ selections });
+  },
 
-  upsertSelection: (selection) =>
-    set((state) => {
+  upsertSelection: (selection) => {
+    logger.debug("lobbyStore", "upsertSelection", { id: selection.id });
+    return set((state) => {
       const idx = state.selections.findIndex(
         (s) => s.id === selection.id,
       );
@@ -113,30 +142,52 @@ export const useLobbyStore = create<LobbyState>()((set) => ({
         return { selections: updated };
       }
       return { selections: [...state.selections, selection] };
-    }),
+    });
+  },
 
-  setBans: (bans) => set({ bans }),
+  setBans: (bans) => {
+    logger.debug("lobbyStore", "setBans", { count: bans.length });
+    set({ bans });
+  },
 
-  addBan: (ban) =>
-    set((state) => ({ bans: [...state.bans, ban] })),
+  addBan: (ban) => {
+    logger.debug("lobbyStore", "addBan", { id: ban.id });
+    return set((state) => ({ bans: [...state.bans, ban] }));
+  },
 
-  removeBan: (banId) =>
-    set((state) => ({
+  removeBan: (banId) => {
+    logger.debug("lobbyStore", "removeBan", { banId });
+    return set((state) => ({
       bans: state.bans.filter((b) => b.id !== banId),
-    })),
+    }));
+  },
 
-  upsertRound: (round) =>
-    set((state) => {
+  upsertRound: (round) => {
+    logger.debug("lobbyStore", "upsertRound", { id: round.id });
+    return set((state) => {
       const idx = state.rounds.findIndex((r) => r.id === round.id);
-      if (idx >= 0) {
-        const updated = [...state.rounds];
-        updated[idx] = round;
-        return { rounds: updated, currentRound: round };
-      }
-      return { rounds: [...state.rounds, round], currentRound: round };
-    }),
+      const nextRounds =
+        idx >= 0
+          ? state.rounds.map((r, i) => (i === idx ? round : r))
+          : [...state.rounds, round];
 
-  setConnectionStatus: (connectionStatus) => set({ connectionStatus }),
+      // currentRound = active round with highest round_number
+      const active = nextRounds
+        .filter((r) => r.status === "active")
+        .sort((a, b) => b.round_number - a.round_number);
+      const nextCurrentRound = active[0] ?? null;
 
-  reset: () => set(initialState),
+      return { rounds: nextRounds, currentRound: nextCurrentRound };
+    });
+  },
+
+  setConnectionStatus: (connectionStatus) => {
+    logger.debug("lobbyStore", "setConnectionStatus", { connectionStatus });
+    set({ connectionStatus });
+  },
+
+  reset: () => {
+    logger.debug("lobbyStore", "reset");
+    set(initialState);
+  },
 }));

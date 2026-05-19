@@ -6,12 +6,15 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { logger } from "@/lib/logger";
 import { MapViewer } from "@/components/maps/MapViewer";
+import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 import type { StrategyTemplate, StrategyHotspot, TaskAssignment } from "@/types";
 
 interface AssignedTask {
   assignment: TaskAssignment & {
-    strategy: StrategyTemplate;
+    strategy: StrategyTemplate | null;
   };
   hotspots: StrategyHotspot[];
 }
@@ -33,15 +36,21 @@ export default function TasksPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Realtime & heartbeat ──────────────────────────────
+  const { lastEventAt } = useLobbyRealtime(lobbyId);
+  const { lastSync } = useHeartbeat(lobbyId);
+
   useEffect(() => {
+    logger.info("TasksPage", "TasksPage mount");
     params.then(({ code: c }) => setCode(c));
   }, [params]);
 
-  // Resolve room_code → lobby_id
+  // ── Resolve room_code → lobby_id ──────────────────────
   useEffect(() => {
     if (!code) return;
 
-    const load = async () => {
+    const init = async () => {
+      logger.debug("TasksPage", "Resolve lobby by code", { code });
       try {
         const supabase = createBrowserClient();
 
@@ -52,60 +61,103 @@ export default function TasksPage({
           .single();
 
         if (!lobby) {
+          logger.warn("TasksPage", "Lobby not found", { code });
           setError("Lobby not found");
           setLoading(false);
           return;
         }
 
         setLobbyId(lobby.id);
-
-        const { data: userData } = await supabase.auth.getUser();
-        if (!userData?.user) {
-          setLoading(false);
-          return;
-        }
-
-        const stateRes = await fetch(`/api/lobby/${lobby.id}/state`);
-        if (!stateRes.ok) {
-          throw new Error("Failed to fetch lobby state");
-        }
-        const stateData: LobbyState = await stateRes.json();
-
-        if (!stateData?.currentRound) {
-          setLoading(false);
-          return;
-        }
-
-        const { data: assignments } = await supabase
-          .from("task_assignments")
-          .select("*, strategy:strategy_templates(*)")
-          .eq("lobby_id", lobby.id)
-          .eq("round_id", stateData.currentRound.id)
-          .eq("user_id", userData.user.id);
-
-        const tasksWithHotspots: AssignedTask[] = [];
-        for (const assignment of (assignments ?? []) as (TaskAssignment & { strategy: StrategyTemplate })[]) {
-          const { data: hotspots } = await supabase
-            .from("strategy_hotspots")
-            .select("*")
-            .eq("strategy_id", assignment.strategy_id);
-
-          tasksWithHotspots.push({
-            assignment,
-            hotspots: (hotspots ?? []) as StrategyHotspot[],
-          });
-        }
-
-        setTasks(tasksWithHotspots);
-      } catch {
-        setError("Failed to load tasks");
-      } finally {
+      } catch (err) {
+        logger.error("TasksPage", "Failed to resolve lobby", err);
+        setError("Failed to load lobby");
         setLoading(false);
       }
     };
 
-    load();
+    init();
   }, [code]);
+
+  // ── Fetch tasks ───────────────────────────────────────
+  const loadTasks = useCallback(async (id: string) => {
+    logger.debug("TasksPage", "Fetch tasks start", { lobbyId: id });
+    try {
+      const supabase = createBrowserClient();
+
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData?.user) {
+        logger.debug("TasksPage", "No authenticated user");
+        setLoading(false);
+        return;
+      }
+
+      const stateRes = await fetch(`/api/lobby/${id}/state`);
+      if (!stateRes.ok) {
+        throw new Error("Failed to fetch lobby state");
+      }
+      const stateData: LobbyState = await stateRes.json();
+
+      if (!stateData?.currentRound) {
+        logger.debug("TasksPage", "No current round");
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
+      const { data: assignments } = await supabase
+        .from("task_assignments")
+        .select("*, strategy:strategy_templates(*)")
+        .eq("lobby_id", id)
+        .eq("round_id", stateData.currentRound.id)
+        .eq("user_id", userData.user.id);
+
+      const allAssignments = (assignments ?? []) as (TaskAssignment & { strategy: StrategyTemplate | null })[];
+
+      // Batch-fetch all hotspots in a single query (fix N+1)
+      const strategyIds = allAssignments
+        .filter((a) => a.strategy)
+        .map((a) => a.strategy_id);
+
+      const hotspotsByStrategy = new Map<string, StrategyHotspot[]>();
+      if (strategyIds.length > 0) {
+        const { data: hotspots } = await supabase
+          .from("strategy_hotspots")
+          .select("*")
+          .in("strategy_id", strategyIds);
+
+        for (const h of (hotspots ?? []) as StrategyHotspot[]) {
+          const existing = hotspotsByStrategy.get(h.strategy_id) ?? [];
+          existing.push(h);
+          hotspotsByStrategy.set(h.strategy_id, existing);
+        }
+      }
+
+      const tasksWithHotspots: AssignedTask[] = allAssignments.map((assignment) => ({
+        assignment,
+        hotspots: hotspotsByStrategy.get(assignment.strategy_id) ?? [],
+      }));
+
+      logger.info("TasksPage", "Tasks fetched", { taskCount: tasksWithHotspots.length });
+      setTasks(tasksWithHotspots);
+    } catch (err) {
+      logger.error("TasksPage", "Failed to load tasks", err);
+      setError("Failed to load tasks");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial fetch when lobbyId is resolved
+  useEffect(() => {
+    if (!lobbyId) return;
+    loadTasks(lobbyId);
+  }, [lobbyId, loadTasks]);
+
+  // Refresh on realtime / heartbeat events
+  useEffect(() => {
+    if (!lobbyId) return;
+    loadTasks(lobbyId);
+  }, [lastEventAt, lastSync, lobbyId, loadTasks]);
 
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
@@ -171,7 +223,10 @@ export default function TasksPage({
               variant="outline"
               size="sm"
               className="h-11 min-w-[120px] rounded-xl border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
-              onClick={() => router.push(`/lobby/${code}`)}
+              onClick={() => {
+                if (!code) return;
+                router.push(`/lobby/${code}`);
+              }}
             >
               Back to Lobby
             </Button>
@@ -196,7 +251,10 @@ export default function TasksPage({
           variant="ghost"
           size="sm"
           className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
-          onClick={() => router.push(`/lobby/${code}`)}
+          onClick={() => {
+            if (!code) return;
+            router.push(`/lobby/${code}`);
+          }}
         >
           <svg
             className="size-4 mr-1.5"
@@ -237,82 +295,108 @@ export default function TasksPage({
             className="py-20"
           />
         ) : (
-          tasks.map(({ assignment, hotspots }, index) => (
-            <div
-              key={assignment.id}
-              className="flex flex-col rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 animate-in fade-in slide-in-from-bottom-2"
-              style={{ animationDelay: `${index * 80}ms` }}
-            >
-              {/* Strategy header */}
-              <div className="px-5 pt-5 pb-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      {/* Step indicator */}
-                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400">
-                        {index + 1}
-                      </span>
-                      <h2 className="text-base font-bold text-neutral-50">
-                        {assignment.strategy.title}
-                      </h2>
+          tasks.map(({ assignment, hotspots }, index) => {
+            // ── Strategy deleted fallback ──────────────────
+            if (!assignment.strategy) {
+              return (
+                <div
+                  key={assignment.id}
+                  className="flex flex-col rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 animate-in fade-in slide-in-from-bottom-2"
+                  style={{ animationDelay: `${index * 80}ms` }}
+                >
+                  <div className="px-5 pt-5 pb-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-1.5">
+                        <h2 className="text-base font-bold text-neutral-500">
+                          Strategy removed
+                        </h2>
+                        <p className="text-sm text-neutral-600">
+                          This strategy is no longer available.
+                        </p>
+                      </div>
                     </div>
-                    {assignment.strategy.description && (
-                      <p className="text-sm text-neutral-400 leading-relaxed">
-                        {assignment.strategy.description}
-                      </p>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={assignment.id}
+                className="flex flex-col rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 animate-in fade-in slide-in-from-bottom-2"
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
+                {/* Strategy header */}
+                <div className="px-5 pt-5 pb-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2">
+                        {/* Step indicator */}
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400">
+                          {index + 1}
+                        </span>
+                        <h2 className="text-base font-bold text-neutral-50">
+                          {assignment.strategy.title}
+                        </h2>
+                      </div>
+                      {assignment.strategy.description && (
+                        <p className="text-sm text-neutral-400 leading-relaxed">
+                          {assignment.strategy.description}
+                        </p>
+                      )}
+                    </div>
+                    {/* Screenshot */}
+                    {assignment.strategy.image_url && (
+                      <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-neutral-800 border border-neutral-700">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={assignment.strategy.image_url}
+                          alt="Strategy screenshot"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                     )}
                   </div>
-                  {/* Screenshot */}
-                  {assignment.strategy.image_url && (
-                    <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-neutral-800 border border-neutral-700">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={assignment.strategy.image_url}
-                        alt="Strategy screenshot"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
                 </div>
-              </div>
 
-              {/* Map with hotspots */}
-              {assignment.strategy.image_url && hotspots.length > 0 && (
-                <div className="px-5 pb-5">
-                  <MapViewer
-                    imageUrl={assignment.strategy.image_url}
-                    hotspots={hotspots.map((h) => ({
-                      x_percent: h.x_percent,
-                      y_percent: h.y_percent,
-                      label: h.label ?? "",
-                    }))}
-                  />
-                </div>
-              )}
-
-              {/* Fallback if no map image */}
-              {(!assignment.strategy.image_url || hotspots.length === 0) && (
-                <div className="px-5 pb-5">
-                  <div className="aspect-video rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center gap-2">
-                    <svg
-                      className="size-5 text-neutral-600"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <circle cx="8.5" cy="8.5" r="1.5" />
-                      <path d="M21 15l-5-5L5 21" />
-                    </svg>
-                    <span className="text-neutral-600 text-xs">No map available</span>
+                {/* Map with hotspots */}
+                {assignment.strategy.image_url && hotspots.length > 0 && (
+                  <div className="px-5 pb-5">
+                    <MapViewer
+                      imageUrl={assignment.strategy.image_url}
+                      hotspots={hotspots.map((h) => ({
+                        x_percent: h.x_percent,
+                        y_percent: h.y_percent,
+                        label: h.label ?? "",
+                      }))}
+                    />
                   </div>
-                </div>
-              )}
-            </div>
-          ))
+                )}
+
+                {/* Fallback if no map image */}
+                {(!assignment.strategy.image_url || hotspots.length === 0) && (
+                  <div className="px-5 pb-5">
+                    <div className="aspect-video rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center gap-2">
+                      <svg
+                        className="size-5 text-neutral-600"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                      </svg>
+                      <span className="text-neutral-600 text-xs">No map available</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>

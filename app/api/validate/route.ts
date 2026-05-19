@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 
@@ -14,6 +15,8 @@ export async function GET(request: Request) {
     const token = searchParams.get("token");
     const strategyId = searchParams.get("strategyId");
     const action = searchParams.get("action");
+
+    logger.info("API", "GET /api/validate start", { strategyId, action });
 
     // -- Validate required params ---------------------------------------
     if (!token || !strategyId || !action) {
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
     // -- Verify HMAC-SHA256 signature -----------------------------------
     const secret = process.env.VALIDATION_HMAC_SECRET;
     if (!secret) {
-      console.error("VALIDATION_HMAC_SECRET is not set");
+      logger.error("API", "VALIDATION_HMAC_SECRET is not set");
       return new NextResponse(
         htmlPage("Server Error", "Validation is not configured."),
         { status: 500, headers: { "Content-Type": "text/html" } },
@@ -99,7 +102,7 @@ export async function GET(request: Request) {
       .eq("id", strategyId);
 
     if (updateError) {
-      console.error("Failed to update strategy status:", updateError);
+      logger.error("API", "Failed to update strategy status", updateError);
       return new NextResponse(
         htmlPage("Server Error", "Failed to update strategy status."),
         { status: 500, headers: { "Content-Type": "text/html" } },
@@ -113,7 +116,7 @@ export async function GET(request: Request) {
       .eq("id", entry.id);
 
     if (markError) {
-      console.error("Failed to mark validation token as used:", markError);
+      logger.error("API", "Failed to mark validation token as used", markError);
       // Non-fatal — strategy status is already updated
     }
 
@@ -131,7 +134,7 @@ export async function GET(request: Request) {
       { status: 200, headers: { "Content-Type": "text/html" } },
     );
   } catch (error) {
-    console.error("Validation unexpected error:", error);
+    logger.error("API", "Validation unexpected error", error);
     return new NextResponse(
       htmlPage("Server Error", "An unexpected error occurred."),
       { status: 500, headers: { "Content-Type": "text/html" } },

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -23,6 +24,7 @@ export async function POST(
     }
 
     const { id } = await params;
+    logger.info("API", "POST /api/lobby/[id]/assign-tasks start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
     let body: { user_id?: unknown; operator_id?: unknown };
@@ -48,6 +50,8 @@ export async function POST(
         { status: 400 },
       );
     }
+
+    logger.info("API", "POST /api/lobby/[id]/assign-tasks body", { lobbyId: id, targetUserId: user_id, operator_id });
 
     // -- Verify authorization --------------------------------------------
     const { data: lobby, error: lobbyError } = await supabase
@@ -233,13 +237,14 @@ export async function POST(
         );
       }
 
-      console.error("Failed to assign task:", assignError);
+      logger.error("API", "Failed to assign task", assignError);
       return NextResponse.json(
         { error: "Failed to assign task" },
         { status: 500 },
       );
     }
 
+    logger.debug("API", "POST /api/lobby/[id]/assign-tasks success", { lobbyId: id, userId: user_id, strategyId: availableStrategy.id });
     return NextResponse.json({
       assignment: {
         ...assignment,
@@ -252,7 +257,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Assign-tasks POST unexpected error:", error);
+    logger.error("API", "Assign-tasks POST unexpected error", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },
