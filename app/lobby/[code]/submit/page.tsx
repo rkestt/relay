@@ -66,6 +66,7 @@ export default function SubmitStrategyPage({
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const autoSelectSiteRef = useRef(false);
 
   const [code, setCode] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
@@ -133,9 +134,15 @@ export default function SubmitStrategyPage({
       .select("*")
       .eq("map_id", selectedMapId)
       .then(({ data }) => {
-        logger.debug("SubmitPage", "Sites loaded", { count: data?.length ?? 0 });
-        setSites((data ?? []) as Site[]);
-        setSelectedSiteId("");
+        const loaded = (data ?? []) as Site[];
+        logger.debug("SubmitPage", "Sites loaded", { count: loaded.length });
+        setSites(loaded);
+        if (autoSelectSiteRef.current && loaded.length > 0) {
+          setSelectedSiteId(loaded[0].id);
+          autoSelectSiteRef.current = false;
+        } else {
+          setSelectedSiteId("");
+        }
       });
   }, [selectedMapId]);
 
@@ -207,7 +214,32 @@ export default function SubmitStrategyPage({
     setHotspots([]);
   }, []);
 
-  // ── Submit form ───────────────────────────────────
+  // ── Fill test data ────────────────────────
+  const handleFillTestData = useCallback(async () => {
+    setTitle("Test Strategy - Hard Breach");
+    setDescription("Standard attack on Kids/Dorms. Thatcher EMPs the wall, Thermite opens it.");
+    setTagsInput("Hard Breach, Plant, Oregon");
+    
+    // Select first map — site auto-selects via ref in sites-loading useEffect
+    if (maps.length > 0) {
+      setSelectedMapId(maps[0].id);
+      autoSelectSiteRef.current = true;
+    }
+    
+    // Load default image from public folder
+    try {
+      const res = await fetch("/images/strategies/test-default.jpg");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const file = new File([blob], "test-default.jpg", { type: "image/jpeg" });
+      setRawFiles([file]);
+      setImagePreviews([URL.createObjectURL(file)]);
+    } catch (err) {
+      logger.warn("SubmitPage", "Failed to load default test image", { err });
+    }
+  }, [maps]);
+
+  // ── Submit form ──────────────────────────────
   const handleSubmit = useCallback(async () => {
     if (!title.trim()) {
       setError("Title is required.");
@@ -340,7 +372,7 @@ export default function SubmitStrategyPage({
     );
   }
 
-  // ── Main form ────────────────────────────────────
+  // ── Main form ─────────────────────────────────────
   return (
     <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
       {/* ── Header ───────────────────────────────────── */}
@@ -349,25 +381,46 @@ export default function SubmitStrategyPage({
           <h1 className="text-base font-bold text-neutral-50">Submit Strategy</h1>
           <p className="text-xs text-neutral-500">Room {code}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
-          onClick={() => router.push(`/lobby/${code}`)}
-        >
-          <svg
-            className="size-4 mr-1.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-11 rounded-xl text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
+            onClick={handleFillTestData}
           >
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Back
-        </Button>
+            <svg
+              className="size-4 mr-1.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+            </svg>
+            Fill Test Data
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
+            onClick={() => router.push(`/lobby/${code}`)}
+          >
+            <svg
+              className="size-4 mr-1.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
+            Back
+          </Button>
+        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto">
