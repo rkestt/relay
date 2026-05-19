@@ -161,8 +161,8 @@ export default function SubmitStrategyPage({
         }
       }
 
-      if (rawFiles.length + files.length > 5) {
-        setError("Maximum 5 images per strategy.");
+      if (rawFiles.length + files.length > 10) {
+        setError("Maximum 10 images per strategy.");
         return;
       }
 
@@ -649,7 +649,7 @@ export default function SubmitStrategyPage({
                 {imagePreviews.length > 0 ? "Add more images" : "Upload screenshots"}
               </p>
               <p className="text-xs text-neutral-600">
-                PNG, JPEG, WebP or AVIF (max 20 MB each, up to 5 images)
+                PNG, JPEG, WebP or AVIF (max 20 MB each, up to 10 images)
               </p>
             </div>
             <input
