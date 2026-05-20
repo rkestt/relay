@@ -118,8 +118,8 @@ export default function LobbyMapPage({
         const data = await res.json();
         throw new Error(data.error ?? "Failed to set map");
       }
-      logger.info("LobbyMapPage", "Map set successfully, redirecting", { code });
-      router.push(`/lobby/${code}`);
+      logger.info("LobbyMapPage", "Map set successfully, redirecting to bans", { code });
+      router.push(`/lobby/${code}/bans`);
     } catch (err) {
       logger.error("LobbyMapPage", "Confirm map failed", err);
       setError(err instanceof Error ? err.message : "Failed to set map");
