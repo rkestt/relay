@@ -40,6 +40,7 @@ export interface Lobby {
   room_code: string;
   leader_id: string;
   status: "active" | "closed";
+  phase: "waiting" | "playing" | "closed";
   starting_side: "attacker" | "defender" | null;
   created_at: string;
   updated_at: string;

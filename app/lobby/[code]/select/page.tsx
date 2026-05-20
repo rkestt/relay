@@ -95,7 +95,7 @@ export default function SelectPage({
         const supabase = createBrowserClient();
         const { data: lobby } = await supabase
           .from("lobbies")
-          .select("id, room_code, leader_id")
+          .select("id, room_code, leader_id, phase")
           .eq("room_code", code)
           .single();
 
@@ -107,6 +107,12 @@ export default function SelectPage({
         }
 
         setLobbyId(lobby.id);
+
+        if (lobby.phase === "waiting") {
+          router.push(`/lobby/${code}`);
+          return;
+        }
+
         await refreshLobbyState(lobby.id);
         logger.info("SelectPage", "Lobby state loaded for initial");
       } catch (err) {

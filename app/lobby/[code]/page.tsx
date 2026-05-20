@@ -20,6 +20,7 @@ interface LobbyState {
     id: string;
     room_code: string;
     leader_id: string;
+    phase: "waiting" | "playing" | "closed";
   };
   members: (LobbyMember & {
     profiles: Profile | null;
@@ -152,6 +153,26 @@ export default function LobbyPage({
     }
   }, [lobbyId, refreshState]);
 
+  const handleStartGame = useCallback(async () => {
+    if (!lobbyId) return;
+    if (state?.members.length === 1) {
+      if (!confirm("You are the only player. Start anyway?")) return;
+    }
+    logger.info("LobbyPage", "Start game click", { lobbyId });
+    try {
+      const res = await fetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+      logger.debug("LobbyPage", "Start game successful, refetching state");
+      await refreshState(lobbyId);
+    } catch (err) {
+      logger.error("LobbyPage", "Start game failed", err);
+      setError(err instanceof Error ? err.message : "Failed to start game");
+    }
+  }, [lobbyId, refreshState, state?.members.length]);
+
   const handleSetBans = () => {
     logger.info("LobbyPage", "Set bans click", { code });
     router.push(`/lobby/${code}/bans`);
@@ -275,284 +296,446 @@ export default function LobbyPage({
 
       <div className="flex flex-col flex-1 gap-8 p-5 pb-8">
 
-        {/* ── Banned Operators ──────────────────────────── */}
-        {state.bans.length > 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-red-400 uppercase mb-3">
-              <svg
-                className="size-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
+        {state.lobby.phase === "waiting" ? (
+          /* ── WAITING ROOM ──────────────────────────────── */
+          <>
+            {/* ── Room Code Display ──────────────────────── */}
+            <section className="flex flex-col items-center justify-center gap-3 py-8 animate-in fade-in duration-300">
+              <p className="text-xs font-semibold tracking-widest text-neutral-500 uppercase">
+                Share this code with your squad
+              </p>
+              <button
+                type="button"
+                className="group relative"
+                onClick={() => {
+                  navigator.clipboard.writeText(code);
+                }}
+                title="Click to copy"
               >
-                <circle cx="12" cy="12" r="10" />
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-              </svg>
-              Banned Operators
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {state.bans.map((ban) =>
-                ban.operators ? (
-                  <div
-                    key={ban.id}
-                    className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-neutral-900 border border-red-400/20"
-                  >
-                    {ban.operators.icon_url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={ban.operators.icon_url}
-                        alt={ban.operators.name}
-                        className="w-6 h-6 rounded object-contain"
-                      />
-                    )}
-                    <span className="text-xs font-medium text-neutral-50">
-                      {ban.operators.name}
-                    </span>
-                    <span className="text-[10px] font-bold tracking-wider text-red-400 uppercase">
-                      Banned
-                    </span>
-                  </div>
-                ) : null
+                <span className="text-5xl sm:text-6xl font-mono font-black tracking-[0.15em] text-amber-400 select-all">
+                  {code}
+                </span>
+                <span className="absolute -top-1 -right-1 flex items-center gap-1 text-[10px] font-medium text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                  Copy
+                </span>
+              </button>
+            </section>
+
+            {/* ── Squad Members (reused) ────────────────── */}
+            <section className="animate-in fade-in slide-in-from-bottom-3 duration-400">
+              <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-3">
+                <svg
+                  className="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Squad
+                <span className="ml-auto text-neutral-700 font-normal tracking-normal">
+                  {state.members.length} member{state.members.length !== 1 ? "s" : ""}
+                </span>
+              </h2>
+
+              {state.members.length === 0 ? (
+                <EmptyState
+                  title="No members yet"
+                  description="Share the room code to invite your squad."
+                  className="py-10"
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {state.members.map((member, index) => {
+                    const isMemberLeader = state.lobby.leader_id === member.user_id;
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl bg-neutral-900 border border-neutral-800 transition-all duration-200 hover:border-neutral-700 animate-in fade-in slide-in-from-bottom-2"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        {/* Avatar */}
+                        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden flex items-center justify-center">
+                          {member.profiles?.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={member.profiles.avatar_url}
+                              alt={member.profiles.username ?? "User"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-bold text-neutral-500">
+                              {(member.profiles?.username ?? "?")[0].toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        {/* Name + badge */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-semibold text-neutral-50 truncate">
+                            {member.profiles?.username ?? "Unknown"}
+                          </span>
+                          {isMemberLeader && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+                              <svg
+                                className="size-3"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                              Leader
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </div>
-          </section>
-        )}
+            </section>
 
-        {/* ── Squad Members ─────────────────────────────── */}
-        <section className="animate-in fade-in slide-in-from-bottom-3 duration-400">
-          <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-3">
-            <svg
-              className="size-3.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-            Squad
-            <span className="ml-auto text-neutral-700 font-normal tracking-normal">
-              {state.members.length} member{state.members.length !== 1 ? "s" : ""}
-            </span>
-          </h2>
-
-          {state.members.length === 0 ? (
-            <EmptyState
-              title="No members yet"
-              description="Share the room code to invite your squad."
-              className="py-10"
-            />
-          ) : (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {state.members.map((member, index) => {
-                const isMemberLeader = state.lobby.leader_id === member.user_id;
-                return (
-                  <div
-                    key={member.id}
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl bg-neutral-900 border border-neutral-800 transition-all duration-200 hover:border-neutral-700 animate-in fade-in slide-in-from-bottom-2"
-                    style={{ animationDelay: `${index * 50}ms` }}
+            {/* ── Start Game (leader) / Waiting (non-leader) ── */}
+            {isLeader ? (
+              <section className="flex flex-col gap-3 mt-auto pt-4 border-t border-neutral-800 animate-in fade-in duration-300">
+                <p className="text-xs text-neutral-600 font-medium">
+                  Squad Leader Actions
+                </p>
+                <Button
+                  size="lg"
+                  className={cn(
+                    "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
+                    "bg-amber-500 text-neutral-950",
+                    "hover:bg-amber-400 active:scale-[0.99]",
+                    "transition-all duration-200",
+                    "shadow-[0_0_24px_-4px_rgba(245,158,11,0.25)]"
+                  )}
+                  onClick={handleStartGame}
+                >
+                  <svg
+                    className="size-5 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
                   >
-                    {/* Avatar */}
-                    <div className="flex-shrink-0 w-11 h-11 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden flex items-center justify-center">
-                      {member.profiles?.avatar_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={member.profiles.avatar_url}
-                          alt={member.profiles.username ?? "User"}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-sm font-bold text-neutral-500">
-                          {(member.profiles?.username ?? "?")[0].toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    {/* Name + badge */}
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-semibold text-neutral-50 truncate">
-                        {member.profiles?.username ?? "Unknown"}
-                      </span>
-                      {isMemberLeader && (
-                        <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-amber-400 uppercase">
-                          <svg
-                            className="size-3"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                          >
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                          </svg>
-                          Leader
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* ── Selections ───────────────────────────────── */}
-        {state.selections.length > 0 && (
-          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-3">
-              <svg
-                className="size-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              Selections
-            </h2>
-            <div className="flex flex-col gap-2">
-              {state.selections
-                .filter((s) => s && typeof s === "object")
-                .map((sel: unknown) => {
-                  const selection = sel as {
-                    user_id: string;
-                    map_id: string | null;
-                    operator_id: string | null;
-                    locked_at: string | null;
-                  };
-                  const member = state.members.find(
-                    (m) => m.user_id === selection.user_id
-                  );
-                  const isLocked = Boolean(selection.locked_at);
-                  return (
-                    <div
-                      key={selection.user_id}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200",
-                        isLocked
-                          ? "bg-green-500/5 border-green-400/20"
-                          : "bg-neutral-900 border-neutral-800"
-                      )}
-                    >
-                      <span className="text-sm font-medium text-neutral-50 min-w-0 truncate">
-                        {member?.profiles?.username ?? "Unknown"}
-                      </span>
-                      <span className="ml-auto text-xs text-neutral-500">
-                        {selection.operator_id
-                          ? `Op: ${selection.operator_id}`
-                          : selection.map_id
-                          ? `Map: ${selection.map_id}`
-                          : "Choosing…"}
-                      </span>
-                      {isLocked && (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-green-400 tracking-wider uppercase">
-                          <svg
-                            className="size-3"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={2.5}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M20 6L9 17l-5-5" />
-                          </svg>
-                          Locked
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </section>
-        )}
-
-        {/* ── Leader Controls ──────────────────────────── */}
-        {isLeader && (
-          <section className="flex flex-col gap-3 mt-auto pt-4 border-t border-neutral-800 animate-in fade-in duration-300">
-            <p className="text-xs text-neutral-600 font-medium">
-              Squad Leader Actions
-            </p>
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                size="lg"
-                className={cn(
-                  "flex-1 h-12 rounded-xl text-sm font-semibold",
-                  "border-amber-500/30 text-amber-400",
-                  "hover:bg-amber-500/10 hover:text-amber-300",
-                  "active:scale-[0.98] transition-all duration-200"
-                )}
-                onClick={handleSetBans}
-              >
-                <svg
-                  className="size-4 mr-2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                </svg>
-                Set Bans
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className={cn(
-                  "flex-1 h-12 rounded-xl text-sm font-semibold",
-                  "border-amber-500/30 text-amber-400",
-                  "hover:bg-amber-500/10 hover:text-amber-300",
-                  "active:scale-[0.98] transition-all duration-200"
-                )}
-                onClick={handleNewRound}
-              >
-                <svg
-                  className="size-4 mr-2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                New Round
-              </Button>
-            </div>
-          </section>
-        )}
-
-        {/* ── Select Operator CTA ──────────────────────── */}
-        <section className="mt-2">
-          <Button
-            size="lg"
-            className={cn(
-              "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-              "bg-neutral-50 text-neutral-950",
-              "hover:bg-neutral-200 active:scale-[0.99]",
-              "transition-all duration-200",
-              "shadow-[0_0_24px_-4px_rgba(240,240,240,0.12)]"
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  Start Game
+                </Button>
+              </section>
+            ) : (
+              <section className="flex flex-col items-center justify-center gap-2 mt-auto pt-4 border-t border-neutral-800 animate-in fade-in duration-300">
+                <div className="flex items-center gap-2 text-neutral-500">
+                  <svg
+                    className="size-4 animate-pulse"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  <span className="text-sm font-medium">
+                    Waiting for squad leader to start the game…
+                  </span>
+                </div>
+              </section>
             )}
-            onClick={() => {
-              logger.info("LobbyPage", "Select operator click", { code });
-              router.push(`/lobby/${code}/select`);
-            }}
-          >
-            Select Operator
-          </Button>
-        </section>
+          </>
+        ) : (
+          /* ── PLAYING PHASE ──────────────────────────────── */
+          <>
+            {/* ── Banned Operators ──────────────────────────── */}
+            {state.bans.length > 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-red-400 uppercase mb-3">
+                  <svg
+                    className="size-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                  Banned Operators
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {state.bans.map((ban) =>
+                    ban.operators ? (
+                      <div
+                        key={ban.id}
+                        className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-neutral-900 border border-red-400/20"
+                      >
+                        {ban.operators.icon_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={ban.operators.icon_url}
+                            alt={ban.operators.name}
+                            className="w-6 h-6 rounded object-contain"
+                          />
+                        )}
+                        <span className="text-xs font-medium text-neutral-50">
+                          {ban.operators.name}
+                        </span>
+                        <span className="text-[10px] font-bold tracking-wider text-red-400 uppercase">
+                          Banned
+                        </span>
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* ── Squad Members ─────────────────────────────── */}
+            <section className="animate-in fade-in slide-in-from-bottom-3 duration-400">
+              <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-3">
+                <svg
+                  className="size-3.5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                Squad
+                <span className="ml-auto text-neutral-700 font-normal tracking-normal">
+                  {state.members.length} member{state.members.length !== 1 ? "s" : ""}
+                </span>
+              </h2>
+
+              {state.members.length === 0 ? (
+                <EmptyState
+                  title="No members yet"
+                  description="Share the room code to invite your squad."
+                  className="py-10"
+                />
+              ) : (
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {state.members.map((member, index) => {
+                    const isMemberLeader = state.lobby.leader_id === member.user_id;
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center gap-3 px-3 py-3 rounded-xl bg-neutral-900 border border-neutral-800 transition-all duration-200 hover:border-neutral-700 animate-in fade-in slide-in-from-bottom-2"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        {/* Avatar */}
+                        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-neutral-800 border border-neutral-700 overflow-hidden flex items-center justify-center">
+                          {member.profiles?.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={member.profiles.avatar_url}
+                              alt={member.profiles.username ?? "User"}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-sm font-bold text-neutral-500">
+                              {(member.profiles?.username ?? "?")[0].toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        {/* Name + badge */}
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-semibold text-neutral-50 truncate">
+                            {member.profiles?.username ?? "Unknown"}
+                          </span>
+                          {isMemberLeader && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-amber-400 uppercase">
+                              <svg
+                                className="size-3"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                              >
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                              Leader
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+
+            {/* ── Selections ───────────────────────────────── */}
+            {state.selections.length > 0 && (
+              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-3">
+                  <svg
+                    className="size-3.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  Selections
+                </h2>
+                <div className="flex flex-col gap-2">
+                  {state.selections
+                    .filter((s) => s && typeof s === "object")
+                    .map((sel: unknown) => {
+                      const selection = sel as {
+                        user_id: string;
+                        map_id: string | null;
+                        operator_id: string | null;
+                        locked_at: string | null;
+                      };
+                      const member = state.members.find(
+                        (m) => m.user_id === selection.user_id
+                      );
+                      const isLocked = Boolean(selection.locked_at);
+                      return (
+                        <div
+                          key={selection.user_id}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200",
+                            isLocked
+                              ? "bg-green-500/5 border-green-400/20"
+                              : "bg-neutral-900 border-neutral-800"
+                          )}
+                        >
+                          <span className="text-sm font-medium text-neutral-50 min-w-0 truncate">
+                            {member?.profiles?.username ?? "Unknown"}
+                          </span>
+                          <span className="ml-auto text-xs text-neutral-500">
+                            {selection.operator_id
+                              ? `Op: ${selection.operator_id}`
+                              : selection.map_id
+                              ? `Map: ${selection.map_id}`
+                              : "Choosing…"}
+                          </span>
+                          {isLocked && (
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-green-400 tracking-wider uppercase">
+                              <svg
+                                className="size-3"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2.5}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M20 6L9 17l-5-5" />
+                              </svg>
+                              Locked
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              </section>
+            )}
+
+            {/* ── Leader Controls ──────────────────────────── */}
+            {isLeader && (
+              <section className="flex flex-col gap-3 mt-auto pt-4 border-t border-neutral-800 animate-in fade-in duration-300">
+                <p className="text-xs text-neutral-600 font-medium">
+                  Squad Leader Actions
+                </p>
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={cn(
+                      "flex-1 h-12 rounded-xl text-sm font-semibold",
+                      "border-amber-500/30 text-amber-400",
+                      "hover:bg-amber-500/10 hover:text-amber-300",
+                      "active:scale-[0.98] transition-all duration-200"
+                    )}
+                    onClick={handleSetBans}
+                  >
+                    <svg
+                      className="size-4 mr-2"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    </svg>
+                    Set Bans
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={cn(
+                      "flex-1 h-12 rounded-xl text-sm font-semibold",
+                      "border-amber-500/30 text-amber-400",
+                      "hover:bg-amber-500/10 hover:text-amber-300",
+                      "active:scale-[0.98] transition-all duration-200"
+                    )}
+                    onClick={handleNewRound}
+                  >
+                    <svg
+                      className="size-4 mr-2"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
+                    New Round
+                  </Button>
+                </div>
+              </section>
+            )}
+
+            {/* ── Select Operator CTA ──────────────────────── */}
+            <section className="mt-2">
+              <Button
+                size="lg"
+                className={cn(
+                  "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
+                  "bg-neutral-50 text-neutral-950",
+                  "hover:bg-neutral-200 active:scale-[0.99]",
+                  "transition-all duration-200",
+                  "shadow-[0_0_24px_-4px_rgba(240,240,240,0.12)]"
+                )}
+                onClick={() => {
+                  logger.info("LobbyPage", "Select operator click", { code });
+                  router.push(`/lobby/${code}/select`);
+                }}
+              >
+                Select Operator
+              </Button>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );

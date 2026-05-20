@@ -57,7 +57,7 @@ export default function TasksPage({
 
         const { data: lobby } = await supabase
           .from("lobbies")
-          .select("id")
+          .select("id, phase")
           .eq("room_code", code)
           .single();
 
@@ -69,6 +69,11 @@ export default function TasksPage({
         }
 
         setLobbyId(lobby.id);
+
+        if (lobby.phase === "waiting") {
+          router.push(`/lobby/${code}`);
+          return;
+        }
       } catch (err) {
         logger.error("TasksPage", "Failed to resolve lobby", err);
         setError("Failed to load lobby");
