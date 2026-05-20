@@ -107,5 +107,6 @@ INSERT INTO operators (id, name, side, icon_url) VALUES
   ('c3434342-3434-3434-3434-343434343434', 'Fenrir', 'defender', NULL),
   ('c3535352-3535-3535-3535-353535353535', 'Tubarão', 'defender', NULL),
   ('c3636362-3636-3636-3636-363636363636', 'Skopós', 'defender', NULL),
-  ('c3737372-3737-3737-3737-373737373737', 'Sentry', 'defender', NULL)
+  ('c3737372-3737-3737-3737-373737373737', 'Sentry', 'defender', NULL),
+  ('c3838382-3838-3838-3838-383838383838', 'Denari', 'defender', NULL)
 ON CONFLICT (id) DO NOTHING;
