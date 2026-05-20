@@ -87,6 +87,7 @@ export interface StrategyTemplate {
   id: string;
   map_id: string | null;
   site_id: string | null;
+  operator_id: string | null;
   title: string;
   description: string | null;
   image_url: string;  // primary image (backward compat)

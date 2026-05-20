@@ -94,21 +94,6 @@ export async function POST(
       );
     }
 
-    // -- Fetch operator tags ---------------------------------------------
-    const { data: operatorTags } = await supabase
-      .from("operator_tags")
-      .select("tag")
-      .eq("operator_id", operator_id);
-
-    if (!operatorTags || operatorTags.length === 0) {
-      return NextResponse.json(
-        { error: "No tags found for the specified operator" },
-        { status: 400 },
-      );
-    }
-
-    const tagValues = operatorTags.map((t) => t.tag);
-
     // -- Find the team's map/site selection for this round ----------------
     const { data: roundSelections } = await supabase
       .from("lobby_selections")
@@ -126,11 +111,12 @@ export async function POST(
       siteId = roundSelections[0].site_id;
     }
 
-    // -- Fetch approved strategies matching operator tags ----------------
+    // -- Fetch approved strategies for this operator ---------------------
     let strategiesQuery = supabase
       .from("strategy_templates")
       .select("id, title, description, image_url, created_at")
-      .eq("status", "approved");
+      .eq("status", "approved")
+      .eq("operator_id", operator_id);
 
     if (mapId) {
       strategiesQuery = strategiesQuery.eq("map_id", mapId);
@@ -144,45 +130,16 @@ export async function POST(
     if (!allStrategies || allStrategies.length === 0) {
       return NextResponse.json(
         {
-          error: "No approved strategies found for the current map/site",
+          error: "No approved strategies found for this operator on the current map/site",
         },
         { status: 404 },
       );
     }
 
-    // -- Filter strategies by matching tags ------------------------------
-    const strategyIds = allStrategies.map((s) => s.id);
-
-    const { data: strategyTags } = await supabase
-      .from("strategy_tags")
-      .select("strategy_id, tag")
-      .in("strategy_id", strategyIds)
-      .in("tag", tagValues);
-
-    if (!strategyTags || strategyTags.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No strategies match the operator's tags",
-        },
-        { status: 404 },
-      );
-    }
-
-    const matchingStrategyIds = new Set(strategyTags.map((st) => st.strategy_id));
-
-    const matchingStrategies = allStrategies
-      .filter((s) => matchingStrategyIds.has(s.id))
-      .sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-      );
-
-    if (matchingStrategies.length === 0) {
-      return NextResponse.json(
-        { error: "No matching strategies available" },
-        { status: 404 },
-      );
-    }
+    const matchingStrategies = allStrategies.sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    );
 
     // -- Check for already-assigned strategies this round -----------------
     const { data: existingAssignments } = await supabase

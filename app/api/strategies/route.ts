@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { title, map_id, site_id, description, tags, image_url, hotspots, images } =
+    const { title, map_id, site_id, operator_id, description, tags, image_url, hotspots, images } =
       body;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -53,6 +53,12 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    if (!operator_id || typeof operator_id !== "string") {
+      return NextResponse.json(
+        { error: "operator_id is required" },
+        { status: 400 },
+      );
+    }
     const imageUrl = Array.isArray(images) && images.length > 0
       ? images[0]
       : image_url;
@@ -72,6 +78,7 @@ export async function POST(request: Request) {
         title,
         map_id,
         site_id,
+        operator_id,
         description: description || null,
         image_url: imageUrl,
         status: "pending",

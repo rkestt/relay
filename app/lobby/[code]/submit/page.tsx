@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { Badge } from "@/components/ui/badge";
 import { MapViewer } from "@/components/maps/MapViewer";
 import { EmptyState } from "@/components/ui/EmptyState";
-import type { Map, Site } from "@/types";
+import type { Map, Site, Operator } from "@/types";
 import imageCompression from "browser-image-compression";
 
 interface HotspotItem {
@@ -84,6 +84,8 @@ export default function SubmitStrategyPage({
 
   const [maps, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -117,6 +119,17 @@ export default function SubmitStrategyPage({
         logger.debug("SubmitPage", "Maps loaded", { count: data?.length ?? 0 });
         setMaps((data ?? []) as Map[]);
         setLoading(false);
+      });
+  }, []);
+
+  // ── Load operators ──────────────────────────────
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase
+      .from("operators")
+      .select("*")
+      .then(({ data }) => {
+        setOperators((data ?? []) as Operator[]);
       });
   }, []);
 
@@ -226,6 +239,11 @@ export default function SubmitStrategyPage({
       autoSelectSiteRef.current = true;
     }
     
+    // Select first operator
+    if (operators.length > 0) {
+      setSelectedOperatorId(operators[0].id);
+    }
+
     // Load default image from public folder
     try {
       const res = await fetch("/images/strategies/test-default.jpg");
@@ -237,7 +255,7 @@ export default function SubmitStrategyPage({
     } catch (err) {
       logger.warn("SubmitPage", "Failed to load default test image", { err });
     }
-  }, [maps]);
+  }, [maps, operators]);
 
   // ── Submit form ──────────────────────────────
   const handleSubmit = useCallback(async () => {
@@ -251,6 +269,10 @@ export default function SubmitStrategyPage({
     }
     if (!selectedSiteId) {
       setError("Please select a site.");
+      return;
+    }
+    if (!selectedOperatorId) {
+      setError("Please select an operator.");
       return;
     }
     if (rawFiles.length === 0) {
@@ -286,6 +308,7 @@ export default function SubmitStrategyPage({
           title: title.trim(),
           map_id: selectedMapId,
           site_id: selectedSiteId,
+          operator_id: selectedOperatorId,
           description: description.trim() || undefined,
           tags,
           images: imageUrls,
@@ -310,7 +333,7 @@ export default function SubmitStrategyPage({
     } finally {
       setSubmitting(false);
     }
-  }, [title, selectedMapId, selectedSiteId, rawFiles, userId, tagsInput, description, hotspots]);
+  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, rawFiles, userId, tagsInput, description, hotspots]);
 
   // ── Redirect after success ────────────────────────
   useEffect(() => {
@@ -544,6 +567,40 @@ export default function SubmitStrategyPage({
                 <option key={site.id} value={site.id}>
                   {site.name}
                   {site.floor ? ` (${site.floor})` : ""}
+                </option>
+              ))}
+            </select>
+          </section>
+
+          {/* ── Operator Selection ─────────────────────────── */}
+          <section className="flex flex-col gap-2">
+            <label
+              htmlFor="operator"
+              className="flex items-center gap-1.5 text-xs font-semibold tracking-widest text-neutral-500 uppercase"
+            >
+              Operator
+              <span className="text-red-400">*</span>
+            </label>
+            <select
+              id="operator"
+              value={selectedOperatorId}
+              onChange={(e) => {
+                logger.debug("SubmitPage", "Operator selection changed", { operatorId: e.target.value });
+                setSelectedOperatorId(e.target.value);
+              }}
+              className={cn(
+                "flex h-12 w-full rounded-xl border-2 px-3 py-2 text-sm transition-all duration-200",
+                "bg-neutral-900 border-neutral-800 text-neutral-200",
+                "focus:outline-none focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/20",
+                !selectedOperatorId && "text-neutral-500",
+              )}
+            >
+              <option value="" disabled>
+                Select an operator…
+              </option>
+              {operators.map((op) => (
+                <option key={op.id} value={op.id}>
+                  {op.name} ({op.side})
                 </option>
               ))}
             </select>
