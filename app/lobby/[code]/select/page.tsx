@@ -171,6 +171,28 @@ export default function SelectPage({
         throw new Error(data.error ?? "Failed to lock selection");
       }
 
+      // -- Auto-assign task if operator was selected ----------------------
+      if (selectedOperatorId) {
+        const supabase = createBrowserClient();
+        const { data: userData } = await supabase.auth.getUser();
+        const currentUserId = userData?.user?.id;
+        if (currentUserId) {
+          logger.info("SelectPage", "Auto-assigning task", { operatorId: selectedOperatorId });
+          const assignRes = await fetch(`/api/lobby/${lobbyId}/assign-tasks`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: currentUserId, operator_id: selectedOperatorId }),
+          });
+          if (!assignRes.ok) {
+            const assignData = await assignRes.json();
+            logger.warn("SelectPage", "Task auto-assignment failed", { error: assignData.error });
+            // Non-fatal: redirect anyway so user sees tasks page
+          } else {
+            logger.info("SelectPage", "Task auto-assigned successfully");
+          }
+        }
+      }
+
       logger.info("SelectPage", "Selection locked, navigating to tasks");
       router.push(`/lobby/${code}/tasks`);
     } catch (err) {
