@@ -41,7 +41,20 @@ export async function POST(
       );
     }
 
-    const { map_id, site_id, operator_id } = body;
+    let { map_id, site_id, operator_id } = body;
+
+    // If map_id not provided, fall back to the lobby's map_id
+    let effectiveMapId = map_id;
+    if (!effectiveMapId) {
+      const { data: lobby } = await supabase
+        .from("lobbies")
+        .select("map_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (lobby?.map_id) {
+        effectiveMapId = lobby.map_id;
+      }
+    }
 
     // Validate types if provided
     if (map_id !== undefined && typeof map_id !== "string") {
@@ -63,10 +76,10 @@ export async function POST(
       );
     }
 
-    logger.info("API", "POST /api/lobby/[id]/lock-selection body", { lobbyId: id, map_id, site_id, operator_id });
+    logger.info("API", "POST /api/lobby/[id]/lock-selection body", { lobbyId: id, map_id, effectiveMapId, site_id, operator_id });
 
     // At least one field must be provided
-    if (!map_id && !site_id && !operator_id) {
+    if (!effectiveMapId && !site_id && !operator_id) {
       return NextResponse.json(
         {
           error:
@@ -100,7 +113,7 @@ export async function POST(
       round_id: currentRound.id,
     };
 
-    if (map_id !== undefined) payload.map_id = map_id;
+    if (effectiveMapId) payload.map_id = effectiveMapId;
     if (site_id !== undefined) payload.site_id = site_id;
     if (operator_id !== undefined) payload.operator_id = operator_id;
     if (operator_id !== undefined) payload.locked_at = new Date().toISOString();
