@@ -41,6 +41,7 @@ export interface Lobby {
   leader_id: string;
   status: "active" | "closed";
   phase: "waiting" | "playing" | "closed";
+  map_id: string | null;
   starting_side: "attacker" | "defender" | null;
   created_at: string;
   updated_at: string;

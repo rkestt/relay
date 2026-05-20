@@ -21,6 +21,7 @@ interface LobbyState {
     room_code: string;
     leader_id: string;
     phase: "waiting" | "playing" | "closed";
+    map_id: string | null;
   };
   members: (LobbyMember & {
     profiles: Profile | null;
@@ -453,8 +454,37 @@ export default function LobbyPage({
               </section>
             )}
           </>
+        ) : state.lobby.phase === 'playing' && !state.lobby.map_id ? (
+          /* ── MAP SELECTION PENDING ─────────────────────── */
+          <section className="flex flex-col items-center justify-center flex-1 gap-4 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 text-amber-400">
+              <svg className="size-6 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="1 6 1 22 8 18 16 22 21 18 21 2 16 6 8 2 1 6" />
+              </svg>
+              <span className="text-sm font-semibold">Map Selection</span>
+            </div>
+            {isLeader ? (
+              <Button
+                size="lg"
+                className={cn(
+                  "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
+                  "bg-amber-500 text-neutral-950",
+                  "hover:bg-amber-400 active:scale-[0.99]",
+                  "transition-all duration-200",
+                  "shadow-[0_0_24px_-4px_rgba(245,158,11,0.25)]"
+                )}
+                onClick={() => router.push(`/lobby/${code}/map`)}
+              >
+                Choose Map
+              </Button>
+            ) : (
+              <p className="text-sm text-neutral-500">
+                Waiting for squad leader to choose the map…
+              </p>
+            )}
+          </section>
         ) : (
-          /* ── PLAYING PHASE ──────────────────────────────── */
+          /* ── PLAYING PHASE (existing content) ──────────── */
           <>
             {/* ── Banned Operators ──────────────────────────── */}
             {state.bans.length > 0 && (
