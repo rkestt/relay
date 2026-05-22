@@ -128,6 +128,17 @@ export interface TaskAssignment {
   round_id: string;
   strategy_id: string;
   assigned_at: string;
+  upvotes?: number;
+  downvotes?: number;
+  user_vote?: "up" | "down" | null;
+}
+
+export interface TaskVote {
+  id: string;
+  task_assignment_id: string;
+  user_id: string;
+  vote_type: "up" | "down";
+  created_at: string;
 }
 
 export interface ValidationQueueItem {
