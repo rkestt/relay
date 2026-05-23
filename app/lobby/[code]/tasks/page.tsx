@@ -3,18 +3,26 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
-import { MapViewer } from "@/components/maps/MapViewer";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
-import type { StrategyTemplate, StrategyHotspot, TaskAssignment } from "@/types";
+import { StrategyCard } from "@/components/tasks/StrategyCard";
+import type {
+  StrategyTemplate,
+  StrategyHotspot,
+  TaskAssignment,
+  Profile,
+} from "@/types";
 
-interface AssignedTask {
+interface FeedTask {
   assignment: TaskAssignment & {
     strategy: StrategyTemplate | null;
+    user: Profile | null;
+    upvotes: number;
+    downvotes: number;
+    user_vote: "up" | "down" | null;
   };
   hotspots: StrategyHotspot[];
 }
@@ -32,7 +40,7 @@ export default function TasksPage({
   const router = useRouter();
   const [code, setCode] = useState<string>("");
   const [lobbyId, setLobbyId] = useState<string | null>(null);
-  const [tasks, setTasks] = useState<AssignedTask[]>([]);
+  const [tasks, setTasks] = useState<FeedTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +64,7 @@ export default function TasksPage({
 
         const { data: lobby } = await supabase
           .from("lobbies")
-          .select("id")
+          .select("id, phase")
           .eq("room_code", code)
           .single();
 
@@ -68,6 +76,11 @@ export default function TasksPage({
         }
 
         setLobbyId(lobby.id);
+
+        if (lobby.phase === "waiting") {
+          router.push(`/lobby/${code}`);
+          return;
+        }
       } catch (err) {
         logger.error("TasksPage", "Failed to resolve lobby", err);
         setError("Failed to load lobby");
@@ -76,7 +89,7 @@ export default function TasksPage({
     };
 
     init();
-  }, [code]);
+  }, [code, router]);
 
   // ── Fetch tasks ───────────────────────────────────────
   const loadTasks = useCallback(async (id: string) => {
@@ -104,16 +117,69 @@ export default function TasksPage({
         return;
       }
 
+      // ── Fetch ALL assignments for this round (all users) ──
       const { data: assignments } = await supabase
         .from("task_assignments")
-        .select("*, strategy:strategy_templates(*)")
+        .select(
+          "*, strategy:strategy_templates(*, images:strategy_images(*)), user:profiles(*)",
+        )
         .eq("lobby_id", id)
-        .eq("round_id", stateData.currentRound.id)
+        .eq("round_id", stateData.currentRound.id);
+
+      const allAssignments = (assignments ?? []) as (TaskAssignment & {
+        strategy: StrategyTemplate | null;
+        user: Profile | null;
+      })[];
+
+      if (allAssignments.length === 0) {
+        setTasks([]);
+        setLoading(false);
+        return;
+      }
+
+      // ── Fetch vote counts for all assignments ────────────
+      const assignmentIds = allAssignments.map((a) => a.id);
+
+      const { data: allVotes } = await supabase
+        .from("task_votes")
+        .select("task_assignment_id, vote_type")
+        .in("task_assignment_id", assignmentIds);
+
+      // Count upvotes/downvotes per assignment
+      const voteCounts = new Map<
+        string,
+        { upvotes: number; downvotes: number }
+      >();
+      for (const id of assignmentIds) {
+        voteCounts.set(id, { upvotes: 0, downvotes: 0 });
+      }
+      for (const v of (allVotes ?? []) as {
+        task_assignment_id: string;
+        vote_type: "up" | "down";
+      }[]) {
+        const counts = voteCounts.get(v.task_assignment_id);
+        if (counts) {
+          if (v.vote_type === "up") counts.upvotes++;
+          else if (v.vote_type === "down") counts.downvotes++;
+        }
+      }
+
+      // ── Fetch current user's votes ──────────────────────
+      const { data: myVotes } = await supabase
+        .from("task_votes")
+        .select("task_assignment_id, vote_type")
+        .in("task_assignment_id", assignmentIds)
         .eq("user_id", userData.user.id);
 
-      const allAssignments = (assignments ?? []) as (TaskAssignment & { strategy: StrategyTemplate | null })[];
+      const userVoteMap = new Map<string, "up" | "down">();
+      for (const v of (myVotes ?? []) as {
+        task_assignment_id: string;
+        vote_type: "up" | "down";
+      }[]) {
+        userVoteMap.set(v.task_assignment_id, v.vote_type);
+      }
 
-      // Batch-fetch all hotspots in a single query (fix N+1)
+      // ── Batch-fetch all hotspots ────────────────────────
       const strategyIds = allAssignments
         .filter((a) => a.strategy)
         .map((a) => a.strategy_id);
@@ -132,13 +198,36 @@ export default function TasksPage({
         }
       }
 
-      const tasksWithHotspots: AssignedTask[] = allAssignments.map((assignment) => ({
-        assignment,
-        hotspots: hotspotsByStrategy.get(assignment.strategy_id) ?? [],
-      }));
+      // ── Merge everything into FeedTask list ─────────────
+      const tasksWithVotes: FeedTask[] = allAssignments
+        .map((assignment) => {
+          const counts = voteCounts.get(assignment.id) ?? {
+            upvotes: 0,
+            downvotes: 0,
+          };
+          return {
+            assignment: {
+              ...assignment,
+              upvotes: counts.upvotes,
+              downvotes: counts.downvotes,
+              user_vote: userVoteMap.get(assignment.id) ?? null,
+            },
+            hotspots:
+              hotspotsByStrategy.get(assignment.strategy_id) ?? [],
+          };
+        })
+        .sort((a, b) => {
+          const scoreA =
+            (a.assignment.upvotes ?? 0) - (a.assignment.downvotes ?? 0);
+          const scoreB =
+            (b.assignment.upvotes ?? 0) - (b.assignment.downvotes ?? 0);
+          return scoreB - scoreA; // DESC
+        });
 
-      logger.info("TasksPage", "Tasks fetched", { taskCount: tasksWithHotspots.length });
-      setTasks(tasksWithHotspots);
+      logger.info("TasksPage", "Tasks fetched", {
+        taskCount: tasksWithVotes.length,
+      });
+      setTasks(tasksWithVotes);
     } catch (err) {
       logger.error("TasksPage", "Failed to load tasks", err);
       setError("Failed to load tasks");
@@ -159,33 +248,126 @@ export default function TasksPage({
     loadTasks(lobbyId);
   }, [lastEventAt, lastSync, lobbyId, loadTasks]);
 
+  // ── Vote handler ───────────────────────────────────────
+  const handleVote = useCallback(
+    async (assignmentId: string, voteType: "up" | "down" | null) => {
+      if (!lobbyId) return;
+
+      // Optimistic update
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t.assignment.id === assignmentId) {
+            const oldUp = t.assignment.upvotes ?? 0;
+            const oldDown = t.assignment.downvotes ?? 0;
+            const oldVote = t.assignment.user_vote;
+
+            let newUp = oldUp;
+            let newDown = oldDown;
+
+            // Remove old vote effect
+            if (oldVote === "up") newUp = Math.max(0, newUp - 1);
+            if (oldVote === "down") newDown = Math.max(0, newDown - 1);
+
+            // Apply new vote effect
+            if (voteType === "up") newUp++;
+            if (voteType === "down") newDown++;
+
+            return {
+              ...t,
+              assignment: {
+                ...t.assignment,
+                upvotes: newUp,
+                downvotes: newDown,
+                user_vote: voteType,
+              },
+            };
+          }
+          return t;
+        }),
+      );
+
+      try {
+        const res = await fetch(
+          `/api/lobby/${lobbyId}/tasks/${assignmentId}/vote`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ vote_type: voteType }),
+          },
+        );
+
+        if (!res.ok) {
+          // Revert on failure — refetch
+          logger.warn("TasksPage", "Vote failed, refetching");
+          loadTasks(lobbyId);
+          return;
+        }
+
+        const data = await res.json();
+        // Sync with server values
+        setTasks((prev) =>
+          prev.map((t) => {
+            if (t.assignment.id === assignmentId) {
+              return {
+                ...t,
+                assignment: {
+                  ...t.assignment,
+                  upvotes: data.upvotes,
+                  downvotes: data.downvotes,
+                  user_vote: data.user_vote,
+                },
+              };
+            }
+            return t;
+          }),
+        );
+      } catch (err) {
+        logger.error("TasksPage", "Vote error", err);
+        loadTasks(lobbyId);
+      }
+    },
+    [lobbyId, loadTasks],
+  );
+
+  // ── Navigation ────────────────────────────────────────
+  const handleCardClick = useCallback(
+    (assignmentId: string) => {
+      if (!code) return;
+      router.push(`/lobby/${code}/tasks/${assignmentId}`);
+    },
+    [code, router],
+  );
+
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
       <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
         <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
           <div className="flex flex-col gap-1">
-            <div className="h-4 w-20 rounded bg-neutral-800 animate-pulse" />
+            <div className="h-4 w-32 rounded bg-neutral-800 animate-pulse" />
             <div className="h-3 w-28 rounded bg-neutral-800/60 animate-pulse" />
           </div>
           <div className="h-9 w-24 rounded-lg bg-neutral-800 animate-pulse" />
         </header>
-        <div className="flex flex-col gap-5 p-5">
-          {Array.from({ length: 2 }).map((_, i) => (
+        <div className="flex flex-col gap-4 p-5">
+          {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
               className="rounded-2xl border border-neutral-800 bg-neutral-900 overflow-hidden animate-pulse"
             >
-              <div className="p-4 flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex flex-col gap-2 flex-1">
-                    <div className="h-4 w-40 rounded bg-neutral-800" />
-                    <div className="h-3 w-60 rounded bg-neutral-800/60" />
-                  </div>
-                  <div className="w-20 h-20 rounded-lg bg-neutral-800" />
+              <div className="flex">
+                <div className="flex flex-col items-center gap-2 pt-4 px-3 min-w-[48px]">
+                  <div className="size-4 rounded bg-neutral-800" />
+                  <div className="h-4 w-4 rounded bg-neutral-800" />
+                  <div className="size-4 rounded bg-neutral-800" />
+                </div>
+                <div className="flex-1 p-4 pl-1">
+                  <div className="h-4 w-40 rounded bg-neutral-800" />
+                  <div className="h-3 w-60 rounded bg-neutral-800/60 mt-2" />
+                  <div className="aspect-video max-h-[160px] rounded-lg bg-neutral-800 mt-3" />
+                  <div className="h-3 w-24 rounded bg-neutral-800/60 mt-2" />
                 </div>
               </div>
-              <div className="aspect-video bg-neutral-800 m-4 rounded-xl" />
             </div>
           ))}
         </div>
@@ -242,10 +424,10 @@ export default function TasksPage({
       {/* ── Header ───────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
         <div>
-          <h1 className="text-base font-bold text-neutral-50">Your Tasks</h1>
-          <p className="text-xs text-neutral-500">
-            Room {code}
-          </p>
+          <h1 className="text-base font-bold text-neutral-50">
+            Strategies Feed
+          </h1>
+          <p className="text-xs text-neutral-500">Room {code}</p>
         </div>
         <Button
           variant="ghost"
@@ -271,8 +453,7 @@ export default function TasksPage({
         </Button>
       </header>
 
-      <div className="flex flex-col gap-5 p-5 pb-8">
-
+      <div className="flex flex-col gap-4 p-5 pb-8">
         {/* ── Empty state ──────────────────────────────── */}
         {tasks.length === 0 ? (
           <EmptyState
@@ -290,113 +471,21 @@ export default function TasksPage({
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
               </svg>
             }
-            title="No tasks assigned yet"
-            description="Tasks are assigned after selecting your operator in a round."
+            title="No strategies assigned yet"
+            description="Strategies are assigned after selecting your operator in a round."
             className="py-20"
           />
         ) : (
-          tasks.map(({ assignment, hotspots }, index) => {
-            // ── Strategy deleted fallback ──────────────────
-            if (!assignment.strategy) {
-              return (
-                <div
-                  key={assignment.id}
-                  className="flex flex-col rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 animate-in fade-in slide-in-from-bottom-2"
-                  style={{ animationDelay: `${index * 80}ms` }}
-                >
-                  <div className="px-5 pt-5 pb-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex flex-col gap-1.5">
-                        <h2 className="text-base font-bold text-neutral-500">
-                          Strategy removed
-                        </h2>
-                        <p className="text-sm text-neutral-600">
-                          This strategy is no longer available.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div
-                key={assignment.id}
-                className="flex flex-col rounded-2xl overflow-hidden border border-neutral-800 bg-neutral-900 animate-in fade-in slide-in-from-bottom-2"
-                style={{ animationDelay: `${index * 80}ms` }}
-              >
-                {/* Strategy header */}
-                <div className="px-5 pt-5 pb-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
-                        {/* Step indicator */}
-                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-400">
-                          {index + 1}
-                        </span>
-                        <h2 className="text-base font-bold text-neutral-50">
-                          {assignment.strategy.title}
-                        </h2>
-                      </div>
-                      {assignment.strategy.description && (
-                        <p className="text-sm text-neutral-400 leading-relaxed">
-                          {assignment.strategy.description}
-                        </p>
-                      )}
-                    </div>
-                    {/* Screenshot */}
-                    {assignment.strategy.image_url && (
-                      <div className="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-neutral-800 border border-neutral-700">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={assignment.strategy.image_url}
-                          alt="Strategy screenshot"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Map with hotspots */}
-                {assignment.strategy.image_url && hotspots.length > 0 && (
-                  <div className="px-5 pb-5">
-                    <MapViewer
-                      imageUrl={assignment.strategy.image_url}
-                      hotspots={hotspots.map((h) => ({
-                        x_percent: h.x_percent,
-                        y_percent: h.y_percent,
-                        label: h.label ?? "",
-                      }))}
-                    />
-                  </div>
-                )}
-
-                {/* Fallback if no map image */}
-                {(!assignment.strategy.image_url || hotspots.length === 0) && (
-                  <div className="px-5 pb-5">
-                    <div className="aspect-video rounded-xl bg-neutral-800 border border-neutral-700 flex items-center justify-center gap-2">
-                      <svg
-                        className="size-5 text-neutral-600"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <path d="M21 15l-5-5L5 21" />
-                      </svg>
-                      <span className="text-neutral-600 text-xs">No map available</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
+          tasks.map(({ assignment, hotspots }) => (
+            <StrategyCard
+              key={assignment.id}
+              assignment={assignment}
+              hotspots={hotspots}
+              username={assignment.user?.username ?? undefined}
+              onVote={(voteType) => handleVote(assignment.id, voteType)}
+              onClick={() => handleCardClick(assignment.id)}
+            />
+          ))
         )}
       </div>
     </div>

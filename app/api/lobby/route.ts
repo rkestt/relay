@@ -77,8 +77,8 @@ export async function POST(request: Request) {
 
       const { data: lobby, error: insertError } = await supabase
         .from("lobbies")
-        .insert({ room_code: roomCode, leader_id: user.id, starting_side: startingSide })
-        .select("id, room_code, leader_id, starting_side")
+        .insert({ room_code: roomCode, leader_id: user.id, starting_side: startingSide, phase: 'waiting' })
+        .select("id, room_code, leader_id, starting_side, phase")
         .single();
 
       if (insertError) {

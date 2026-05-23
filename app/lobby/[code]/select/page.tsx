@@ -12,7 +12,7 @@ import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map, Site, Operator, OperatorTag } from "@/types";
 
-type SelectionStep = "map" | "site" | "operator";
+type SelectionStep = "site" | "operator";
 
 interface LobbyState {
   lobby: { id: string; room_code: string; leader_id: string };
@@ -36,7 +36,7 @@ export default function SelectPage({
   const router = useRouter();
   const [code, setCode] = useState<string>("");
   const [lobbyId, setLobbyId] = useState<string | null>(null);
-  const [step, setStep] = useState<SelectionStep>("map");
+  const [step, setStep] = useState<SelectionStep>("site");
   const [maps, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
@@ -95,7 +95,7 @@ export default function SelectPage({
         const supabase = createBrowserClient();
         const { data: lobby } = await supabase
           .from("lobbies")
-          .select("id, room_code, leader_id")
+          .select("id, room_code, leader_id, phase, map_id")
           .eq("room_code", code)
           .single();
 
@@ -107,6 +107,16 @@ export default function SelectPage({
         }
 
         setLobbyId(lobby.id);
+
+        if (lobby.map_id) {
+          setSelectedMapId(lobby.map_id);
+        }
+
+        if (lobby.phase === "waiting") {
+          router.push(`/lobby/${code}`);
+          return;
+        }
+
         await refreshLobbyState(lobby.id);
         logger.info("SelectPage", "Lobby state loaded for initial");
       } catch (err) {
@@ -161,6 +171,28 @@ export default function SelectPage({
         throw new Error(data.error ?? "Failed to lock selection");
       }
 
+      // -- Auto-assign task if operator was selected ----------------------
+      if (selectedOperatorId) {
+        const supabase = createBrowserClient();
+        const { data: userData } = await supabase.auth.getUser();
+        const currentUserId = userData?.user?.id;
+        if (currentUserId) {
+          logger.info("SelectPage", "Auto-assigning task", { operatorId: selectedOperatorId });
+          const assignRes = await fetch(`/api/lobby/${lobbyId}/assign-tasks`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: currentUserId, operator_id: selectedOperatorId }),
+          });
+          if (!assignRes.ok) {
+            const assignData = await assignRes.json();
+            logger.warn("SelectPage", "Task auto-assignment failed", { error: assignData.error });
+            // Non-fatal: redirect anyway so user sees tasks page
+          } else {
+            logger.info("SelectPage", "Task auto-assigned successfully");
+          }
+        }
+      }
+
       logger.info("SelectPage", "Selection locked, navigating to tasks");
       router.push(`/lobby/${code}/tasks`);
     } catch (err) {
@@ -181,10 +213,10 @@ export default function SelectPage({
     return (
       <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
         <header className="flex items-center gap-2 px-5 py-4 border-b border-neutral-800">
-          {["map", "site", "operator"].map((s, i) => (
+          {["site", "operator"].map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-neutral-800 animate-pulse" />
-              {i < 2 && <div className="w-8 h-px bg-neutral-800" />}
+              {i < 1 && <div className="w-8 h-px bg-neutral-800" />}
             </div>
           ))}
           <div className="h-4 w-24 rounded bg-neutral-800 animate-pulse ml-2" />
@@ -237,7 +269,7 @@ export default function SelectPage({
     );
   }
 
-  const steps: SelectionStep[] = ["map", "site", "operator"];
+  const steps: SelectionStep[] = ["site", "operator"];
   const currentStepIndex = steps.indexOf(step);
 
   return (
@@ -287,7 +319,7 @@ export default function SelectPage({
           );
         })}
         <span className="ml-3 text-sm font-semibold text-neutral-200 capitalize">
-          {step === "map" ? "Choose Map" : step === "site" ? "Choose Site" : "Choose Operator"}
+          {step === "site" ? "Choose Site" : "Choose Operator"}
         </span>
         {lobbyState?.currentRound?.team_side && (
           <span className={cn(
@@ -303,68 +335,13 @@ export default function SelectPage({
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
 
-        {/* ── Map Selection ────────────────────────────── */}
-        {step === "map" && (
-          <div className="animate-in fade-in slide-in-from-right-2 duration-300">
-            {maps.length === 0 ? (
-              <EmptyState
-                title="No maps available"
-                description="Maps will appear here once added to the database."
-                className="py-16"
-              />
-            ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {maps.map((map, i) => (
-                  <button
-                    key={map.id}
-                    onClick={() => {
-                      logger.info("SelectPage", "Map selected", { mapId: map.id, mapName: map.name });
-                      setSelectedMapId(map.id);
-                      setSelectedSiteId(null);
-                      setStep("site");
-                    }}
-                    className={cn(
-                      "flex flex-col rounded-2xl overflow-hidden border text-left",
-                      "transition-all duration-200",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50",
-                      "active:scale-[0.98] active:brightness-95",
-                      selectedMapId === map.id
-                        ? "border-neutral-50 bg-neutral-800 shadow-[0_0_16px_-4px_rgba(240,240,240,0.15)]"
-                        : "border-neutral-800 bg-neutral-900 hover:border-neutral-600"
-                    )}
-                    style={{ animationDelay: `${i * 30}ms` }}
-                  >
-                    <div className="aspect-video bg-neutral-800 overflow-hidden">
-                      {map.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={map.image_url}
-                          alt={map.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-neutral-600 text-xs">
-                          No image
-                        </div>
-                      )}
-                    </div>
-                    <div className="px-3 py-2.5">
-                      <span className="text-sm font-semibold text-neutral-50">{map.name}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ── Site Selection ────────────────────────────── */}
         {step === "site" && (
           <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-right-2 duration-300">
             <button
               onClick={() => {
-                logger.info("SelectPage", "Back to maps");
-                setStep("map");
+                logger.info("SelectPage", "Back to lobby");
+                router.push(`/lobby/${code}`);
               }}
               className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 transition-all duration-200 active:scale-95"
             >
@@ -379,7 +356,7 @@ export default function SelectPage({
               >
                 <path d="M19 12H5M12 5l-7 7 7 7" />
               </svg>
-              Back to Maps
+              Back to Lobby
             </button>
 
             {sites.length === 0 ? (

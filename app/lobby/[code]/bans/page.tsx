@@ -68,7 +68,7 @@ export default function BansPage({
 
         const { data: lobby } = await supabase
           .from("lobbies")
-          .select("id, leader_id")
+          .select("id, leader_id, phase")
           .eq("room_code", code)
           .single();
 
@@ -81,6 +81,11 @@ export default function BansPage({
 
         setLobbyId(lobby.id);
         setIsLeader(currentUserId === lobby.leader_id);
+
+        if (lobby.phase === "waiting") {
+          router.push(`/lobby/${code}`);
+          return;
+        }
 
         const res = await fetch(`/api/lobby/${lobby.id}/state`);
         if (!res.ok) throw new Error("Failed to fetch state");

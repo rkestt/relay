@@ -17,6 +17,7 @@ const MAX_RECONNECT_DELAY = 30_000; // 30 seconds
  * - `lobby_selections` (INSERT / UPDATE)
  * - `lobby_bans`     (INSERT / DELETE)
  * - `rounds`         (INSERT / UPDATE)
+ * - `lobbies`        (UPDATE)
  *
  * On every change the matching Zustand store action is called.
  * Handles reconnect with exponential backoff.
@@ -232,6 +233,21 @@ export function useLobbyRealtime(lobbyId: string | null) {
           if (payload.new) {
             upsertRound(payload.new as Round);
           }
+          setLastEventAt(Date.now());
+        },
+      );
+
+      // lobbies ───────────────────────────────────────────────
+      channel.on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "lobbies",
+          filter: `id=eq.${id}`,
+        },
+        (payload) => {
+          logger.debug("useLobbyRealtime", "lobbies UPDATE", { new: payload.new });
           setLastEventAt(Date.now());
         },
       );

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { title, map_id, site_id, description, tags, image_url, hotspots } =
+    const { title, map_id, site_id, operator_id, description, tags, image_url, hotspots, images } =
       body;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -53,22 +53,34 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!image_url || typeof image_url !== "string") {
+    if (!operator_id || typeof operator_id !== "string") {
+      return NextResponse.json(
+        { error: "operator_id is required" },
+        { status: 400 },
+      );
+    }
+    const imageUrl = Array.isArray(images) && images.length > 0
+      ? images[0]
+      : image_url;
+
+    if (!imageUrl || typeof imageUrl !== "string") {
       return NextResponse.json(
         { error: "image_url is required" },
         { status: 400 },
       );
     }
 
-    // -- Insert strategy template ---------------------------------------
-    const { data: strategy, error: insertError } = await supabase
+    // -- Insert strategy template (use admin client to bypass RLS) ------
+    const adminClient = createAdminClient();
+    const { data: strategy, error: insertError } = await adminClient
       .from("strategy_templates")
       .insert({
         title,
         map_id,
         site_id,
+        operator_id,
         description: description || null,
-        image_url,
+        image_url: imageUrl,
         status: "pending",
         created_by: user.id,
       })
@@ -76,9 +88,10 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError || !strategy) {
+      console.error("[API DEBUG] Insert error:", insertError);
       logger.error("API", "Failed to insert strategy", insertError);
       return NextResponse.json(
-        { error: "Failed to create strategy" },
+        { error: "Failed to create strategy", details: insertError?.message },
         { status: 500 },
       );
     }
@@ -90,7 +103,7 @@ export async function POST(request: Request) {
         .map((tag) => ({ strategy_id: strategy.id, tag }));
 
       if (tagRows.length > 0) {
-        const { error: tagError } = await supabase
+        const { error: tagError } = await adminClient
           .from("strategy_tags")
           .insert(tagRows);
 
@@ -111,6 +124,7 @@ export async function POST(request: Request) {
             x_percent: number;
             y_percent: number;
             label?: string;
+            image_id?: string;
           } =>
             typeof h === "object" &&
             h !== null &&
@@ -122,10 +136,11 @@ export async function POST(request: Request) {
           x_percent: h.x_percent,
           y_percent: h.y_percent,
           label: h.label || null,
+          image_id: h.image_id || null,
         }));
 
       if (hotspotRows.length > 0) {
-        const { error: hotspotError } = await supabase
+        const { error: hotspotError } = await adminClient
           .from("strategy_hotspots")
           .insert(hotspotRows);
 
@@ -133,6 +148,25 @@ export async function POST(request: Request) {
           logger.error("API", "Failed to insert hotspots", hotspotError);
           // Non-fatal
         }
+      }
+    }
+
+    // -- Insert images ----------------------------------------------------
+    const strategyImages = images as string[] | undefined;
+    if (Array.isArray(strategyImages) && strategyImages.length > 0) {
+      const imageRows = strategyImages.map((url, index) => ({
+        strategy_id: strategy.id,
+        image_url: url,
+        sort_order: index,
+      }));
+
+      const { error: imageError } = await adminClient
+        .from("strategy_images")
+        .insert(imageRows);
+
+      if (imageError) {
+        logger.error("API", "Failed to insert images", imageError);
+        // Non-fatal — strategy already created
       }
     }
 
@@ -155,7 +189,7 @@ export async function POST(request: Request) {
           Date.now() + 7 * 24 * 60 * 60 * 1000,
         ).toISOString();
 
-        const { error: queueError } = await supabase
+        const { error: queueError } = await adminClient
           .from("validation_queue")
           .insert({
             strategy_id: strategy.id,
@@ -254,7 +288,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*)",
+        "id, title, description, image_url, status, map_id, site_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);
