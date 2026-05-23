@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { getTeamSide } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -44,10 +45,6 @@ export async function POST(
     }
 
     const startingSide = (lobby.starting_side as "attacker" | "defender") ?? "attacker";
-    const getTeamSide = (roundNumber: number): "attacker" | "defender" => {
-      // R6S ranked: sides alternate every round
-      return roundNumber % 2 === 1 ? startingSide : (startingSide === "attacker" ? "defender" : "attacker");
-    };
 
     // -- Find current active round ---------------------------------------
     const { data: currentRound } = await supabase
@@ -90,7 +87,7 @@ export async function POST(
         lobby_id: id,
         round_number: newRoundNumber,
         status: "active",
-        team_side: getTeamSide(newRoundNumber),
+        team_side: getTeamSide(startingSide, newRoundNumber),
       })
       .select("id, round_number, team_side")
       .single();
