@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { getTeamSide } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
 
 // 30-character alphabet excluding 0, O, 1, I, l
@@ -14,14 +15,6 @@ function generateRoomCode(): string {
     code += ALPHABET[idx];
   }
   return code;
-}
-
-function getTeamSide(startingSide: "attacker" | "defender", roundNumber: number): "attacker" | "defender" {
-  // In R6S ranked, sides alternate every round
-  // Round 1: starting_side, Round 2: opposite, Round 3: starting_side, etc.
-  const isOdd = roundNumber % 2 === 1;
-  if (isOdd) return startingSide;
-  return startingSide === "attacker" ? "defender" : "attacker";
 }
 
 export async function POST(request: Request) {

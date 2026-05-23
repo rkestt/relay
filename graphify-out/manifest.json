@@ -1,0 +1,697 @@
+{
+  "C:\\Projects\\r6Hub\\components.json": {
+    "mtime": 1778878967.3472576,
+    "ast_hash": "02016e740b7b0e6a3b00a3441ac0bda7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\eslint.config.mjs": {
+    "mtime": 1778878967.3566277,
+    "ast_hash": "6c4307ffa009658f5c97f5629094c0c2",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\middleware.ts": {
+    "mtime": 1778943803.6501946,
+    "ast_hash": "e09311b96487473dc9e8221b00a7a5fb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\next-env.d.ts": {
+    "mtime": 1779526559.0438824,
+    "ast_hash": "b698cdd97fe8e3bd16dcd74899ad7cef",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\next.config.ts": {
+    "mtime": 1778880030.9463346,
+    "ast_hash": "b9506c633af5f3a31a167aa450ac13e2",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\package.json": {
+    "mtime": 1778878967.383412,
+    "ast_hash": "be036fd0241c45e43345fc02dba12d73",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\postcss.config.mjs": {
+    "mtime": 1778878967.383412,
+    "ast_hash": "481fac0fdecd70e1821cc30b86030c1a",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\tsconfig.json": {
+    "mtime": 1778878967.3948865,
+    "ast_hash": "ab575e944f15d39a5486cf9fca385c5e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\opencode.json": {
+    "mtime": 1779527824.4859407,
+    "ast_hash": "f2ae21510d07365eb2bce8159272c7a0",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\plugins\\graphify.js": {
+    "mtime": 1779527824.4859407,
+    "ast_hash": "32b67963417a30cb80544e0b2a56a98d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\layout.tsx": {
+    "mtime": 1778945893.5989628,
+    "ast_hash": "4fff992f7cad658668de5b0d596b40e9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\page.tsx": {
+    "mtime": 1779036977.8389263,
+    "ast_hash": "3b8cf379253a19baca60a907d714316f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\route.ts": {
+    "mtime": 1779526446.1275625,
+    "ast_hash": "ddd3b9ece7f6007e91f811a7862a4b99",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\join\\route.ts": {
+    "mtime": 1778946064.4642289,
+    "ast_hash": "03557355800cdabcdd5e192c1e8773d0",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\assign-tasks\\route.ts": {
+    "mtime": 1779526446.1146543,
+    "ast_hash": "bf7b3ca58cc761148d93b0a49f8cfaff",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\bans\\route.ts": {
+    "mtime": 1778946155.0202568,
+    "ast_hash": "091f87f9fab745fc2c7673b2889c194b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\leave\\route.ts": {
+    "mtime": 1778878967.3193433,
+    "ast_hash": "ac7052c2191248399f52dc9e0b44bbd3",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\lock-selection\\route.ts": {
+    "mtime": 1779526446.1146543,
+    "ast_hash": "5b828b55b28fa52baa8324814b0c046d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\new-round\\route.ts": {
+    "mtime": 1779036939.1275427,
+    "ast_hash": "b4e16c9eff95a567d5a4f1b2b2ab5ba9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\set-map\\route.ts": {
+    "mtime": 1779526446.1216521,
+    "ast_hash": "a6046b770a0474c1542440e79af5a0df",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\start\\route.ts": {
+    "mtime": 1779526446.1238396,
+    "ast_hash": "30fdaeb57df7cf39a8ad7ab8e38a6b96",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\state\\route.ts": {
+    "mtime": 1778946098.3490984,
+    "ast_hash": "dc24156ba4c53a23c669e2c5e4f3c5ae",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\lobby\\[id]\\tasks\\[assignmentId]\\vote\\route.ts": {
+    "mtime": 1779526446.1275625,
+    "ast_hash": "53872401aa16678424ad973ac169ced6",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\strategies\\route.ts": {
+    "mtime": 1779526446.1310472,
+    "ast_hash": "dc14d0eb360eea8a8e2b76a42b14982f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\strategies\\[id]\\approve\\route.ts": {
+    "mtime": 1778878967.3282,
+    "ast_hash": "c40d6edc892a2de79630f8558e00a523",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\api\\validate\\route.ts": {
+    "mtime": 1779526446.132659,
+    "ast_hash": "9cc90b53f9cf6a219be039cf63a7f06e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\auth\\callback\\route.ts": {
+    "mtime": 1778942039.099675,
+    "ast_hash": "0093c0981a950511799052c9b03fab3a",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\page.tsx": {
+    "mtime": 1779526446.1370194,
+    "ast_hash": "c15dbefd7f3f1a9b3fda4cc8640d79ca",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\bans\\page.tsx": {
+    "mtime": 1779526446.1336756,
+    "ast_hash": "b671c9741954b837800f88e1ee12aa3c",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\map\\page.tsx": {
+    "mtime": 1779526446.1336756,
+    "ast_hash": "0e573d784bd2fac9c050a5f3127834dc",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\select\\page.tsx": {
+    "mtime": 1779526446.139931,
+    "ast_hash": "bed598f22afc2c896e2075fd283b7d53",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\submit\\page.tsx": {
+    "mtime": 1779526446.1443868,
+    "ast_hash": "a70a9cfe6771b016fd8e8339f22fffbb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\tasks\\page.tsx": {
+    "mtime": 1779526446.1482341,
+    "ast_hash": "9ecee6a04cf5555d74709e1aec643707",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\lobby\\[code]\\tasks\\[id]\\page.tsx": {
+    "mtime": 1779526446.145455,
+    "ast_hash": "b945754cf02fb650ad99c49dce7d46c1",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\login\\page.tsx": {
+    "mtime": 1778946380.8550637,
+    "ast_hash": "1441e3fea29bdde586807f2045305861",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\app\\validate\\page.tsx": {
+    "mtime": 1778947766.6800811,
+    "ast_hash": "afef1d297683dc23663f5578a46b7242",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\debug\\LogPanel.tsx": {
+    "mtime": 1778945883.231053,
+    "ast_hash": "6f27484903a4ffbe16e9eaa8f991c276",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\maps\\MapViewer.tsx": {
+    "mtime": 1778878967.348255,
+    "ast_hash": "f25b8400a7c65aa9d6b2c04da739e966",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\tasks\\StrategyCard.tsx": {
+    "mtime": 1779526446.1502416,
+    "ast_hash": "51f182f83c5ff79c3a5df05f0a04c88f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\tasks\\VoteButtons.tsx": {
+    "mtime": 1779526446.1502416,
+    "ast_hash": "4990dc39b3e102664c7da87d1386b367",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\badge.tsx": {
+    "mtime": 1778878967.3516505,
+    "ast_hash": "d2aed41432be65dc5fd91f0d810c31a4",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\button.tsx": {
+    "mtime": 1778878967.3527613,
+    "ast_hash": "fa7dc9bec92a2ea0344e2a5c4738514f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\card.tsx": {
+    "mtime": 1778878967.3538637,
+    "ast_hash": "218a382211abcfb4526ecd3c01d02d30",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\dialog.tsx": {
+    "mtime": 1778878967.3538637,
+    "ast_hash": "cd655e21a31012d1163a3ac008b38e2c",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\EmptyState.tsx": {
+    "mtime": 1778878967.348255,
+    "ast_hash": "095860f590ccf97630313bb2bee78bb6",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\ErrorBoundary.tsx": {
+    "mtime": 1778878967.3494134,
+    "ast_hash": "03c45982e4fa4313c18cbf55392eca97",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\input.tsx": {
+    "mtime": 1778878967.3549757,
+    "ast_hash": "f899b7643d5e4389e24bbae6ed279aa7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\LoadingSpinner.tsx": {
+    "mtime": 1778878967.3505235,
+    "ast_hash": "a0cbcc2c3de4c61fb3988a01d2f0211e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\OfflineBanner.tsx": {
+    "mtime": 1778878967.3505235,
+    "ast_hash": "f49744d991ea8ec1ba66689fbe69c9a3",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\components\\ui\\SkeletonCard.tsx": {
+    "mtime": 1778878967.3516505,
+    "ast_hash": "29c963058e1776e62ec2f7e4b987a9f4",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\hooks\\useHeartbeat.ts": {
+    "mtime": 1778946821.1200187,
+    "ast_hash": "a439d8825b84c4e7575dbaab6a6fe8dc",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\hooks\\useLobbyRealtime.ts": {
+    "mtime": 1779526446.159025,
+    "ast_hash": "f104d549a790cbf8a3255ce79c6b65eb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\hooks\\usePresence.ts": {
+    "mtime": 1778946151.6497073,
+    "ast_hash": "a11c98ca268f2be6b17e3114413f2ad9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\lib\\logger.ts": {
+    "mtime": 1778945847.476274,
+    "ast_hash": "05f0f3b1985eaf5f7a2e595cdd1c1790",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\lib\\utils.ts": {
+    "mtime": 1778878967.3626833,
+    "ast_hash": "1d8011eb18769078bf77502b220daa5e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\lib\\supabase\\client.ts": {
+    "mtime": 1778944294.2469032,
+    "ast_hash": "5f4648992aefa180306361f1ac3ccd7d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\lib\\supabase\\middleware.ts": {
+    "mtime": 1778947823.771286,
+    "ast_hash": "27437f2a9746c381194757d96ea56e5d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\lib\\supabase\\server.ts": {
+    "mtime": 1779526446.1610634,
+    "ast_hash": "6275884e1e8225c4277fd60357a8ad01",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\manifest.json": {
+    "mtime": 1778878967.385588,
+    "ast_hash": "3f6fe59f4e2d95e47f0bfd84fb2a416b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\stores\\lobbyStore.ts": {
+    "mtime": 1778946873.7590656,
+    "ast_hash": "e2f70bb7413850bdfa73a964e203f7d9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00001_setup_schema.sql": {
+    "mtime": 1778878967.3908486,
+    "ast_hash": "034842419062325ae132aea0b1a32a83",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00002_r6s_seed_data.sql": {
+    "mtime": 1779526446.2191882,
+    "ast_hash": "bff5f662373c50b28075a6e087830e75",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00002_rls_policies.sql": {
+    "mtime": 1779267918.6357398,
+    "ast_hash": "b4c51fb999ab345035b5986489eb48d2",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00003_lobby_starting_side.sql": {
+    "mtime": 1779036868.695465,
+    "ast_hash": "80f30bb766144d6d24621597c9a9d824",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00003_seed_reference.sql": {
+    "mtime": 1778878967.392869,
+    "ast_hash": "6e5315501f7eacfdf1fda25e22d75f8d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00004_seed_strategies.sql": {
+    "mtime": 1778879937.2187817,
+    "ast_hash": "4f3dfc7fa1e87bd9fa66d9e594de88de",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00005_auth_triggers.sql": {
+    "mtime": 1778878967.3948865,
+    "ast_hash": "6f92b90a80e19ff479d1baee9bd8610c",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00006_fix_lobby_members_rls.sql": {
+    "mtime": 1778944651.5270581,
+    "ast_hash": "fe292d6cbb8e1c838e9b6184721618e6",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00007_add_missing_lobby_policies.sql": {
+    "mtime": 1778944884.7946687,
+    "ast_hash": "1721a24a17aa1c002c9cdc0bc07a2f06",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00008_r6s_sites.sql": {
+    "mtime": 1779038225.3753266,
+    "ast_hash": "913bc647515312c592814a8abae7038f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00009_lobby_insert_policy.sql": {
+    "mtime": 1779039860.9159586,
+    "ast_hash": "642b55a010a2c312931df7e75ca589f9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00010_strategy_images.sql": {
+    "mtime": 1779526446.2205484,
+    "ast_hash": "1bb393dd7d1b9fd7eb6ba3fc3c118879",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00011_fix_map_urls.sql": {
+    "mtime": 1779526446.2214234,
+    "ast_hash": "b1c26cd10eb8a84be0c36a087774f96b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00012_lobby_phase.sql": {
+    "mtime": 1779526446.2220316,
+    "ast_hash": "e7df327814cd51a5a55c2cbc00359997",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00014_lobby_map_id.sql": {
+    "mtime": 1779526446.223746,
+    "ast_hash": "df4e4ba2d3a0de4460cb6f32ebc0b45e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00015_add_denari_operator.sql": {
+    "mtime": 1779526446.2261927,
+    "ast_hash": "c480b3a4344b98b536bae9da04a282c1",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00016_strategy_operator_id.sql": {
+    "mtime": 1779526446.2261927,
+    "ast_hash": "0316cfa8bbef3c4383e7249cf81b892a",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\supabase\\migrations\\00017_task_votes.sql": {
+    "mtime": 1779526446.2261927,
+    "ast_hash": "521cd0fc225801db47be05c75bc96d70",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\types\\index.ts": {
+    "mtime": 1779526446.233571,
+    "ast_hash": "c1258cb61273b40f1ba0fd4baf61e29d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\AGENTS.md": {
+    "mtime": 1779527824.4859407,
+    "ast_hash": "a8bcc8d9af5256f6af0b7f958d7e2f46",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\CLAUDE.md": {
+    "mtime": 1778878967.3138096,
+    "ast_hash": "771faa62feb60b7de901a397aebb29b0",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dumbhuman.md": {
+    "mtime": 1778943416.6975694,
+    "ast_hash": "9b5833bf0519970a25b4277d36d90239",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\PDD.md": {
+    "mtime": 1778878967.314868,
+    "ast_hash": "4dd4969bffcc0746550b3b09ec27bce7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\README.md": {
+    "mtime": 1778879013.1693242,
+    "ast_hash": "6693e6c2e70144044017561c14f58cc2",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\TODO.md": {
+    "mtime": 1778927587.7385051,
+    "ast_hash": "5c8ad31c5f4ccf3d0671e28673d06820",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.config\\opencode\\skills\\graphify\\SKILL.md": {
+    "mtime": 1779527824.4859407,
+    "ast_hash": "a40b1bdf74ba936cb110d0d8226a4661",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\commands\\opsx-apply.md": {
+    "mtime": 1778878967.3017118,
+    "ast_hash": "863d2cc62d4e8c83fe38bbcec1c57a6d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\commands\\opsx-archive.md": {
+    "mtime": 1778878967.3028243,
+    "ast_hash": "04eb358ba6d0a39e9966b01f73f23ab2",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\commands\\opsx-explore.md": {
+    "mtime": 1778878967.3028243,
+    "ast_hash": "0fcb5367097b820db7d48cbbc36f646f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\commands\\opsx-propose.md": {
+    "mtime": 1778878967.3039334,
+    "ast_hash": "558812d2bea103b7158cd48585dd9af3",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\skills\\openspec-apply-change\\SKILL.md": {
+    "mtime": 1778878967.3056498,
+    "ast_hash": "337e038de52eeda65d9cc0fd64ea95d9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\skills\\openspec-archive-change\\SKILL.md": {
+    "mtime": 1778878967.3074403,
+    "ast_hash": "3329d18df6062ca45c9b22df9410cd56",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\skills\\openspec-explore\\SKILL.md": {
+    "mtime": 1778878967.3114846,
+    "ast_hash": "fdd0c0703b7f2e51d767da4033dec54b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\.opencode\\skills\\openspec-propose\\SKILL.md": {
+    "mtime": 1778878967.3127997,
+    "ast_hash": "0217a5c2dd63167d71166a903a9183db",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\docs\\plans\\2026-05-20-lobby-map-selection.md": {
+    "mtime": 1779526446.1536937,
+    "ast_hash": "f390c8e1f861c587be1db590e9d52558",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\docs\\plans\\2026-05-20-lobby-waiting-flow.md": {
+    "mtime": 1779526446.1536937,
+    "ast_hash": "c52a91a647b39aab3fdfc801549618f7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\docs\\plans\\2026-05-20-strategy-operator-binding.md": {
+    "mtime": 1779526446.1572227,
+    "ast_hash": "08801817bbbec84a0f1f1673f2a9c433",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\report.md": {
+    "mtime": 1778928985.7803142,
+    "ast_hash": "04131d98f19488f6702a2cb9a7a4fa20",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\config.yaml": {
+    "mtime": 1778878967.3791726,
+    "ast_hash": "63c26766698dd49488b53c274bfec0f9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\.openspec.yaml": {
+    "mtime": 1778878967.365993,
+    "ast_hash": "1c8c2e6028e960fb11db68126f97b0fd",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\design.md": {
+    "mtime": 1778878967.365993,
+    "ast_hash": "5923a82af851aeb17f0c6f42025ee5e4",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\proposal.md": {
+    "mtime": 1778878967.3671906,
+    "ast_hash": "657b43807b0d2f1512a5335d1a34dc96",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\tasks.md": {
+    "mtime": 1778878967.3780656,
+    "ast_hash": "f2f1d4e57b585ac0b758239c611aaa5b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\content-ugc\\spec.md": {
+    "mtime": 1778878967.3685427,
+    "ast_hash": "55666608a856c266ca74a56a14cdd18f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\content-validation\\spec.md": {
+    "mtime": 1778878967.3696406,
+    "ast_hash": "3a8af0634d561a2d039f84bb82c6c29b",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\lobby-management\\spec.md": {
+    "mtime": 1778878967.3696406,
+    "ast_hash": "c224261aaec23b4fa2b88108b50a3979",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\operator-selection\\spec.md": {
+    "mtime": 1778878967.3707466,
+    "ast_hash": "6cbe6001a26d3c8a6baa91bae5674343",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\pwa-core\\spec.md": {
+    "mtime": 1778878967.372233,
+    "ast_hash": "ec16fa8f8d7e82413f0ac32d2611050d",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\realtime-sync\\spec.md": {
+    "mtime": 1778878967.376057,
+    "ast_hash": "690977f4e6c6b87b3a1a925f566dc461",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\openspec\\changes\\archive\\2026-05-16-design-app-from-scratch\\specs\\task-assignment-engine\\spec.md": {
+    "mtime": 1778878967.3780656,
+    "ast_hash": "97940bc02f4ab529a38b6126eb527913",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\create-lobby.png": {
+    "mtime": 1778928599.4289608,
+    "ast_hash": "ec05e5e55fd503206f791d3b0c274126",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\homepage-after-fix.png": {
+    "mtime": 1778942108.4484048,
+    "ast_hash": "778dcef410e2d578dc2db0f9e82126fb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\homepage-final.png": {
+    "mtime": 1778928951.17292,
+    "ast_hash": "778dcef410e2d578dc2db0f9e82126fb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\homepage.png": {
+    "mtime": 1778928565.4267938,
+    "ast_hash": "778dcef410e2d578dc2db0f9e82126fb",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\issue-001-homepage-error.png": {
+    "mtime": 1778928640.2069423,
+    "ast_hash": "ec05e5e55fd503206f791d3b0c274126",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\join-lobby-error.png": {
+    "mtime": 1778928778.4122734,
+    "ast_hash": "47a30aa457c5bc7110aa57b0eb1b5e59",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\login-after-fix.png": {
+    "mtime": 1778942180.66156,
+    "ast_hash": "e2fcef8842399b761eab5453d236b023",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\login-page.png": {
+    "mtime": 1778928915.6797142,
+    "ast_hash": "a5e65250e32143914312949af83f9440",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\dogfood-output\\screenshots\\login-redirect.png": {
+    "mtime": 1778928663.0228958,
+    "ast_hash": "a5e65250e32143914312949af83f9440",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\file.svg": {
+    "mtime": 1778878967.384511,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\globe.svg": {
+    "mtime": 1778878967.384511,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\next.svg": {
+    "mtime": 1778878967.385588,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\vercel.svg": {
+    "mtime": 1778878967.3866944,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\window.svg": {
+    "mtime": 1778878967.3866944,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\maps\\bank.svg": {
+    "mtime": 1779526446.1635935,
+    "ast_hash": "5672a87fd21153ee8ca91616745596f7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\maps\\border.svg": {
+    "mtime": 1779526446.164194,
+    "ast_hash": "86e55ca691d68178e7c49e554b30b2b7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\maps\\clubhouse.svg": {
+    "mtime": 1779526446.165245,
+    "ast_hash": "80f20306e60c36e3fe404950f5ab7cca",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\maps\\kafe.svg": {
+    "mtime": 1779526446.165245,
+    "ast_hash": "b208d5f47488f2158fe3b0a3e7da54c8",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\maps\\oregon.svg": {
+    "mtime": 1779526446.1686196,
+    "ast_hash": "c0998bddfa61e49a8eb881e1fc6d3cbe",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260505222208_1.jpg": {
+    "mtime": 1779526446.175946,
+    "ast_hash": "6789a62a6522faadd05a3c7f0325f85f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260510163118_1.jpg": {
+    "mtime": 1779526446.1806118,
+    "ast_hash": "e22cf85e4509424365614939a0bbb8fc",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184607_1.jpg": {
+    "mtime": 1779526446.1846285,
+    "ast_hash": "e8351a6b35adb92584cfd57b23f11e22",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184614_1.jpg": {
+    "mtime": 1779526446.186645,
+    "ast_hash": "92e9ba30fb5a1a7e43ec8c56bacd1ff9",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184620_1.jpg": {
+    "mtime": 1779526446.1936111,
+    "ast_hash": "1763714098d8c6fb7896fca649da72e5",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184633_1.jpg": {
+    "mtime": 1779526446.19769,
+    "ast_hash": "7997709e753d6e90a3195a9a5846daff",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184638_1.jpg": {
+    "mtime": 1779526446.2029343,
+    "ast_hash": "41c758edd9158060142ceb991eee663f",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184644_1.jpg": {
+    "mtime": 1779526446.2086997,
+    "ast_hash": "f711444e906ac963d654508dc2d6e797",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\20260517184653_1.jpg": {
+    "mtime": 1779526446.2143853,
+    "ast_hash": "5b17872466f74c3fd87e63cfabee85a7",
+    "semantic_hash": ""
+  },
+  "C:\\Projects\\r6Hub\\public\\images\\strategies\\test-default.jpg": {
+    "mtime": 1779526446.2158403,
+    "ast_hash": "e8351a6b35adb92584cfd57b23f11e22",
+    "semantic_hash": ""
+  }
+}
