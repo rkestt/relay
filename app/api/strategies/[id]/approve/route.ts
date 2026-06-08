@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -29,7 +30,7 @@ export async function POST(
       .eq("id", id);
 
     if (updateError) {
-      console.error("Failed to approve strategy:", updateError);
+      logger.error("API", "Failed to approve strategy:", updateError);
       return NextResponse.json(
         { error: "Failed to approve strategy" },
         { status: 500 },
@@ -38,7 +39,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Strategy approve unexpected error:", error);
+    logger.error("API", "Strategy approve unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

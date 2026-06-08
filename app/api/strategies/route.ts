@@ -88,10 +88,9 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError || !strategy) {
-      console.error("[API DEBUG] Insert error:", insertError);
-      logger.error("API", "Failed to insert strategy", insertError);
+      logger.error("API", "Insert error:", insertError);
       return NextResponse.json(
-        { error: "Failed to create strategy", details: insertError?.message },
+        { error: "Failed to create strategy" },
         { status: 500 },
       );
     }

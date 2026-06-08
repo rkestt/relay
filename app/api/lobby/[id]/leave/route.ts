@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
 export async function POST(
@@ -27,7 +28,7 @@ export async function POST(
       .eq("user_id", user.id);
 
     if (deleteError) {
-      console.error("Failed to leave lobby:", deleteError);
+      logger.error("API", "Failed to leave lobby:", deleteError);
       return NextResponse.json(
         { error: "Failed to leave lobby" },
         { status: 500 },
@@ -36,7 +37,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Lobby leave unexpected error:", error);
+    logger.error("API", "Lobby leave unexpected error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 },

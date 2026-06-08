@@ -111,32 +111,63 @@ export async function POST(
       siteId = roundSelections[0].site_id;
     }
 
-    // -- Fetch approved strategies for this operator ---------------------
-    let strategiesQuery = supabase
-      .from("strategy_templates")
-      .select("id, title, description, image_url, created_at")
-      .eq("status", "approved")
-      .eq("operator_id", operator_id);
+    // -- Fetch approved strategies with progressive fallback -------------
+    const baseQuery = () =>
+      supabase
+        .from("strategy_templates")
+        .select("id, title, description, image_url, created_at")
+        .eq("status", "approved");
 
-    if (mapId) {
-      strategiesQuery = strategiesQuery.eq("map_id", mapId);
+    let strategies: Array<{
+      id: string;
+      title: string;
+      description: string | null;
+      image_url: string | null;
+      created_at: string;
+    }> | null = null;
+    let fallbackLevel = 0;
+
+    // Level 1: operator_id + map_id + site_id (perfect match)
+    const q1 = baseQuery().eq("operator_id", operator_id);
+    if (mapId) q1.eq("map_id", mapId);
+    if (siteId) q1.eq("site_id", siteId);
+    const { data: d1 } = await q1;
+    if (d1 && d1.length > 0) {
+      strategies = d1;
+      fallbackLevel = 1;
     }
-    if (siteId) {
-      strategiesQuery = strategiesQuery.eq("site_id", siteId);
+
+    // Level 2: map_id + site_id only (right map/site, any operator)
+    if (!strategies && (mapId || siteId)) {
+      const q2 = baseQuery();
+      if (mapId) q2.eq("map_id", mapId);
+      if (siteId) q2.eq("site_id", siteId);
+      const { data: d2 } = await q2;
+      if (d2 && d2.length > 0) {
+        strategies = d2;
+        fallbackLevel = 2;
+      }
     }
 
-    const { data: allStrategies } = await strategiesQuery;
+    // Level 3: operator_id only (right operator, any map/site)
+    if (!strategies && (mapId || siteId)) {
+      const { data: d3 } = await baseQuery().eq("operator_id", operator_id);
+      if (d3 && d3.length > 0) {
+        strategies = d3;
+        fallbackLevel = 3;
+      }
+    }
 
-    if (!allStrategies || allStrategies.length === 0) {
+    if (!strategies || strategies.length === 0) {
       return NextResponse.json(
-        {
-          error: "No approved strategies found for this operator on the current map/site",
-        },
+        { error: "No strategies available" },
         { status: 404 },
       );
     }
 
-    const matchingStrategies = allStrategies.sort(
+    logger.debug("API", "Progressive fallback level", { lobbyId: id, fallbackLevel });
+
+    const matchingStrategies = strategies.sort(
       (a, b) =>
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
