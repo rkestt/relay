@@ -173,6 +173,12 @@ export default function LobbyPage({
     }
   }, [lobbyId, router]);
 
+  // ── Derived data (must be before conditional returns) ──
+  const operatorMap = useMemo(() =>
+    new Map(operators.map(op => [op.id, op.name])),
+    [operators]
+  );
+
   const handleNewRound = useCallback(async () => {
     if (!lobbyId) return;
     logger.info("LobbyPage", "New round click", { lobbyId });
@@ -317,10 +323,6 @@ export default function LobbyPage({
   }
 
   const bannedOperatorIds = new Set(state.bans.map((b) => b.operator_id));
-  const operatorMap = useMemo(() =>
-    new Map(operators.map(op => [op.id, op.name])),
-    [operators]
-  );
 
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
