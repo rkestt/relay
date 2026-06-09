@@ -9,46 +9,62 @@ import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
 import { AlertIcon } from "@/components/icons";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [discordLoading, setDiscordLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    logger.info("LoginPage", "LoginPage mount");
+    logger.info("SignupPage", "SignupPage mount");
   }, []);
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info("LoginPage", "Email/password login", { email });
+    logger.info("SignupPage", "Email/password signup", { email });
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const supabase = createBrowserClient();
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error, data } = await supabase.auth.signUp({
         email,
         password,
       });
 
       if (error) throw error;
-      logger.info("LoginPage", "Login successful", { email });
-      window.location.href = "/";
+
+      logger.info("SignupPage", "Signup successful", {
+        email,
+        userId: data.user?.id,
+      });
+      setSuccess(true);
     } catch (err) {
-      logger.error("LoginPage", "Login failed", err);
-      setError(err instanceof Error ? err.message : "Failed to sign in");
+      logger.error("SignupPage", "Signup failed", err);
+      setError(err instanceof Error ? err.message : "Failed to create account");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDiscordLogin = async () => {
-    logger.info("LoginPage", "Discord OAuth login");
+  const handleDiscordSignup = async () => {
+    logger.info("SignupPage", "Discord OAuth signup");
     setDiscordLoading(true);
     setError(null);
 
@@ -63,13 +79,61 @@ export default function LoginPage() {
 
       if (error) throw error;
     } catch (err) {
-      logger.error("LoginPage", "Discord OAuth failed", err);
+      logger.error("SignupPage", "Discord OAuth failed", err);
       setError(
-        err instanceof Error ? err.message : "Failed to sign in with Discord",
+        err instanceof Error ? err.message : "Failed to sign up with Discord",
       );
       setDiscordLoading(false);
     }
   };
+
+  // Success screen after email signup
+  if (success) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div
+          className={cn(
+            "w-full max-w-sm bg-card border border-border rounded-xl p-8",
+            "transition-all duration-300 ease-out",
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+          )}
+        >
+          <div className="flex flex-col items-center gap-6 text-center">
+            <div className="flex items-center justify-center size-14 rounded-full bg-success/10 border border-success/20 animate-in zoom-in duration-300">
+              <svg
+                className="size-7 text-success"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                Check your email
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                We sent a confirmation link to{" "}
+                <span className="text-foreground font-medium">{email}</span>.
+                Click the link to activate your account.
+              </p>
+            </div>
+            <Link
+              href="/login"
+              className="text-sm text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
+            >
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
@@ -83,9 +147,9 @@ export default function LoginPage() {
         {/* Header */}
         <div className="flex flex-col gap-1.5 text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Welcome back
+            Create account
           </h1>
-          <p className="text-sm text-muted-foreground">Sign in to continue</p>
+          <p className="text-sm text-muted-foreground">Join r6Hub today</p>
         </div>
 
         {/* Error */}
@@ -101,7 +165,7 @@ export default function LoginPage() {
         )}
 
         {/* Email/Password Form */}
-        <form onSubmit={handleEmailLogin} className="flex flex-col gap-5">
+        <form onSubmit={handleSignup} className="flex flex-col gap-5">
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="email"
@@ -133,11 +197,12 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Min. 6 characters"
                 required
+                minLength={6}
                 className={cn(
                   "pr-10",
                   error && "border-destructive/50 focus:ring-destructive/20 focus:border-destructive",
@@ -178,19 +243,40 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="confirmPassword"
+              className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+            >
+              Confirm Password
+            </label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+              required
+              className={error ? "border-destructive/50 focus:ring-destructive/20 focus:border-destructive" : undefined}
+            />
+          </div>
+
           <Button
             type="submit"
             size="lg"
-            disabled={loading || !email.trim() || !password.trim()}
+            disabled={
+              loading || !email.trim() || !password.trim() || !confirmPassword.trim()
+            }
             className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center gap-2">
                 <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                Signing in...
+                Creating account...
               </span>
             ) : (
-              "Sign In"
+              "Create Account"
             )}
           </Button>
         </form>
@@ -209,7 +295,7 @@ export default function LoginPage() {
           type="button"
           variant="outline"
           size="lg"
-          onClick={handleDiscordLogin}
+          onClick={handleDiscordSignup}
           disabled={discordLoading}
           className="w-full h-11"
           aria-label="Continue with Discord"
@@ -227,14 +313,14 @@ export default function LoginPage() {
           )}
         </Button>
 
-        {/* Signup link */}
+        {/* Login link */}
         <p className="text-center text-sm text-muted-foreground mt-6">
-          Don&apos;t have an account?{" "}
+          Already have an account?{" "}
           <Link
-            href="/signup"
+            href="/login"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
           >
-            Sign up
+            Sign in
           </Link>
         </p>
       </div>

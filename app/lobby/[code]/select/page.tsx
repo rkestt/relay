@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
+import Image from "next/image";
 import type { Map, Site, Operator, OperatorTag } from "@/types";
+import { AlertIcon, BackArrowIcon, ArrowRightIcon, CheckIcon, LockIcon, UsersIcon } from "@/components/icons";
 
 type SelectionStep = "site" | "operator";
 
@@ -47,7 +49,10 @@ export default function SelectPage({
   const [lobbyState, setLobbyState] = useState<LobbyState | null>(null);
   const [loading, setLoading] = useState(true);
   const [locking, setLocking] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stepDirection, setStepDirection] = useState<"left" | "right">("right");
 
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
@@ -153,6 +158,7 @@ export default function SelectPage({
   const handleLockIn = useCallback(async () => {
     if (!lobbyId) return;
     logger.info("SelectPage", "Lock selection click", { selectedMapId, selectedSiteId, selectedOperatorId });
+    setShowConfirm(false);
     setLocking(true);
     setError(null);
     try {
@@ -193,8 +199,10 @@ export default function SelectPage({
         }
       }
 
-      logger.info("SelectPage", "Selection locked, navigating to tasks");
-      router.push(`/lobby/${code}/tasks`);
+      logger.info("SelectPage", "Selection locked successfully");
+      setLocked(true);
+      // Redirect to tasks after brief success display
+      setTimeout(() => router.push(`/lobby/${code}/tasks`), 1500);
     } catch (err) {
       logger.error("SelectPage", "Lock selection failed", err);
       setError(err instanceof Error ? err.message : "Failed to lock selection");
@@ -211,15 +219,15 @@ export default function SelectPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center gap-2 px-5 py-4 border-b border-neutral-800">
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
           {["site", "operator"].map((s, i) => (
             <div key={s} className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-neutral-800 animate-pulse" />
-              {i < 1 && <div className="w-8 h-px bg-neutral-800" />}
+              <div className="w-6 h-6 rounded-full bg-muted animate-pulse" />
+              {i < 1 && <div className="w-8 h-px bg-muted" />}
             </div>
           ))}
-          <div className="h-4 w-24 rounded bg-neutral-800 animate-pulse ml-2" />
+          <div className="h-4 w-24 rounded bg-muted animate-pulse ml-2" />
         </header>
         <div className="flex flex-col gap-4 p-5">
           <SkeletonGrid count={6} />
@@ -231,33 +239,19 @@ export default function SelectPage({
   // ── Error state ────────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <div className="h-5 w-20 rounded bg-neutral-800 animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
-          icon={
-            <svg
-              className="size-7 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          }
+          icon={<AlertIcon className="size-7 text-destructive" />}
           title="Failed to load selection"
           description={error}
           action={
             <Button
               variant="outline"
               size="sm"
-              className="h-11 min-w-[120px] rounded-xl border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              className="h-11 min-w-[120px] rounded-xl border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => router.push(`/lobby/${code}`)}
             >
               Back to Lobby
@@ -269,13 +263,32 @@ export default function SelectPage({
     );
   }
 
+  // ── Locked success state ─────────────────────────────
+  if (locked) {
+    return (
+      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-screen p-6 animate-in fade-in duration-400">
+        <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-[0_0_24px_-4px_oklch(0.70_0.18_145/0.25)]">
+          <CheckIcon className="w-8 h-8 text-success animate-in zoom-in duration-300" />
+        </div>
+        <div className="text-center">
+          <h2 className="text-lg font-bold text-foreground mb-1 animate-in fade-in slide-in-from-bottom-1 duration-400 delay-100">
+            Selection locked!
+          </h2>
+          <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-400 delay-150">
+            Your operator and site are locked. Redirecting to tasks…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const steps: SelectionStep[] = ["site", "operator"];
   const currentStepIndex = steps.indexOf(step);
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
       {/* ── Step Indicator ─────────────────────────────── */}
-      <header className="flex items-center gap-2 px-5 py-4 border-b border-neutral-800">
+      <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
         {steps.map((s, i) => {
           const isComplete = i < currentStepIndex;
           const isActive = step === s;
@@ -285,48 +298,43 @@ export default function SelectPage({
                 className={cn(
                   "w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-all duration-300",
                   isActive
-                    ? "bg-neutral-50 text-neutral-950 shadow-[0_0_12px_-2px_rgba(240,240,240,0.3)]"
+                    ? "bg-primary text-primary-foreground shadow-[0_0_12px_-2px_oklch(0.65_0.22_25/0.3)]"
                     : isComplete
-                    ? "bg-green-500 text-neutral-950"
-                    : "bg-neutral-800 text-neutral-500"
+                    ? "bg-success text-success-foreground"
+                    : "bg-muted text-muted-foreground"
                 )}
               >
-                {isComplete ? (
-                  <svg
-                    className="size-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
+                  {isComplete ? (
+                    <CheckIcon className="size-3.5" strokeWidth={3} />
                 ) : (
                   i + 1
                 )}
               </div>
+              <span className={cn(
+                "text-xs hidden sm:inline font-medium",
+                isActive && "text-primary font-semibold",
+                isComplete && "text-success",
+                !isActive && !isComplete && "text-muted-foreground"
+              )}>
+                {s === "site" ? "Site" : "Operator"}
+              </span>
               {i < steps.length - 1 && (
                 <div
                   className={cn(
                     "w-10 h-px transition-all duration-300",
-                    isComplete ? "bg-green-500" : "bg-neutral-800"
+                    isComplete ? "bg-success" : "bg-border"
                   )}
                 />
               )}
             </div>
           );
         })}
-        <span className="ml-3 text-sm font-semibold text-neutral-200 capitalize">
-          {step === "site" ? "Choose Site" : "Choose Operator"}
-        </span>
         {lobbyState?.currentRound?.team_side && (
           <span className={cn(
             "ml-auto text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded-lg",
             lobbyState.currentRound.team_side === "attacker"
-              ? "bg-amber-500/20 text-amber-400"
-              : "bg-sky-500/20 text-sky-400"
+              ? "bg-attacker/20 text-attacker"
+              : "bg-defender/20 text-defender"
           )}>
             {lobbyState.currentRound.team_side}
           </span>
@@ -335,27 +343,20 @@ export default function SelectPage({
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
 
-        {/* ── Site Selection ────────────────────────────── */}
+        {/* ── Site Selection (Step 1) ──────────────────── */}
         {step === "site" && (
-          <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className={cn(
+            "flex flex-col gap-3",
+            stepDirection === "right" ? "animate-slide-in-right" : "animate-fade-in"
+          )} key="site-step">
             <button
               onClick={() => {
                 logger.info("SelectPage", "Back to lobby");
                 router.push(`/lobby/${code}`);
               }}
-              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 transition-all duration-200 active:scale-95"
+              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200 active:scale-95"
             >
-              <svg
-                className="size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 5l-7 7 7 7" />
-              </svg>
+              <BackArrowIcon className="size-4" />
               Back to Lobby
             </button>
 
@@ -366,43 +367,34 @@ export default function SelectPage({
                 className="py-12"
               />
             ) : (
-              <div className="flex flex-col gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {sites.map((site, i) => (
                   <button
                     key={site.id}
                     onClick={() => {
                       logger.info("SelectPage", "Site selected", { siteId: site.id, siteName: site.name });
                       setSelectedSiteId(site.id);
+                      setStepDirection("right");
                       setStep("operator");
                     }}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3.5 rounded-xl border text-left",
+                      "flex items-center gap-3 px-4 py-4 rounded-xl border text-left",
                       "transition-all duration-200",
-                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                       "active:scale-[0.99]",
                       selectedSiteId === site.id
-                        ? "border-neutral-50 bg-neutral-800 shadow-[0_0_12px_-2px_rgba(240,240,240,0.12)]"
-                        : "border-neutral-800 bg-neutral-900 hover:border-neutral-600"
+                        ? "border-primary bg-card ring-2 ring-primary"
+                        : "border-border bg-card hover:border-border"
                     )}
                     style={{ animationDelay: `${i * 40}ms` }}
                   >
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-neutral-50">{site.name}</span>
+                      <span className="text-sm font-semibold text-foreground">{site.name}</span>
                       {site.floor && (
-                        <span className="text-xs text-neutral-500">{site.floor}</span>
+                        <span className="text-xs text-muted-foreground">{site.floor}</span>
                       )}
                     </div>
-                    <svg
-                      className="ml-auto size-4 text-neutral-600"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+                    <ArrowRightIcon className="ml-auto size-4 text-muted-foreground" />
                   </button>
                 ))}
               </div>
@@ -410,34 +402,28 @@ export default function SelectPage({
           </div>
         )}
 
-        {/* ── Operator Selection ────────────────────────── */}
+        {/* ── Operator Selection (Step 2) ──────────────── */}
         {step === "operator" && (
-          <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-right-2 duration-300">
+          <div className={cn(
+            "flex flex-col gap-4",
+            stepDirection === "right" ? "animate-slide-in-right" : "animate-fade-in"
+          )} key="operator-step">
             <button
               onClick={() => {
                 logger.info("SelectPage", "Back to sites");
+                setStepDirection("left");
                 setStep("site");
               }}
-              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900 transition-all duration-200 active:scale-95"
+              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200 active:scale-95"
             >
-              <svg
-                className="size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 5l-7 7 7 7" />
-              </svg>
+              <BackArrowIcon className="size-4" />
               Back to Sites
             </button>
 
-            {/* Attackers — shown when team is attacker or no round set */}
+            {/* Attackers */}
             {(!lobbyState?.currentRound?.team_side || lobbyState.currentRound.team_side === "attacker") && (
             <div>
-              <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-red-400 uppercase mb-3">
+              <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-attacker uppercase mb-3">
                 <svg
                   className="size-3.5"
                   viewBox="0 0 24 24"
@@ -470,29 +456,29 @@ export default function SelectPage({
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
                           "transition-all duration-200",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                           "active:scale-[0.96]",
                           selectedOperatorId === op.id
-                            ? "border-neutral-50 bg-neutral-800 ring-2 ring-neutral-500/40"
-                            : "border-neutral-800 bg-neutral-900 hover:border-neutral-600",
-                          banned && "opacity-35 grayscale cursor-not-allowed"
+                            ? "border-primary bg-card ring-2 ring-primary"
+                            : "border-border bg-card hover:border-border",
+                          banned && "opacity-40 bg-destructive/10 cursor-not-allowed grayscale"
                         )}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-neutral-800 overflow-hidden">
+                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                           {op.icon_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={op.icon_url}
                               alt={op.name}
-                              className="w-full h-full object-contain"
+                              fill
+                              className="object-contain"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-neutral-600 text-xs">
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                               {op.name[0]}
                             </div>
                           )}
                         </div>
-                        <span className="text-[11px] font-medium text-neutral-50 leading-tight">
+                        <span className="text-[11px] font-medium text-foreground leading-tight">
                           {op.name}
                         </span>
                         {tags.length > 0 && (
@@ -500,7 +486,7 @@ export default function SelectPage({
                             {tags.slice(0, 2).map((tag) => (
                               <span
                                 key={tag}
-                                className="text-[9px] font-medium px-1 py-0.5 rounded bg-neutral-800 text-neutral-400"
+                                className="text-[9px] font-medium px-1 py-0.5 rounded bg-muted text-muted-foreground"
                               >
                                 {tag}
                               </span>
@@ -508,7 +494,7 @@ export default function SelectPage({
                           </div>
                         )}
                         {banned && (
-                          <span className="text-[9px] font-bold text-red-400 tracking-wider uppercase">
+                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase">
                             Banned
                           </span>
                         )}
@@ -519,10 +505,10 @@ export default function SelectPage({
             </div>
             )}
 
-            {/* Defenders — shown when team is defender or no round set */}
+            {/* Defenders */}
             {(!lobbyState?.currentRound?.team_side || lobbyState.currentRound.team_side === "defender") && (
             <div>
-              <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-blue-400 uppercase mb-3">
+              <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-defender uppercase mb-3">
                 <svg
                   className="size-3.5"
                   viewBox="0 0 24 24"
@@ -555,29 +541,29 @@ export default function SelectPage({
                         className={cn(
                           "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
                           "transition-all duration-200",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                           "active:scale-[0.96]",
                           selectedOperatorId === op.id
-                            ? "border-neutral-50 bg-neutral-800 ring-2 ring-neutral-500/40"
-                            : "border-neutral-800 bg-neutral-900 hover:border-neutral-600",
-                          banned && "opacity-35 grayscale cursor-not-allowed"
+                            ? "border-primary bg-card ring-2 ring-primary"
+                            : "border-border bg-card hover:border-border",
+                          banned && "opacity-40 bg-destructive/10 cursor-not-allowed grayscale"
                         )}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-neutral-800 overflow-hidden">
+                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                           {op.icon_url ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <Image
                               src={op.icon_url}
                               alt={op.name}
-                              className="w-full h-full object-contain"
+                              fill
+                              className="object-contain"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-neutral-600 text-xs">
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                               {op.name[0]}
                             </div>
                           )}
                         </div>
-                        <span className="text-[11px] font-medium text-neutral-50 leading-tight">
+                        <span className="text-[11px] font-medium text-foreground leading-tight">
                           {op.name}
                         </span>
                         {tags.length > 0 && (
@@ -585,7 +571,7 @@ export default function SelectPage({
                             {tags.slice(0, 2).map((tag) => (
                               <span
                                 key={tag}
-                                className="text-[9px] font-medium px-1 py-0.5 rounded bg-neutral-800 text-neutral-400"
+                                className="text-[9px] font-medium px-1 py-0.5 rounded bg-muted text-muted-foreground"
                               >
                                 {tag}
                               </span>
@@ -593,7 +579,7 @@ export default function SelectPage({
                           </div>
                         )}
                         {banned && (
-                          <span className="text-[9px] font-bold text-red-400 tracking-wider uppercase">
+                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase">
                             Banned
                           </span>
                         )}
@@ -609,22 +595,9 @@ export default function SelectPage({
         {/* ── Teammates' Selections ─────────────────────── */}
         {lobbyState && lobbyState.selections.length > 0 && (
           <section className="mt-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-neutral-500 uppercase mb-2">
-              <svg
-                className="size-3.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              Squad Selections
+              <h3 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-2">
+                <UsersIcon className="size-3.5" />
+                Squad Selections
             </h3>
             <div className="flex flex-col gap-1.5">
               {lobbyState.selections.map((sel) => {
@@ -638,14 +611,14 @@ export default function SelectPage({
                     className={cn(
                       "flex items-center gap-2 px-3 py-2 rounded-xl border text-xs transition-all duration-200",
                       isLocked
-                        ? "bg-green-500/5 border-green-400/20"
-                        : "bg-neutral-950 border-neutral-800"
+                        ? "bg-success/5 border-success/20"
+                        : "bg-card border-border"
                     )}
                   >
-                    <span className="font-medium text-neutral-200">
+                    <span className="font-medium text-foreground">
                       {member?.profiles?.username ?? "Unknown"}
                     </span>
-                    <span className="ml-auto text-neutral-500">
+                    <span className="ml-auto text-muted-foreground">
                       {sel.operator_id
                         ? `Op: ${sel.operator_id}`
                         : sel.map_id
@@ -653,18 +626,8 @@ export default function SelectPage({
                         : "Choosing…"}
                     </span>
                     {isLocked && (
-                      <span className="flex items-center gap-1 text-green-400 font-bold tracking-wider uppercase text-[10px]">
-                        <svg
-                          className="size-3"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
+                      <span className="flex items-center gap-1 text-success font-bold tracking-wider uppercase text-[10px]">
+                        <CheckIcon className="size-3" strokeWidth={2.5} />
                         Locked
                       </span>
                     )}
@@ -677,21 +640,9 @@ export default function SelectPage({
 
         {/* ── Error ────────────────────────────────────── */}
         {error && (
-          <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/20">
-            <svg
-              className="size-4 text-red-400 flex-shrink-0 mt-0.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20" role="alert" aria-live="polite">
+            <AlertIcon className="size-4 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
@@ -702,34 +653,26 @@ export default function SelectPage({
               size="lg"
               className={cn(
                 "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-                "bg-green-500 text-neutral-950",
-                "hover:bg-green-400 active:scale-[0.99]",
+                "bg-primary text-primary-foreground",
+                "hover:bg-primary-hover active:bg-primary-active",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "transition-all duration-200",
-                "shadow-[0_0_20px_-4px_rgba(34,197,94,0.25)]"
+                "shadow-[0_0_20px_-4px_oklch(0.65_0.22_25/0.25)]"
               )}
-              onClick={handleLockIn}
+              onClick={() => {
+                logger.info("SelectPage", "Lock In clicked, showing confirm");
+                setShowConfirm(true);
+              }}
               disabled={locking || !selectedOperatorId}
             >
               {locking ? (
                 <span className="flex items-center gap-2">
-                  <div className="size-4 border-2 border-neutral-700 border-t-neutral-950 rounded-full animate-spin" />
+                  <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Locking…
                 </span>
               ) : (
                 <>
-                  <svg
-                    className="size-5 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                  </svg>
+                  <LockIcon className="size-5 mr-2" />
                   Lock In
                 </>
               )}
@@ -737,6 +680,53 @@ export default function SelectPage({
           </div>
         )}
       </div>
+
+      {/* ── Confirmation Dialog ─────────────────────────── */}
+      {showConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="bg-popover border border-border rounded-xl shadow-3 p-6 max-w-sm w-full space-y-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <LockIcon className="size-5 text-primary" />
+              </div>
+              <div>
+                <h3 id="confirm-title" className="text-base font-semibold text-foreground">
+                  Lock in selection?
+                </h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Are you sure? This will lock your selection and assign tasks.
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-11 min-w-[100px] rounded-xl"
+                onClick={() => setShowConfirm(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="h-11 min-w-[100px] rounded-xl bg-primary text-primary-foreground hover:bg-primary-hover"
+                onClick={handleLockIn}
+              >
+                Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

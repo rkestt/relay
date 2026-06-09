@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
 // ──────────────────────────────────────────────
@@ -40,11 +41,16 @@ function ValidateContent() {
     const action = searchParams.get("action");
 
     if (!token || !strategyId || !action) {
-      logger.warn("ValidatePage", "Validation mount - missing params", { token: !!token, strategyId: !!strategyId, action: !!action });
+      logger.warn("ValidatePage", "Validation mount - missing params", {
+        token: !!token,
+        strategyId: !!strategyId,
+        action: !!action,
+      });
       setState({
         status: "error",
         title: "Invalid Request",
-        message: "Missing required parameters. Please use the link from Discord.",
+        message:
+          "Missing required parameters. Please use the link from Discord.",
       });
       return;
     }
@@ -61,10 +67,18 @@ function ValidateContent() {
         const { title, message } = parseHtmlResponse(html);
 
         if (res.ok) {
-          logger.info("ValidatePage", "Validation result", { status: "success", title, message });
+          logger.info("ValidatePage", "Validation result", {
+            status: "success",
+            title,
+            message,
+          });
           setState({ status: "success", title, message });
         } else {
-          logger.info("ValidatePage", "Validation result", { status: "error", title, message });
+          logger.info("ValidatePage", "Validation result", {
+            status: "error",
+            title,
+            message,
+          });
           setState({ status: "error", title, message });
         }
       } catch (err) {
@@ -72,89 +86,119 @@ function ValidateContent() {
         setState({
           status: "error",
           title: "Connection Error",
-          message: "Failed to reach the validation server. Please try again.",
+          message:
+            "Failed to reach the validation server. Please try again.",
         });
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Loading ──────────────────────────────
-  if (state.status === "loading") {
-    return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-4 bg-neutral-950 text-neutral-50 min-h-screen">
-        <div className="w-10 h-10 border-2 border-neutral-700 border-t-neutral-50 rounded-full animate-spin" />
-        <p className="text-neutral-400 text-sm font-medium">
-          Processing validation…
-        </p>
-        <p className="text-neutral-600 text-xs">
-          Please wait while we process your request.
-        </p>
-      </div>
-    );
-  }
-
-  // ── Result ───────────────────────────────
-  const isSuccess = state.status === "success";
+  // ── Auto-redirect after 3s on success ──────
+  useEffect(() => {
+    if (state.status === "success") {
+      const timer = setTimeout(() => {
+        router.push("/lobby");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [state.status, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-neutral-50 p-6">
-      <div className="w-full max-w-sm flex flex-col items-center gap-5">
-        {/* Icon */}
-        <div
-          className={`w-16 h-16 rounded-full border flex items-center justify-center ${
-            isSuccess
-              ? "bg-green-500/20 border-green-500/30"
-              : "bg-red-500/20 border-red-500/30"
-          }`}
-        >
-          {isSuccess ? (
-            <svg
-              className="w-8 h-8 text-green-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 6L9 17l-5-5" />
-            </svg>
-          ) : (
-            <svg
-              className="w-8 h-8 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 8v4M12 16h.01" />
-            </svg>
-          )}
-        </div>
+    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
+        {/* Loading */}
+        {state.status === "loading" && (
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="size-10 border-2 border-border border-t-foreground rounded-full animate-spin" />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-foreground">
+                Validating...
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Please wait while we process your request.
+              </p>
+            </div>
+          </div>
+        )}
 
-        {/* Text */}
-        <div className="text-center">
-          <h1 className="text-lg font-semibold text-neutral-50 mb-1">
-            {state.title}
-          </h1>
-          {state.message && (
-            <p className="text-sm text-neutral-400">{state.message}</p>
-          )}
-        </div>
+        {/* Success */}
+        {state.status === "success" && (
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="flex items-center justify-center size-16 rounded-full bg-success/10 border border-success/20 animate-in zoom-in duration-300">
+              <svg
+                className="size-8 text-success"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-lg font-semibold text-foreground">
+                {state.title}
+              </h1>
+              {state.message && (
+                <p className="text-sm text-muted-foreground">
+                  {state.message}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-3">
+                Redirecting to lobby in 3 seconds...
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-11"
+              onClick={() => router.push("/lobby")}
+            >
+              Go to Lobby
+            </Button>
+          </div>
+        )}
 
-        {/* Action */}
-        <Button
-          variant="outline"
-          size="lg"
-          className="w-full h-12 rounded-xl text-sm font-semibold border-neutral-700 text-neutral-50 hover:bg-neutral-800"
-          onClick={() => router.push("/")}
-        >
-          Back to Home
-        </Button>
+        {/* Error */}
+        {state.status === "error" && (
+          <div className="flex flex-col items-center gap-5 text-center">
+            <div className="flex items-center justify-center size-16 rounded-full bg-destructive/10 border border-destructive/20 animate-in zoom-in duration-300">
+              <svg
+                className="size-8 text-destructive"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4M12 16h.01" />
+              </svg>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-lg font-semibold text-foreground">
+                {state.title}
+              </h1>
+              {state.message && (
+                <p className="text-sm text-muted-foreground">
+                  {state.message}
+                </p>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-11"
+              onClick={() => router.push("/")}
+            >
+              Back to Home
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -164,9 +208,13 @@ export default function ValidatePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex flex-col flex-1 items-center justify-center gap-4 bg-neutral-950 text-neutral-50 min-h-screen">
-          <div className="w-8 h-8 border-2 border-neutral-700 border-t-neutral-50 rounded-full animate-spin" />
-          <p className="text-neutral-500 text-sm">Loading…</p>
+        <div className="flex min-h-screen items-center justify-center bg-background px-6">
+          <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <div className="size-8 border-2 border-border border-t-foreground rounded-full animate-spin" />
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          </div>
         </div>
       }
     >

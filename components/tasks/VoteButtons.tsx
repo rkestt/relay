@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { VoteUpIcon, VoteDownIcon } from "@/components/icons";
 
 interface VoteButtonsProps {
   score: number;
@@ -18,14 +20,22 @@ export function VoteButtons({
   size = "sm",
 }: VoteButtonsProps) {
   const isVertical = orientation === "vertical";
+  const [animatingVote, setAnimatingVote] = useState<"up" | "down" | null>(null);
+
+  const triggerVoteAnim = useCallback((type: "up" | "down") => {
+    setAnimatingVote(type);
+    setTimeout(() => setAnimatingVote(null), 200);
+  }, []);
 
   const handleUpvote = (e: React.MouseEvent) => {
     e.stopPropagation();
+    triggerVoteAnim("up");
     onVote(userVote === "up" ? null : "up");
   };
 
   const handleDownvote = (e: React.MouseEvent) => {
     e.stopPropagation();
+    triggerVoteAnim("down");
     onVote(userVote === "down" ? null : "down");
   };
 
@@ -41,37 +51,30 @@ export function VoteButtons({
         onClick={handleUpvote}
         className={cn(
           "flex items-center justify-center rounded-md transition-all duration-150",
-          "hover:scale-110 active:scale-95",
+          "hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           size === "sm" ? "size-7" : "size-9",
           userVote === "up"
-            ? "text-amber-500"
-            : "text-neutral-500 hover:text-amber-400",
+            ? "text-primary"
+            : "text-muted-foreground hover:text-primary",
+          animatingVote === "up" && "scale-125",
         )}
         aria-label="Upvote"
+        aria-pressed={userVote === "up"}
       >
-        <svg
-          className={cn(size === "sm" ? "size-4" : "size-5")}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M18 15l-6-6-6 6" />
-        </svg>
+        <VoteUpIcon className={cn(size === "sm" ? "size-4" : "size-5")} />
       </button>
 
       {/* Score */}
       <span
         className={cn(
-          "font-bold tabular-nums leading-none transition-colors duration-150",
+          "font-bold tabular-nums leading-none transition-all duration-150",
           size === "sm" ? "text-sm" : "text-lg",
-          userVote === "up"
-            ? "text-amber-500"
-            : userVote === "down"
-              ? "text-red-400"
-              : "text-neutral-500",
+          score > 0
+            ? "text-success"
+            : score < 0
+              ? "text-destructive"
+              : "text-muted-foreground",
+          animatingVote && "scale-110",
         )}
       >
         {score}
@@ -82,25 +85,17 @@ export function VoteButtons({
         onClick={handleDownvote}
         className={cn(
           "flex items-center justify-center rounded-md transition-all duration-150",
-          "hover:scale-110 active:scale-95",
+          "hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           size === "sm" ? "size-7" : "size-9",
           userVote === "down"
-            ? "text-red-400"
-            : "text-neutral-500 hover:text-red-400",
+            ? "text-destructive"
+            : "text-muted-foreground hover:text-destructive",
+          animatingVote === "down" && "scale-125",
         )}
         aria-label="Downvote"
+        aria-pressed={userVote === "down"}
       >
-        <svg
-          className={cn(size === "sm" ? "size-4" : "size-5")}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 9l6 6 6-6" />
-        </svg>
+        <VoteDownIcon className={cn(size === "sm" ? "size-4" : "size-5")} />
       </button>
     </div>
   );

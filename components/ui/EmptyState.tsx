@@ -29,14 +29,14 @@ export function EmptyState({
       {/* Icon container */}
       <div
         className={cn(
-          "w-14 h-14 rounded-2xl border border-neutral-800 bg-neutral-900",
+          "w-14 h-14 rounded-lg border border-border bg-card",
           "flex items-center justify-center",
-          "shadow-[0_0_24px_-4px_rgba(240,240,240,0.04)]"
+          "shadow-1"
         )}
       >
         {icon ?? (
           <svg
-            className="size-6 text-neutral-600"
+            className="size-6 text-muted-foreground"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -52,9 +52,9 @@ export function EmptyState({
 
       {/* Text */}
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-semibold text-neutral-200">{title}</p>
+        <p className="text-h3 font-semibold text-foreground">{title}</p>
         {description && (
-          <p className="text-xs text-neutral-500 max-w-[260px]">{description}</p>
+          <p className="text-sm text-muted-foreground max-w-[260px]">{description}</p>
         )}
       </div>
 

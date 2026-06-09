@@ -31,9 +31,22 @@ Thumbs.db
 
 # Supabase
 .supabase
+.env.supabase
+volumes/db/data/
+volumes/storage/
 
 # Temporary
 *.tmp
 *.temp
+*.bak
+*.log
 
 tsconfig.tsbuildinfo
+
+# Auto-generated
+next-env.d.ts
+graphify-out/
+
+# Test output
+dogfood-output/
+*.png

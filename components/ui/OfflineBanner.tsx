@@ -36,8 +36,8 @@ export function OfflineBanner({
     <div
       className={cn(
         "sticky top-0 z-50 flex items-center justify-between gap-3 px-4 py-2 text-xs font-medium",
-        "bg-amber-400/10 border-b border-amber-400/20 text-amber-400",
-        status === "error" && "bg-red-400/10 border-red-400/20 text-red-400"
+        "bg-warning/10 border-b border-warning/20 text-warning",
+        status === "error" && "bg-destructive/10 border-destructive/20 text-destructive"
       )}
     >
       <div className="flex items-center gap-2">
@@ -45,7 +45,7 @@ export function OfflineBanner({
         <span
           className={cn(
             "inline-block w-1.5 h-1.5 rounded-full",
-            status === "disconnected" ? "bg-amber-400 animate-pulse" : "bg-red-400"
+            status === "disconnected" ? "bg-warning animate-pulse" : "bg-destructive"
           )}
         />
         {label}
@@ -56,7 +56,7 @@ export function OfflineBanner({
             setDismissed(true);
             onDismiss();
           }}
-          className="ml-auto flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors"
+          className="ml-auto flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
           aria-label="Dismiss"
         >
           <svg

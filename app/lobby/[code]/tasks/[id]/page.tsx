@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
 import { MapViewer } from "@/components/maps/MapViewer";
 import { VoteButtons } from "@/components/tasks/VoteButtons";
+import Image from "next/image";
 import type {
   StrategyTemplate,
   StrategyHotspot,
@@ -17,6 +18,7 @@ import type {
   Profile,
   Map,
 } from "@/types";
+import { AlertIcon, ArrowRightIcon, BackArrowIcon, UserIcon } from "@/components/icons";
 
 interface DetailData {
   assignment: TaskAssignment & {
@@ -43,6 +45,7 @@ export default function TaskDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     logger.info("TaskDetailPage", "Mount");
@@ -51,6 +54,28 @@ export default function TaskDetailPage({
       setAssignmentId(id);
     });
   }, [params]);
+
+  // ── Keyboard navigation for gallery ─────────────────────
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!data || !data.assignment.strategy) return;
+      const images = getOrderedImages(data.assignment.strategy);
+      if (images.length <= 1) return;
+
+      if (e.key === "ArrowLeft") {
+        setActiveImageIdx((prev) =>
+          prev > 0 ? prev - 1 : images.length - 1,
+        );
+      } else if (e.key === "ArrowRight") {
+        setActiveImageIdx((prev) =>
+          prev < images.length - 1 ? prev + 1 : 0,
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [data]);
 
   // ── Resolve room_code → lobby_id ──────────────────────
   useEffect(() => {
@@ -278,23 +303,23 @@ export default function TaskDetailPage({
   // ── Loading ──────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-neutral-800 animate-pulse" />
-            <div className="h-5 w-48 rounded bg-neutral-800 animate-pulse" />
+            <div className="size-9 rounded-lg bg-muted animate-pulse" />
+            <div className="h-5 w-48 rounded bg-muted animate-pulse" />
           </div>
           <div className="flex items-center gap-2">
-            <div className="size-8 rounded bg-neutral-800 animate-pulse" />
-            <div className="h-6 w-8 rounded bg-neutral-800 animate-pulse" />
-            <div className="size-8 rounded bg-neutral-800 animate-pulse" />
+            <div className="size-8 rounded bg-muted animate-pulse" />
+            <div className="h-6 w-8 rounded bg-muted animate-pulse" />
+            <div className="size-8 rounded bg-muted animate-pulse" />
           </div>
         </header>
         <div className="p-5">
-          <div className="aspect-video rounded-xl bg-neutral-800 animate-pulse" />
-          <div className="h-4 w-3/4 rounded bg-neutral-800 animate-pulse mt-5" />
-          <div className="h-3 w-full rounded bg-neutral-800/60 animate-pulse mt-3" />
-          <div className="h-3 w-5/6 rounded bg-neutral-800/60 animate-pulse mt-2" />
+          <div className="aspect-video rounded-xl bg-muted animate-pulse" />
+          <div className="h-4 w-3/4 rounded bg-muted animate-pulse mt-5" />
+          <div className="h-3 w-full rounded bg-muted/60 animate-pulse mt-3" />
+          <div className="h-3 w-5/6 rounded bg-muted/60 animate-pulse mt-2" />
         </div>
       </div>
     );
@@ -303,51 +328,27 @@ export default function TaskDetailPage({
   // ── Error ────────────────────────────────────────────
   if (error || !data) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50"
+            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
-            <svg
-              className="size-4 mr-1"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
+            <BackArrowIcon className="size-4 mr-1" />
             Back
           </Button>
         </header>
         <EmptyState
-          icon={
-            <svg
-              className="size-7 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          }
+          icon={<AlertIcon className="size-7 text-destructive" />}
           title={error ?? "Task not found"}
           description="Could not load this task assignment."
           action={
             <Button
               variant="outline"
               size="sm"
-              className="h-11 min-w-[120px] rounded-xl border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              className="h-11 min-w-[120px] rounded-xl border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => router.push(`/lobby/${code}/tasks`)}
             >
               Back to Feed
@@ -366,34 +367,24 @@ export default function TaskDetailPage({
   // ── Strategy removed ────────────────────────────────────
   if (!strategy) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50"
+            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
-            <svg
-              className="size-4 mr-1"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
+            <BackArrowIcon className="size-4 mr-1" />
             Back
           </Button>
         </header>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-lg font-bold text-neutral-500">
+            <h1 className="text-lg font-bold text-muted-foreground">
               Strategy removed
             </h1>
-            <p className="text-sm text-neutral-600 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               This strategy is no longer available.
             </p>
           </div>
@@ -407,27 +398,17 @@ export default function TaskDetailPage({
   const currentImage = images[safeIdx];
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 min-w-[80px] rounded-lg text-sm text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
+          className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
           onClick={() => router.push(`/lobby/${code}/tasks`)}
         >
-          <svg
-            className="size-4 mr-1"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Back
+            <BackArrowIcon className="size-4 mr-1" />
+            Back
         </Button>
 
         <h1 className="text-base font-bold truncate max-w-[50%]">
@@ -448,25 +429,25 @@ export default function TaskDetailPage({
         <div className="p-5 pb-8 max-w-2xl mx-auto w-full">
           {/* ── Image Gallery ──────────────────────────────── */}
           {images.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-3" ref={galleryRef} aria-label="Strategy image gallery">
               {images.length === 1 ? (
-                <div className="aspect-video rounded-xl overflow-hidden bg-neutral-800">
-                  <img
+                <div className="aspect-video rounded-xl overflow-hidden bg-muted relative">
+                  <Image
                     src={currentImage.image_url}
                     alt={currentImage.caption ?? strategy.title}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized={currentImage.image_url.startsWith('blob:') || currentImage.image_url.startsWith('data:')}
                   />
                 </div>
               ) : (
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-neutral-800">
-                  <img
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
+                  <Image
                     src={currentImage.image_url}
                     alt={currentImage.caption ?? strategy.title}
-                    loading={activeImageIdx === 0 ? "eager" : "lazy"}
-                    decoding="async"
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    unoptimized={currentImage.image_url.startsWith('blob:') || currentImage.image_url.startsWith('data:')}
                   />
 
                   {/* Prev button */}
@@ -476,7 +457,7 @@ export default function TaskDetailPage({
                         prev > 0 ? prev - 1 : images.length - 1,
                       )
                     }
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-neutral-300 hover:bg-black/70 hover:text-neutral-50 transition-all"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-muted-foreground hover:bg-black/70 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     aria-label="Previous image"
                   >
                     <svg
@@ -499,32 +480,27 @@ export default function TaskDetailPage({
                         prev < images.length - 1 ? prev + 1 : 0,
                       )
                     }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-neutral-300 hover:bg-black/70 hover:text-neutral-50 transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-muted-foreground hover:bg-black/70 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     aria-label="Next image"
                   >
-                    <svg
-                      className="size-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
+                    <ArrowRightIcon className="size-4" />
                   </button>
+
+                  {/* Image counter */}
+                  <div className="absolute bottom-2 right-2 z-10 px-2 py-1 rounded-md bg-black/60 text-xs text-foreground font-medium">
+                    {safeIdx + 1} / {images.length}
+                  </div>
                 </div>
               )}
 
               {/* Caption */}
               {currentImage.caption && (
-                <p className="text-xs text-neutral-500 text-center">
+                <p className="text-xs text-muted-foreground text-center">
                   {currentImage.caption}
                 </p>
               )}
 
-              {/* Dots */}
+              {/* Thumbnail strip */}
               {images.length > 1 && (
                 <div className="flex items-center justify-center gap-2">
                   {images.map((img, i) => (
@@ -532,10 +508,10 @@ export default function TaskDetailPage({
                       key={img.id}
                       onClick={() => setActiveImageIdx(i)}
                       className={cn(
-                        "size-2 rounded-full transition-all",
+                        "size-2 rounded-full transition-all duration-200",
                         i === safeIdx
-                          ? "bg-amber-500 w-4"
-                          : "bg-neutral-600 hover:bg-neutral-500",
+                          ? "bg-primary w-4"
+                          : "bg-muted-foreground hover:bg-foreground",
                       )}
                       aria-label={`Go to image ${i + 1}`}
                     />
@@ -545,17 +521,50 @@ export default function TaskDetailPage({
             </div>
           )}
 
+          {/* ── Strategy Info ──────────────────────────────── */}
+          <div className="mt-6">
+            <h1 className="text-2xl font-bold text-foreground">
+              {strategy.title}
+            </h1>
+
+            {/* Author + timestamp */}
+            <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <UserIcon className="size-4" />
+                {assignment.user?.username ?? "Unknown"}
+              </span>
+              <span className="text-muted-foreground">·</span>
+              <span>
+                {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+
+            {/* Map / Site / Operator badges */}
+            {data.map && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                <span className="px-2.5 py-1 rounded-lg bg-card border border-border text-xs font-medium text-muted-foreground">
+                  {data.map.name}
+                </span>
+              </div>
+            )}
+          </div>
+
           {/* ── Description ──────────────────────────────── */}
-          <div className="mt-8 pt-6 border-t border-neutral-800">
-            <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-3">
+          <div className="mt-8 pt-6 border-t border-border">
+            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Description
             </h2>
             {strategy.description ? (
-              <p className="text-sm text-neutral-200 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
                 {strategy.description}
               </p>
             ) : (
-              <p className="text-sm text-neutral-600 italic">
+              <p className="text-sm text-muted-foreground italic">
                 No description provided.
               </p>
             )}
@@ -563,8 +572,8 @@ export default function TaskDetailPage({
 
           {/* ── Tactical Map ──────────────────────────────── */}
           {hotspots.length > 0 && data.map && (
-            <div className="mt-8 pt-6 border-t border-amber-500/20">
-              <h2 className="text-sm font-semibold text-amber-500/80 uppercase tracking-wider mb-3">
+            <div className="mt-8 pt-6 border-t border-primary/20">
+              <h2 className="text-sm font-semibold text-primary/80 uppercase tracking-wider mb-3">
                 Tactical Map
               </h2>
               {data.map.image_url ? (
@@ -577,9 +586,9 @@ export default function TaskDetailPage({
                   }))}
                 />
               ) : (
-                <div className="aspect-video rounded-xl bg-neutral-800 border border-neutral-700 flex flex-col items-center justify-center gap-2">
+                <div className="aspect-video rounded-xl bg-muted border border-border flex flex-col items-center justify-center gap-2">
                   <svg
-                    className="size-6 text-neutral-600"
+                    className="size-6 text-muted-foreground"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -591,44 +600,26 @@ export default function TaskDetailPage({
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <path d="M21 15l-5-5L5 21" />
                   </svg>
-                  <span className="text-neutral-600 text-sm">
+                  <span className="text-muted-foreground text-sm">
                     Map image not available for {data.map.name}
                   </span>
                 </div>
               )}
             </div>
           )}
+        </div>
+      </div>
 
-          {/* ── Meta info ─────────────────────────────────── */}
-          <div className="mt-8 pt-6 border-t border-neutral-800 flex items-center gap-3 text-sm text-neutral-500">
-            <svg
-              className="size-4 text-neutral-600"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            <span>
-              Assigned by{" "}
-              <span className="text-neutral-300 font-medium">
-                {assignment.user?.username ?? "Unknown"}
-              </span>
-            </span>
-            <span className="text-neutral-700">·</span>
-            <span>
-              {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </span>
-          </div>
+      {/* ── Sticky Vote Bar (mobile) ────────────────────── */}
+      <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur-sm p-3 md:hidden">
+        <div className="flex items-center justify-center">
+          <VoteButtons
+            score={score}
+            userVote={data.userVote}
+            onVote={handleVote}
+            orientation="horizontal"
+            size="md"
+          />
         </div>
       </div>
     </div>

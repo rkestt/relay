@@ -10,17 +10,17 @@ export function SkeletonCard({ className, lines = 3 }: SkeletonCardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-neutral-800 bg-neutral-900 p-5",
+        "rounded-lg border border-border bg-card p-6",
         "animate-pulse",
         className
       )}
     >
       {/* Header skeleton */}
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-neutral-800" />
+        <div className="w-10 h-10 rounded-full bg-muted" />
         <div className="flex flex-col gap-1.5 flex-1">
-          <div className="h-3 w-24 rounded bg-neutral-800" />
-          <div className="h-2.5 w-16 rounded bg-neutral-800/60" />
+          <div className="h-3 w-24 rounded bg-muted" />
+          <div className="h-2.5 w-16 rounded bg-muted/60" />
         </div>
       </div>
 
@@ -29,8 +29,8 @@ export function SkeletonCard({ className, lines = 3 }: SkeletonCardProps) {
         {Array.from({ length: lines }).map((_, i) => (
           <div
             key={i}
-            className="h-2.5 rounded bg-neutral-800"
-            style={{ width: `${Math.random() * 40 + 60}%` }}
+            className="h-2.5 rounded bg-muted"
+            style={{ width: `${60 + (i * 10) % 40}%` }}
           />
         ))}
       </div>
@@ -53,15 +53,15 @@ export function SkeletonGrid({
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="rounded-2xl border border-neutral-800 bg-neutral-900 overflow-hidden animate-pulse"
+          className="rounded-lg border border-border bg-card overflow-hidden animate-pulse"
         >
           {/* Image area */}
-          <div className="aspect-video bg-neutral-800" />
+          <div className="aspect-video bg-muted" />
 
           {/* Text area */}
           <div className="p-3 flex flex-col gap-2">
-            <div className="h-3 w-20 rounded bg-neutral-800" />
-            <div className="h-2 w-14 rounded bg-neutral-800/60" />
+            <div className="h-3 w-20 rounded bg-muted" />
+            <div className="h-2 w-14 rounded bg-muted/60" />
           </div>
         </div>
       ))}

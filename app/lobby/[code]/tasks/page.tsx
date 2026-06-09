@@ -8,6 +8,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
+import { cn } from "@/lib/utils";
+import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
   StrategyTemplate,
@@ -15,6 +17,9 @@ import type {
   TaskAssignment,
   Profile,
 } from "@/types";
+import { AlertIcon, BackArrowIcon } from "@/components/icons";
+
+type SortMode = "score" | "newest";
 
 interface FeedTask {
   assignment: TaskAssignment & {
@@ -43,6 +48,7 @@ export default function TasksPage({
   const [tasks, setTasks] = useState<FeedTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>("score");
 
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
@@ -221,7 +227,7 @@ export default function TasksPage({
             (a.assignment.upvotes ?? 0) - (a.assignment.downvotes ?? 0);
           const scoreB =
             (b.assignment.upvotes ?? 0) - (b.assignment.downvotes ?? 0);
-          return scoreB - scoreA; // DESC
+          return scoreB - scoreA; // DESC by score
         });
 
       logger.info("TasksPage", "Tasks fetched", {
@@ -338,38 +344,35 @@ export default function TasksPage({
     [code, router],
   );
 
+  // Sort tasks based on sort mode
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (sortMode === "newest") {
+      return (
+        new Date(b.assignment.assigned_at).getTime() -
+        new Date(a.assignment.assigned_at).getTime()
+      );
+    }
+    // Default: by score (already sorted, but re-sort for safety)
+    const scoreA =
+      (a.assignment.upvotes ?? 0) - (a.assignment.downvotes ?? 0);
+    const scoreB =
+      (b.assignment.upvotes ?? 0) - (b.assignment.downvotes ?? 0);
+    return scoreB - scoreA;
+  });
+
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex flex-col gap-1">
-            <div className="h-4 w-32 rounded bg-neutral-800 animate-pulse" />
-            <div className="h-3 w-28 rounded bg-neutral-800/60 animate-pulse" />
+            <div className="h-4 w-32 rounded bg-muted animate-pulse" />
+            <div className="h-3 w-28 rounded bg-muted/60 animate-pulse" />
           </div>
-          <div className="h-9 w-24 rounded-lg bg-neutral-800 animate-pulse" />
+          <div className="h-9 w-24 rounded-lg bg-muted animate-pulse" />
         </header>
-        <div className="flex flex-col gap-4 p-5">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="rounded-2xl border border-neutral-800 bg-neutral-900 overflow-hidden animate-pulse"
-            >
-              <div className="flex">
-                <div className="flex flex-col items-center gap-2 pt-4 px-3 min-w-[48px]">
-                  <div className="size-4 rounded bg-neutral-800" />
-                  <div className="h-4 w-4 rounded bg-neutral-800" />
-                  <div className="size-4 rounded bg-neutral-800" />
-                </div>
-                <div className="flex-1 p-4 pl-1">
-                  <div className="h-4 w-40 rounded bg-neutral-800" />
-                  <div className="h-3 w-60 rounded bg-neutral-800/60 mt-2" />
-                  <div className="aspect-video max-h-[160px] rounded-lg bg-neutral-800 mt-3" />
-                  <div className="h-3 w-24 rounded bg-neutral-800/60 mt-2" />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="p-5">
+          <SkeletonGrid count={6} />
         </div>
       </div>
     );
@@ -378,33 +381,19 @@ export default function TasksPage({
   // ── Error state ──────────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <div className="h-5 w-20 rounded bg-neutral-800 animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
-          icon={
-            <svg
-              className="size-7 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-          }
+          icon={<AlertIcon className="size-7 text-destructive" />}
           title="Failed to load tasks"
           description={error}
           action={
             <Button
               variant="outline"
               size="sm"
-              className="h-11 min-w-[120px] rounded-xl border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              className="h-11 min-w-[120px] rounded-xl border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => {
                 if (!code) return;
                 router.push(`/lobby/${code}`);
@@ -420,73 +409,107 @@ export default function TasksPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h1 className="text-base font-bold text-neutral-50">
+          <h1 className="text-base font-bold text-foreground">
             Strategies Feed
           </h1>
-          <p className="text-xs text-neutral-500">Room {code}</p>
+          <p className="text-xs text-muted-foreground">Room {code}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50 transition-all duration-200 active:scale-95"
-          onClick={() => {
-            if (!code) return;
-            router.push(`/lobby/${code}`);
-          }}
-        >
-          <svg
-            className="size-4 mr-1.5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="flex items-center gap-2">
+          {/* Sort toggle */}
+          <button
+            onClick={() => setSortMode(sortMode === "score" ? "newest" : "score")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200"
           >
-            <path d="M19 12H5M12 5l-7 7 7 7" />
-          </svg>
-          Back
-        </Button>
+            <svg
+              className="size-3.5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M11 5h10M11 9h7M11 13h4" />
+              <path d="M3 4v16" />
+              <path d="M3 4l4 4-4 4" />
+            </svg>
+            {sortMode === "score" ? "By Score" : "Newest"}
+          </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+            onClick={() => {
+              if (!code) return;
+              router.push(`/lobby/${code}`);
+            }}
+          >
+            <BackArrowIcon className="size-4 mr-1.5" />
+            Back
+          </Button>
+        </div>
       </header>
 
-      <div className="flex flex-col gap-4 p-5 pb-8">
-        {/* ── Empty state ──────────────────────────────── */}
-        {tasks.length === 0 ? (
-          <EmptyState
-            icon={
-              <svg
-                className="size-7 text-neutral-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 11l3 3L22 4" />
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-              </svg>
-            }
-            title="No strategies assigned yet"
-            description="Strategies are assigned after selecting your operator in a round."
-            className="py-20"
-          />
-        ) : (
-          tasks.map(({ assignment, hotspots }) => (
-            <StrategyCard
-              key={assignment.id}
-              assignment={assignment}
-              hotspots={hotspots}
-              username={assignment.user?.username ?? undefined}
-              onVote={(voteType) => handleVote(assignment.id, voteType)}
-              onClick={() => handleCardClick(assignment.id)}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-5 pb-8">
+          {/* ── Empty state ──────────────────────────────── */}
+          {sortedTasks.length === 0 ? (
+            <EmptyState
+              icon={
+                <svg
+                  className="size-7 text-muted-foreground"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+              }
+              title="No strategies yet"
+              description="Be the first to submit! Strategies appear after selecting an operator in a round."
+              action={
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="h-11 rounded-xl"
+                  onClick={() => {
+                    if (!code) return;
+                    router.push(`/lobby/${code}/submit`);
+                  }}
+                >
+                  Submit Strategy
+                </Button>
+              }
+              className="py-20"
             />
-          ))
-        )}
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {sortedTasks.map(({ assignment, hotspots }, index) => (
+                <div
+                  key={assignment.id}
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${index * 75}ms` }}
+                >
+                  <StrategyCard
+                    assignment={assignment}
+                    hotspots={hotspots}
+                    username={assignment.user?.username ?? undefined}
+                    onVote={(voteType) => handleVote(assignment.id, voteType)}
+                    onClick={() => handleCardClick(assignment.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

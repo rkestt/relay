@@ -27,13 +27,13 @@ export function LoadingSpinner({
     <div className="flex flex-col items-center justify-center gap-3">
       <div
         className={cn(
-          "rounded-full border-neutral-700 border-t-current animate-spin",
+          "rounded-full text-primary border-current border-t-transparent animate-spin",
           sizeMap[size],
           className
         )}
       />
       {label && (
-        <p className={cn("text-neutral-500", labelMap[size])}>{label}</p>
+        <p className={cn("text-muted-foreground", labelMap[size])}>{label}</p>
       )}
     </div>
   );
@@ -46,9 +46,9 @@ export function LoadingScreen({
   label?: string;
 }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-neutral-950 text-neutral-50">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-background/80">
       <LoadingSpinner size="lg" />
-      <p className="text-sm text-neutral-500 animate-pulse">{label}</p>
+      <p className="text-sm text-muted-foreground animate-pulse">{label}</p>
     </div>
   );
 }

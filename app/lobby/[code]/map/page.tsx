@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
+import Image from "next/image";
 import type { Map } from "@/types";
+import { AlertIcon, CheckIcon } from "@/components/icons";
 
 export default function LobbyMapPage({
   params,
@@ -23,6 +25,7 @@ export default function LobbyMapPage({
   const [selectedMapId, setSelectedMapId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Resolve params
@@ -118,8 +121,12 @@ export default function LobbyMapPage({
         const data = await res.json();
         throw new Error(data.error ?? "Failed to set map");
       }
-      logger.info("LobbyMapPage", "Map set successfully, redirecting to bans", { code });
-      router.push(`/lobby/${code}/bans`);
+      logger.info("LobbyMapPage", "Map set successfully, redirecting to lobby", { code });
+      setConfirmed(true);
+      // Brief feedback before redirect
+      setTimeout(() => {
+        router.push(`/lobby/${code}`);
+      }, 800);
     } catch (err) {
       logger.error("LobbyMapPage", "Confirm map failed", err);
       setError(err instanceof Error ? err.message : "Failed to set map");
@@ -131,13 +138,13 @@ export default function LobbyMapPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <div className="h-5 w-32 rounded bg-neutral-800 animate-pulse" />
-          <div className="h-9 w-16 rounded-lg bg-neutral-800 animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="h-5 w-32 rounded bg-muted animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
         </header>
         <div className="flex flex-col gap-4 p-5">
-          <div className="h-4 w-24 rounded bg-neutral-800 animate-pulse" />
+          <div className="h-4 w-24 rounded bg-muted animate-pulse" />
           <SkeletonGrid count={6} />
         </div>
       </div>
@@ -147,33 +154,34 @@ export default function LobbyMapPage({
   // ── Non-leader waiting state ─────────────────────────
   if (!isLeader && lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <h1 className="text-base font-semibold text-neutral-50">Choose Map</h1>
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50"
+            className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={() => router.push(`/lobby/${code}`)}
           >
             Back
           </Button>
         </header>
         <div className="flex flex-col items-center justify-center flex-1 gap-4 px-5">
-          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-neutral-900 border border-neutral-800">
+          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card border border-border">
             <svg
-              className="size-5 text-neutral-500 animate-pulse"
+              className="size-5 text-muted-foreground animate-pulse"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
-            <p className="text-sm font-medium text-neutral-400">
+            <p className="text-sm font-medium text-muted-foreground">
               Waiting for leader to choose the map…
             </p>
           </div>
@@ -185,25 +193,13 @@ export default function LobbyMapPage({
   // ── Error state ──────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
-          <div className="h-5 w-24 rounded bg-neutral-800 animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
           icon={
-            <svg
-              className="size-7 text-red-400"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
+            <AlertIcon className="size-7 text-destructive" />
           }
           title="Failed to load"
           description={error}
@@ -211,7 +207,7 @@ export default function LobbyMapPage({
             <Button
               variant="outline"
               size="sm"
-              className="h-11 min-w-[120px] rounded-xl border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+              className="h-11 min-w-[120px] rounded-xl"
               onClick={() => router.push(`/lobby/${code}`)}
             >
               Back to Lobby
@@ -224,17 +220,17 @@ export default function LobbyMapPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-neutral-800">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h1 className="text-base font-semibold text-neutral-50">Choose Map</h1>
-          <p className="text-xs text-neutral-500">Room {code}</p>
+          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
+          <p className="text-xs text-muted-foreground">Room {code}</p>
         </div>
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-neutral-50"
+          className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
           onClick={() => router.push(`/lobby/${code}`)}
         >
           Back
@@ -243,21 +239,9 @@ export default function LobbyMapPage({
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
         {error && (
-          <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/20">
-            <svg
-              className="size-4 text-red-400 flex-shrink-0 mt-0.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20" role="alert" aria-live="polite">
+            <AlertIcon className="size-4 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
@@ -269,85 +253,105 @@ export default function LobbyMapPage({
             className="py-16"
           />
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {maps.map((map, i) => (
-              <button
-                key={map.id}
-                onClick={() => {
-                  logger.info("LobbyMapPage", "Map selected", { mapId: map.id, mapName: map.name });
-                  setSelectedMapId(map.id);
-                  setError(null);
-                }}
-                className={cn(
-                  "flex flex-col rounded-2xl overflow-hidden border text-left",
-                  "transition-all duration-200",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500/50",
-                  "active:scale-[0.98] active:brightness-95",
-                  selectedMapId === map.id
-                    ? "border-amber-500 bg-neutral-800 shadow-[0_0_16px_-4px_rgba(245,158,11,0.25)]"
-                    : "border-neutral-800 bg-neutral-900 hover:border-neutral-600"
-                )}
-                style={{ animationDelay: `${i * 30}ms` }}
-              >
-                <div className="aspect-video bg-neutral-800 overflow-hidden">
-                  {map.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={map.image_url}
-                      alt={map.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-neutral-600 text-xs">
-                      No image
-                    </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {maps.map((map, i) => {
+              const isSelected = selectedMapId === map.id;
+              return (
+                <button
+                  key={map.id}
+                  onClick={() => {
+                    if (submitting || confirmed) return;
+                    logger.info("LobbyMapPage", "Map selected", { mapId: map.id, mapName: map.name });
+                    setSelectedMapId(map.id);
+                    setError(null);
+                  }}
+                  disabled={submitting || confirmed}
+                  className={cn(
+                    "flex flex-col rounded-2xl overflow-hidden border text-left",
+                    "transition-all duration-200",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                    "active:scale-[0.98]",
+                    isSelected
+                      ? "ring-2 ring-primary bg-card shadow-[0_0_16px_-4px_oklch(0.65_0.22_25_/_0.3)]"
+                      : "border-border bg-card hover:border-border/80 hover:bg-card/80"
                   )}
-                </div>
-                <div className="px-3 py-2.5">
-                  <span className="text-sm font-semibold text-neutral-50">{map.name}</span>
-                </div>
-              </button>
-            ))}
+                  style={{ animationDelay: `${i * 30}ms` }}
+                  aria-pressed={isSelected}
+                  aria-label={isSelected ? `${map.name} (selected)` : map.name}
+                >
+                  <div className="aspect-video bg-muted overflow-hidden relative">
+                    {map.image_url ? (
+                      <Image
+                        src={map.image_url}
+                        alt={map.name}
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                        No image
+                      </div>
+                    )}
+                    {/* Selected checkmark overlay */}
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                        <CheckIcon className="size-4 text-primary-foreground" strokeWidth={2.5} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-3 py-2.5">
+                    <span className="text-sm font-semibold text-foreground">{map.name}</span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
         {/* ── Confirm Button ───────────────────────────── */}
         <div className="mt-auto pt-4">
-          <Button
-            size="lg"
-            className={cn(
-              "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-              "bg-amber-500 text-neutral-950",
-              "hover:bg-amber-400 active:scale-[0.99]",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              "transition-all duration-200",
-              "shadow-[0_0_20px_-4px_rgba(245,158,11,0.25)]"
-            )}
-            onClick={handleConfirmMap}
-            disabled={submitting || !selectedMapId}
-          >
-            {submitting ? (
-              <span className="flex items-center gap-2">
-                <div className="size-4 border-2 border-neutral-600 border-t-neutral-950 rounded-full animate-spin" />
-                Confirming…
-              </span>
-            ) : (
-              <>
-                <svg
-                  className="size-5 mr-2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-                Confirm Map
-              </>
-            )}
-          </Button>
+          {confirmed ? (
+            <div className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-success/10 border border-success/20 text-success text-sm font-semibold animate-in fade-in">
+              <CheckIcon className="size-5" strokeWidth={2.5} />
+              Map confirmed! Redirecting…
+            </div>
+          ) : (
+            <Button
+              size="lg"
+              className={cn(
+                "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
+                "bg-primary text-primary-foreground",
+                "hover:bg-primary-hover active:scale-[0.99]",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "transition-all duration-200",
+                "shadow-[0_0_20px_-4px_oklch(0.65_0.22_25_/_0.35)]"
+              )}
+              onClick={handleConfirmMap}
+              disabled={submitting || !selectedMapId || confirmed}
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Confirming…
+                </span>
+              ) : (
+                <>
+                  <svg
+                    className="size-5 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                  Confirm Map
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </div>

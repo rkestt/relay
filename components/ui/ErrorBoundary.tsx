@@ -48,13 +48,13 @@ export class ErrorBoundary extends Component<Props, State> {
           {/* Warning icon */}
           <div
             className={cn(
-              "w-14 h-14 rounded-2xl border border-red-400/20 bg-red-400/10",
+              "w-14 h-14 rounded-lg border border-destructive/20 bg-destructive/10",
               "flex items-center justify-center",
-              "shadow-[0_0_24px_-4px_rgba(239,68,68,0.15)]"
+              "shadow-1"
             )}
           >
             <svg
-              className="size-6 text-red-400"
+              className="size-6 text-destructive"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -70,24 +70,19 @@ export class ErrorBoundary extends Component<Props, State> {
 
           {/* Text */}
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold text-neutral-200">
+            <p className="text-h3 font-semibold text-foreground">
               Something went wrong
             </p>
-            <p className="text-xs text-neutral-500 max-w-[280px]">
+            <p className="text-sm text-muted-foreground max-w-[280px]">
               {this.state.error?.message ?? "An unexpected error occurred."}
             </p>
           </div>
 
           {/* Retry button */}
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
-            className={cn(
-              "h-10 min-w-[120px] rounded-xl",
-              "border-neutral-700 text-neutral-200",
-              "hover:bg-neutral-800 hover:text-neutral-50",
-              "transition-all duration-200"
-            )}
+            className="min-w-[120px]"
             onClick={this.handleRetry}
           >
             <svg

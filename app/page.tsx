@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
+import { PlusIcon, RefreshIcon, AlertIcon } from "@/components/icons";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
 
@@ -12,20 +14,24 @@ export default function HomePage() {
   const router = useRouter();
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [roomCode, setRoomCode] = useState("");
-  const [rejoinCode, setRejoinCode] = useState<string | null>(null);
+  const [rejoinCode, setRejoinCode] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(ROOM_CODE_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [startingSide, setStartingSide] = useState<"attacker" | "defender">("attacker");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check localStorage on mount for existing room_code
+  // Log mount + rejoin code
   useEffect(() => {
     logger.info("Landing", "Landing mount");
-    const stored = localStorage.getItem(ROOM_CODE_KEY);
-    if (stored) {
-      logger.info("Landing", "Rejoin code found in storage", { code: stored });
-      setRejoinCode(stored);
+    if (rejoinCode) {
+      logger.info("Landing", "Rejoin code found in storage", { code: rejoinCode });
     }
-  }, []);
+  }, [rejoinCode]);
 
   const handleCreate = useCallback(async () => {
     logger.info("Landing", "Create lobby click", { startingSide });
@@ -109,18 +115,16 @@ export default function HomePage() {
   }, [router, rejoinCode]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-neutral-950 text-neutral-50">
+    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
 
       {/* ── Hero ──────────────────────────────────────── */}
-      <main className="flex flex-col flex-1 items-center justify-center px-6 py-20 gap-16">
+      <main className="flex flex-col flex-1 items-center justify-center px-6 py-32 gap-20">
 
         {/* Logomark + Title */}
-        <div className="flex flex-col items-center gap-4 text-center animate-in fade-in slide-in-from-bottom-1 duration-500">
-          <div
-            className="flex items-center justify-center w-16 h-16 rounded-2xl border border-neutral-800 bg-neutral-900 shadow-[0_0_32px_-8px_rgba(240,240,240,0.08)]"
-          >
+        <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl border border-border bg-card">
             <svg
-              className="size-8 text-neutral-50"
+              className="size-8 text-primary"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -134,139 +138,102 @@ export default function HomePage() {
             </svg>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <h1 className="text-5xl font-bold tracking-tight text-neutral-50">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-5xl font-bold tracking-tight text-foreground">
               r6hub
             </h1>
-            <p className="text-neutral-400 text-base font-medium tracking-wide">
+            <p className="text-base text-muted-foreground font-medium">
               Tactical sync for Rainbow Six Siege
             </p>
           </div>
         </div>
 
         {/* ── CTA Buttons ──────────────────────────────── */}
-        <div className="flex flex-col gap-3 w-full max-w-xs animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
+        <div className="flex flex-col gap-3 w-full max-w-xs">
 
           {/* Starting side selector */}
-          <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold tracking-wider text-neutral-500 uppercase text-center">
+          <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase text-center">
               Your team starts as
             </span>
-            <div className="flex rounded-xl bg-neutral-900 border border-neutral-800 p-1">
-              <button
+            <div className="flex rounded-xl bg-card border border-border p-1">
+              <Button
                 type="button"
+                variant={startingSide === "attacker" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setStartingSide("attacker")}
                 className={cn(
-                  "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
-                  startingSide === "attacker"
-                    ? "bg-amber-500 text-neutral-950 shadow-lg"
-                    : "text-neutral-400 hover:text-neutral-200"
+                  "flex-1",
+                  startingSide === "attacker" && "bg-attacker hover:bg-attacker/90"
                 )}
               >
                 Attacker
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant={startingSide === "defender" ? "default" : "ghost"}
+                size="sm"
                 onClick={() => setStartingSide("defender")}
                 className={cn(
-                  "flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200",
-                  startingSide === "defender"
-                    ? "bg-sky-500 text-neutral-950 shadow-lg"
-                    : "text-neutral-400 hover:text-neutral-200"
+                  "flex-1",
+                  startingSide === "defender" && "bg-defender hover:bg-defender/90"
                 )}
               >
                 Defender
-              </button>
+              </Button>
             </div>
           </div>
 
-          {/* Create lobby — primary amber action */}
-          <Button
-            size="lg"
-            className={cn(
-              "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-              "bg-amber-500 text-neutral-950",
-              "hover:bg-amber-400 active:scale-[0.98]",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              "transition-all duration-200",
-              "shadow-[0_0_24px_-4px_rgba(245,158,11,0.3)]"
-            )}
-            onClick={handleCreate}
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="size-4 border-2 border-neutral-700 border-t-neutral-950 rounded-full animate-spin" />
-                Creating…
-              </span>
-            ) : (
-              <>
-                <svg
-                  className="size-5 mr-2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Create Lobby
-              </>
-            )}
-          </Button>
-
-          {/* Join lobby */}
-          <Button
-            variant="outline"
-            size="lg"
-            className={cn(
-              "w-full h-14 rounded-2xl text-base font-semibold tracking-wide",
-              "border-neutral-700 text-neutral-200",
-              "hover:bg-neutral-800 hover:border-neutral-600 hover:text-neutral-50",
-              "active:scale-[0.98] transition-all duration-200"
-            )}
-            onClick={() => {
-              logger.info("Landing", "Join modal opened");
-              setShowJoinModal(true);
-              setRoomCode("");
-              setError(null);
-            }}
-            disabled={loading}
-          >
-            <svg
-              className="size-5 mr-2"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-              <polyline points="10 17 15 12 10 7" />
-              <line x1="15" y1="12" x2="3" y2="12" />
-            </svg>
-            Join Lobby
-          </Button>
-
-          {/* Rejoin — ghost, only shown when there's a stored session */}
-          {rejoinCode && (
+          {/* Create lobby — primary red-orange action */}
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
             <Button
-              variant="ghost"
               size="lg"
               className={cn(
-                "w-full h-12 rounded-xl text-sm font-medium text-neutral-500",
-                "hover:bg-neutral-800 hover:text-neutral-300",
-                "active:scale-[0.98] transition-all duration-200",
-                "animate-in fade-in duration-300"
+                "w-full h-14 rounded-lg text-base font-bold tracking-wide",
+                "bg-primary text-primary-foreground",
+                "hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "transition-all duration-150",
+                "shadow-[0_0_24px_-4px_var(--primary)]"
               )}
-              onClick={handleRejoin}
+              onClick={handleCreate}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Creating…
+                </span>
+              ) : (
+                <>
+                  <PlusIcon className="size-5 mr-2" />
+                  Create Lobby
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Join lobby */}
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
+            <Button
+              variant="outline"
+              size="lg"
+              className={cn(
+                "w-full h-14 rounded-lg text-base font-semibold tracking-wide",
+                "border-border text-foreground",
+                "hover:bg-muted hover:border-border",
+                "active:scale-[0.98] transition-all duration-150"
+              )}
+              onClick={() => {
+                logger.info("Landing", "Join modal opened");
+                setShowJoinModal(true);
+                setRoomCode("");
+                setError(null);
+              }}
               disabled={loading}
             >
               <svg
-                className="size-4 mr-2"
+                className="size-5 mr-2"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -274,33 +241,44 @@ export default function HomePage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                <path d="M8 16H3v5" />
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
               </svg>
-              Rejoin Lobby ({rejoinCode})
+              Join Lobby
             </Button>
+          </div>
+
+          {/* Rejoin — ghost, only shown when there's a stored session */}
+          {rejoinCode && (
+            <div className="animate-in fade-in duration-300">
+              <Button
+                variant="ghost"
+                size="lg"
+                className={cn(
+                  "w-full h-12 rounded-lg text-sm font-medium text-muted-foreground",
+                  "hover:bg-muted hover:text-foreground",
+                  "active:scale-[0.98] transition-all duration-150"
+                )}
+                onClick={handleRejoin}
+                disabled={loading}
+              >
+                <RefreshIcon className="size-4 mr-2" />
+                Rejoin Lobby ({rejoinCode})
+              </Button>
+            </div>
           )}
         </div>
 
         {/* Error */}
         {error && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-400/10 border border-red-400/20 animate-in fade-in slide-in-from-bottom-1 duration-200">
-            <svg
-              className="size-4 text-red-400 flex-shrink-0"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <p className="text-sm text-red-400 text-center">{error}</p>
+          <div
+            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-bottom-1 duration-200"
+            role="alert"
+            aria-live="polite"
+          >
+             <AlertIcon className="size-4 text-destructive flex-shrink-0" />
+            <p className="text-sm text-destructive text-center">{error}</p>
           </div>
         )}
       </main>
@@ -315,19 +293,19 @@ export default function HomePage() {
         >
           <div
             className={cn(
-              "w-full max-w-sm bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl",
+              "w-full max-w-sm bg-popover border border-border rounded-xl p-6 shadow-lg",
               "animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
             )}
           >
-            <h2 className="text-lg font-bold text-neutral-50 mb-1">
+            <h2 className="text-lg font-bold text-foreground mb-1">
               Join Lobby
             </h2>
-            <p className="text-sm text-neutral-400 mb-5">
+            <p className="text-sm text-muted-foreground mb-5">
               Enter the 6-character room code shared by your squad leader.
             </p>
 
             {/* Code input */}
-            <input
+            <Input
               type="text"
               value={roomCode}
               onChange={(e) =>
@@ -336,21 +314,21 @@ export default function HomePage() {
               placeholder="XXXXXX"
               maxLength={6}
               className={cn(
-                "w-full h-14 text-center text-2xl font-mono font-bold tracking-[0.3em] uppercase rounded-xl",
-                "bg-neutral-950 border-2 transition-all duration-200 mb-5",
-                "placeholder:text-neutral-700 placeholder:tracking-normal",
-                "focus:outline-none focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20",
+                "h-14 text-center text-2xl font-mono font-bold tracking-[0.3em] uppercase rounded-xl",
+                "bg-muted border-2 transition-all duration-150 mb-5",
+                "placeholder:text-muted-foreground/30 placeholder:tracking-normal",
                 error
-                  ? "border-red-400/60 focus:border-red-400 focus:ring-red-400/20"
-                  : "border-neutral-700 focus:border-amber-500/60 focus:ring-amber-500/20",
-                "hover:border-neutral-600"
+                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
+                  : "border-border focus:border-primary focus:ring-primary/20",
+                "hover:border-foreground/20"
               )}
               autoFocus
+              aria-label="Room code"
             />
 
             {/* Inline error inside modal */}
             {error && (
-              <p className="text-sm text-red-400 mb-4 text-center animate-in fade-in slide-in-from-top-1 duration-200">
+              <p className="text-sm text-destructive mb-4 text-center animate-in fade-in slide-in-from-top-1 duration-200">
                 {error}
               </p>
             )}
@@ -361,9 +339,9 @@ export default function HomePage() {
                 variant="ghost"
                 size="lg"
                 className={cn(
-                  "flex-1 h-12 rounded-xl text-sm font-medium text-neutral-400",
-                  "hover:bg-neutral-800 hover:text-neutral-200",
-                  "active:scale-[0.98] transition-all duration-200"
+                  "flex-1 h-12 rounded-lg text-sm font-medium text-muted-foreground",
+                  "hover:bg-muted hover:text-foreground",
+                  "active:scale-[0.98] transition-all duration-150"
                 )}
                 onClick={() => setShowJoinModal(false)}
               >
@@ -372,18 +350,18 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className={cn(
-                  "flex-1 h-12 rounded-xl text-sm font-bold",
-                  "bg-amber-500 text-neutral-950",
-                  "hover:bg-amber-400 active:scale-[0.98]",
+                  "flex-1 h-12 rounded-lg text-sm font-bold",
+                  "bg-primary text-primary-foreground",
+                  "hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]",
                   "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "transition-all duration-200"
+                  "transition-all duration-150"
                 )}
                 onClick={handleJoin}
                 disabled={roomCode.length !== 6 || loading}
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
-                    <div className="size-4 border-2 border-neutral-700 border-t-neutral-950 rounded-full animate-spin" />
+                    <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                     Joining…
                   </span>
                 ) : (

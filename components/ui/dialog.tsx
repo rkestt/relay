@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { XIcon } from "@/components/icons";
 
 // ──────────────────────────────────────────────────────
 // Custom Dialog (using native HTML + portal pattern)
@@ -61,6 +62,24 @@ function DialogTrigger({ children, className, ...props }: React.ButtonHTMLAttrib
 
 function DialogContent({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const { open, onOpenChange } = useDialogContext();
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [isExiting, setIsExiting] = React.useState(false);
+
+  // Handle open/close with animation
+  React.useEffect(() => {
+    if (open) {
+      setIsVisible(true);
+      setIsExiting(false);
+    } else if (isVisible) {
+      // Trigger exit animation
+      setIsExiting(true);
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+        setIsExiting(false);
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [open, isVisible]);
 
   // Close on backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -69,15 +88,15 @@ function DialogContent({ children, className, ...props }: React.HTMLAttributes<H
 
   // Close on Escape
   React.useEffect(() => {
-    if (!open) return;
+    if (!isVisible) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onOpenChange(false);
     };
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [open, onOpenChange]);
+  }, [isVisible, onOpenChange]);
 
-  if (!open) return null;
+  if (!isVisible) return null;
 
   return (
     <div
@@ -86,13 +105,18 @@ function DialogContent({ children, className, ...props }: React.HTMLAttributes<H
       {...props}
     >
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" />
+      <div
+        className={cn(
+          "fixed inset-0 bg-background/80 backdrop-blur-sm",
+          isExiting ? "animate-fade-out" : "animate-fade-in"
+        )}
+      />
 
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-2xl border border-border bg-popover p-6 shadow-2xl",
-          "animate-in zoom-in-95 fade-in duration-200",
+          "relative z-10 w-full max-w-lg rounded-xl border border-border bg-popover p-6 shadow-3",
+          isExiting ? "animate-scale-out" : "animate-scale-in",
           className
         )}
       >
@@ -108,7 +132,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h2
     ref={ref}
-    className={cn("text-lg font-semibold text-popover-foreground", className)}
+    className={cn("text-h3 font-semibold text-popover-foreground", className)}
     {...props}
   />
 ));
@@ -131,17 +155,20 @@ function DialogClose({ children, className, ...props }: React.ButtonHTMLAttribut
   return (
     <button
       type="button"
+      aria-label="Close"
       className={cn(
-        "mt-4 inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium",
-        "text-foreground hover:bg-muted transition-colors",
-        "focus:outline-none focus:ring-2 focus:ring-ring/50",
+        "absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg",
+        "text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         "disabled:pointer-events-none disabled:opacity-50",
         className
       )}
       onClick={() => onOpenChange(false)}
       {...props}
     >
-      {children ?? "Close"}
+      {children ?? (
+        <XIcon className="size-4" />
+      )}
     </button>
   );
 }

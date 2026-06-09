@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LogPanel } from "@/components/debug/LogPanel";
+import UserMenu from "@/components/auth/UserMenu";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,10 +42,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-50">
-        {children}
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <UserMenu />
+        <PageTransition>{children}</PageTransition>
         <LogPanel />
       </body>
     </html>
