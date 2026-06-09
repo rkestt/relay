@@ -160,6 +160,8 @@ services:
     container_name: realtime-dev.supabase-realtime
     image: supabase/realtime:v2.102.3
     restart: unless-stopped
+    ports:
+      - 4000:4000
     depends_on:
       db:
         condition: service_healthy
