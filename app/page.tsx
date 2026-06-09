@@ -14,13 +14,15 @@ export default function HomePage() {
   const router = useRouter();
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [roomCode, setRoomCode] = useState("");
-  const [rejoinCode, setRejoinCode] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem(ROOM_CODE_KEY);
-    } catch {
-      return null;
+  const [rejoinCode, setRejoinCode] = useState<string | null>(null);
+
+  // Read rejoin code from localStorage after mount (avoid hydration mismatch)
+  useEffect(() => {
+    const stored = localStorage.getItem(ROOM_CODE_KEY);
+    if (stored) {
+      setRejoinCode(stored);
     }
-  });
+  }, []);
   const [startingSide, setStartingSide] = useState<"attacker" | "defender">("attacker");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
