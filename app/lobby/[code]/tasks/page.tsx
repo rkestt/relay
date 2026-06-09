@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ export default function TasksPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
+  const initialized = useRef(false);
 
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
@@ -248,9 +249,13 @@ export default function TasksPage({
     loadTasks(lobbyId);
   }, [lobbyId, loadTasks]);
 
-  // Refresh on realtime / heartbeat events
+  // Refresh on realtime / heartbeat events (skip first run — already fetched on mount)
   useEffect(() => {
     if (!lobbyId) return;
+    if (!initialized.current) {
+      initialized.current = true;
+      return;
+    }
     loadTasks(lobbyId);
   }, [lastEventAt, lastSync, lobbyId, loadTasks]);
 

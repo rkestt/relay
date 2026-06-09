@@ -196,12 +196,19 @@ export default function SubmitStrategyPage({
       setRawFiles((prev) => [...prev, ...files]);
 
       const newPreviews: string[] = [];
+      let errorCount = 0;
       for (const file of files) {
         const reader = new FileReader();
         reader.onload = () => {
           newPreviews.push(reader.result as string);
           if (newPreviews.length === files.length) {
             setImagePreviews((prev) => [...prev, ...newPreviews]);
+            setCompressing(false);
+          }
+        };
+        reader.onerror = () => {
+          errorCount++;
+          if (errorCount + newPreviews.length === files.length) {
             setCompressing(false);
           }
         };

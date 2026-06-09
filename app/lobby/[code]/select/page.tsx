@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
@@ -57,6 +57,12 @@ export default function SelectPage({
   const [operatorSearch, setOperatorSearch] = useState("");
   const [activeRoleFilter, setActiveRoleFilter] = useState<string | null>(null);
 
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
 
@@ -205,7 +211,7 @@ export default function SelectPage({
       logger.info("SelectPage", "Selection locked successfully");
       setLocked(true);
       // Redirect to tasks after brief success display
-      setTimeout(() => router.push(`/lobby/${code}/tasks`), 1500);
+      timerRef.current = setTimeout(() => router.push(`/lobby/${code}/tasks`), 1500);
     } catch (err) {
       logger.error("SelectPage", "Lock selection failed", err);
       setError(err instanceof Error ? err.message : "Failed to lock selection");

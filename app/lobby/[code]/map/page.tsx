@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,13 @@ export default function LobbyMapPage({
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   // Resolve params
   useEffect(() => {
@@ -124,7 +131,7 @@ export default function LobbyMapPage({
       logger.info("LobbyMapPage", "Map set successfully, redirecting to lobby", { code });
       setConfirmed(true);
       // Brief feedback before redirect
-      setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         router.push(`/lobby/${code}`);
       }, 800);
     } catch (err) {
@@ -267,7 +274,7 @@ export default function LobbyMapPage({
                   }}
                   disabled={submitting || confirmed}
                   className={cn(
-                    "flex flex-col rounded-2xl overflow-hidden border text-left",
+                    "group flex flex-col rounded-2xl overflow-hidden border text-left",
                     "transition-all duration-200",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     "active:scale-[0.98]",

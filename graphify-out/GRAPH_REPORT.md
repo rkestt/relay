@@ -1,15 +1,16 @@
-# Graph Report - .  (2026-05-23)
+# Graph Report - r6Hub  (2026-06-09)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 157 files · ~223,814 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 741 nodes · 1020 edges · 48 communities (44 shown, 4 thin omitted)
+- 1122 nodes · 1537 edges · 87 communities (80 shown, 7 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `41039354`
+- Built from commit: `a801900a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -59,40 +60,76 @@
 - [[_COMMUNITY_Community 42|Community 42]]
 - [[_COMMUNITY_Community 44|Community 44]]
 - [[_COMMUNITY_Community 45|Community 45]]
+- [[_COMMUNITY_Community 48|Community 48]]
+- [[_COMMUNITY_Community 49|Community 49]]
+- [[_COMMUNITY_Community 50|Community 50]]
+- [[_COMMUNITY_Community 51|Community 51]]
+- [[_COMMUNITY_Community 52|Community 52]]
+- [[_COMMUNITY_Community 53|Community 53]]
+- [[_COMMUNITY_Community 54|Community 54]]
+- [[_COMMUNITY_Community 55|Community 55]]
+- [[_COMMUNITY_Community 56|Community 56]]
+- [[_COMMUNITY_Community 57|Community 57]]
+- [[_COMMUNITY_Community 58|Community 58]]
+- [[_COMMUNITY_Community 59|Community 59]]
+- [[_COMMUNITY_Community 60|Community 60]]
+- [[_COMMUNITY_Community 61|Community 61]]
+- [[_COMMUNITY_Community 62|Community 62]]
+- [[_COMMUNITY_Community 63|Community 63]]
+- [[_COMMUNITY_Community 64|Community 64]]
+- [[_COMMUNITY_Community 65|Community 65]]
+- [[_COMMUNITY_Community 66|Community 66]]
+- [[_COMMUNITY_Community 67|Community 67]]
+- [[_COMMUNITY_Community 68|Community 68]]
+- [[_COMMUNITY_Community 69|Community 69]]
+- [[_COMMUNITY_Community 70|Community 70]]
+- [[_COMMUNITY_Community 71|Community 71]]
+- [[_COMMUNITY_Community 72|Community 72]]
+- [[_COMMUNITY_Community 73|Community 73]]
+- [[_COMMUNITY_Community 74|Community 74]]
+- [[_COMMUNITY_Community 75|Community 75]]
+- [[_COMMUNITY_Community 76|Community 76]]
+- [[_COMMUNITY_Community 77|Community 77]]
+- [[_COMMUNITY_Community 78|Community 78]]
+- [[_COMMUNITY_Community 79|Community 79]]
+- [[_COMMUNITY_Community 80|Community 80]]
+- [[_COMMUNITY_Community 84|Community 84]]
+- [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `cn()` - 44 edges
-2. `Logger` - 43 edges
+1. `cn()` - 66 edges
+2. `Logger` - 48 edges
 3. `createClient()` - 31 edges
-4. `compilerOptions` - 16 edges
-5. `Decisions` - 16 edges
-6. `What You Must Do When Invoked` - 15 edges
-7. `Button()` - 14 edges
-8. `/graphify` - 14 edges
-9. `createBrowserClient()` - 12 edges
-10. `useLobbyRealtime()` - 11 edges
+4. `Button()` - 17 edges
+5. `compilerOptions` - 16 edges
+6. `Decisions` - 16 edges
+7. `What You Must Do When Invoked` - 15 edges
+8. `createBrowserClient()` - 14 edges
+9. `/graphify` - 14 edges
+10. `Test Autonomia Agente - Report Finale` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `cn()` --calls--> `clsx`  [INFERRED]
   lib/utils.ts → package.json
-- `LoadingSpinner()` --calls--> `cn()`  [EXTRACTED]
-  components/ui/LoadingSpinner.tsx → lib/utils.ts
-- `HomePage()` --calls--> `cn()`  [EXTRACTED]
-  app/page.tsx → lib/utils.ts
-- `POST()` --calls--> `createClient()`  [EXTRACTED]
-  app/api/lobby/join/route.ts → lib/supabase/server.ts
-- `POST()` --calls--> `createClient()`  [EXTRACTED]
-  app/api/lobby/[id]/assign-tasks/route.ts → lib/supabase/server.ts
+- `LobbyMapPage()` --calls--> `cn()`  [EXTRACTED]
+  app/lobby/[code]/map/page.tsx → lib/utils.ts
+- `SubmitStrategyPage()` --calls--> `cn()`  [EXTRACTED]
+  app/lobby/[code]/submit/page.tsx → lib/utils.ts
+- `LoginPage()` --calls--> `cn()`  [EXTRACTED]
+  app/login/page.tsx → lib/utils.ts
+- `SignupPage()` --calls--> `cn()`  [EXTRACTED]
+  app/signup/page.tsx → lib/utils.ts
 
-## Communities (48 total, 4 thin omitted)
+## Communities (87 total, 7 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.06
-Nodes (70): HomePage(), BansPage(), LobbyBanWithOperator, LobbyState, LobbyPage(), LobbyState, LobbyStateResponse, useHeartbeat() (+62 more)
+Cohesion: 0.15
+Nodes (19): BackArrowIcon(), DetailData, FeedTask, LobbyState, SortMode, getFirstImage(), StrategyCard(), StrategyCardProps (+11 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.08
-Nodes (29): POST(), POST(), GET(), POST(), GET(), POST(), POST(), formatTime() (+21 more)
+Cohesion: 0.18
+Nodes (6): formatTime(), generateId(), getStoredLogs(), isClient(), Logger, saveLogs()
 
 ### Community 2 - "Community 2"
 Cohesion: 0.05
@@ -103,8 +140,8 @@ Cohesion: 0.06
 Nodes (34): code:block1 (/graphify                                             # full), code:bash ($(cat graphify-out/.graphify_python) -c "), code:bash ($(cat graphify-out/.graphify_python) -c "), code:bash (if [ ! -f graphify-out/.graphify_extract.json ]; then), code:bash ($(cat graphify-out/.graphify_python) -c "), code:bash ($(cat graphify-out/.graphify_python) -c "), code:bash ($(cat graphify-out/.graphify_python) -c "), code:bash ($(cat graphify-out/.graphify_python) -c ") (+26 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.06
-Nodes (33): dependencies, @base-ui/react, browser-image-compression, class-variance-authority, clsx, @ducanh2912/next-pwa, lucide-react, next (+25 more)
+Cohesion: 0.05
+Nodes (40): dependencies, @base-ui/react, browser-image-compression, class-variance-authority, clsx, @ducanh2912/next-pwa, lucide-react, next (+32 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.06
@@ -163,8 +200,8 @@ Cohesion: 0.17
 Nodes (11): Check for context, code:block1 (┌─────────────────────────────────────────┐), code:bash (openspec list --json), Ending Discovery, Guardrails, OpenSpec Awareness, The Stance, What You Don't Have To Do (+3 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.18
-Nodes (9): geistMono, geistSans, metadata, viewport, LEVEL_BG, LEVEL_COLORS, LogPanel(), LogEntry (+1 more)
+Cohesion: 0.12
+Nodes (14): geistMono, geistSans, metadata, viewport, LEVEL_BG, LEVEL_COLORS, LogPanel(), mockLogs (+6 more)
 
 ### Community 20 - "Community 20"
 Cohesion: 0.17
@@ -188,7 +225,7 @@ Nodes (10): ADDED Requirements, Requirement: Client recovers from disconnection 
 
 ### Community 25 - "Community 25"
 Cohesion: 0.24
-Nodes (9): DialogClose(), DialogContent(), DialogContext, DialogContextValue, DialogDescription, DialogProps, DialogTitle, DialogTrigger() (+1 more)
+Nodes (12): Dialog(), DialogClose(), DialogContent(), DialogContext, DialogContextValue, DialogDescription, DialogProps, DialogTitle (+4 more)
 
 ### Community 26 - "Community 26"
 Cohesion: 0.20
@@ -215,12 +252,12 @@ Cohesion: 0.43
 Nodes (5): config, middleware(), isPublicPath(), publicPaths, updateSession()
 
 ### Community 32 - "Community 32"
-Cohesion: 0.29
+Cohesion: 0.46
 Nodes (6): Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle
 
 ### Community 33 - "Community 33"
-Cohesion: 0.33
-Nodes (4): labelMap, LoadingSpinner(), LoadingSpinnerProps, sizeMap
+Cohesion: 0.32
+Nodes (6): labelMap, LoadingScreen(), LoadingSpinner(), LoadingSpinnerProps, sizeMap, { rerender }
 
 ### Community 34 - "Community 34"
 Cohesion: 0.33
@@ -231,8 +268,8 @@ Cohesion: 0.33
 Nodes (5): code:bash (openspec status --change "<name>" --json), code:bash (openspec instructions apply --change "<name>" --json), code:block3 (## Implementing: <change-name> (schema: <schema-name>)), code:block4 (## Implementation Complete), code:block5 (## Implementation Paused)
 
 ### Community 36 - "Community 36"
-Cohesion: 0.33
-Nodes (5): DELEGA SEMPRE AI SUBAGENTS, graphify, This is NOT the Next.js you know, USA SEMPRE /CAVEMAN, USA SEMPRE LE SKILL DISPONIBILI
+Cohesion: 0.17
+Nodes (11): Browser Testing (agent-browser), code:bash (agent-browser --init-script test-scripts/confirm-bypass.js o), DELEGA SEMPRE AI SUBAGENTS, Flow Login Test, For @explorer, graphify, Local Project Info, Setup Infrastruttura Locale (+3 more)
 
 ### Community 37 - "Community 37"
 Cohesion: 0.40
@@ -250,25 +287,157 @@ Nodes (4): code:bash (openspec new change "<name>"), code:bash (openspec status 
 Cohesion: 0.50
 Nodes (3): code:bash (mkdir -p openspec/changes/archive), code:bash (mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-), code:block3 (## Archive Complete)
 
+### Community 48 - "Community 48"
+Cohesion: 0.06
+Nodes (33): 1. Primo setup, 2. Avvio successivo, 3. Stop, 4. Reset completo (cancella dati), Accessi, Aggiornare .env.local per produzione, Applicare Migrations, code:powershell (.\scripts\setup-supabase.ps1) (+25 more)
+
+### Community 49 - "Community 49"
+Cohesion: 0.06
+Nodes (30): 1. Login Flow ✅, 1. Migrations Incomplete (CRITICO) ✅ FIXATO, 2. Agent-Browser Instabilità (MEDIO) ⚠️ PARZIALE, 2. Home Page ✅, 3. Create Lobby ✅ (dopo fix), 4. Lobby Waiting Page ✅, 5. Migrations System ✅, Autonomia Complessiva: **75%** (+22 more)
+
+### Community 50 - "Community 50"
+Cohesion: 0.18
+Nodes (10): CheckIcon(), LobbyMapPage(), Button(), buttonVariants, btn, EmptyState(), EmptyStateProps, svg (+2 more)
+
+### Community 51 - "Community 51"
+Cohesion: 0.16
+Nodes (20): BansPage(), LobbyBanWithOperator, LobbyState, LobbyPage(), LobbyStateResponse, useHeartbeat(), useLobbyRealtime(), usePresence() (+12 more)
+
+### Community 52 - "Community 52"
+Cohesion: 0.09
+Nodes (21): 1. Migrations Incomplete (CRITICO), 2. Agent-Browser Instabile, 3. Start Game Problema, ⏸️ Ban/Vote System, Bug Trovati, Conclusioni, ⚠️ Create Lobby, Dati Seed Applicati (+13 more)
+
+### Community 53 - "Community 53"
+Cohesion: 0.14
+Nodes (14): POST(), mockSupabaseClient, params, updateQuery, POST(), GET(), POST(), deleteQuery (+6 more)
+
+### Community 54 - "Community 54"
+Cohesion: 0.15
+Nodes (15): getTeamSide(), actual, expected, rounds, generateRoomCode(), getTeamSide(), POST(), POST() (+7 more)
+
+### Community 55 - "Community 55"
+Cohesion: 0.12
+Nodes (15): calls, delay, fakeBan, fakeMember, fakeRound, fakeSelection, handler, mockChannel (+7 more)
+
+### Community 56 - "Community 56"
+Cohesion: 0.17
+Nodes (11): XIcon(), MapViewer(), MapViewerProps, HotspotItem, SubmitStrategyPage(), uid(), uploadImage(), Site (+3 more)
+
+### Community 57 - "Community 57"
+Cohesion: 0.15
+Nodes (12): insertProfileQuery, lobbyInsert, lobbyQuery, membersInsert, membersQuery, mockSupabaseClient, profileInsertQuery, profileMock (+4 more)
+
+### Community 58 - "Community 58"
+Cohesion: 0.22
+Nodes (5): LoginPage(), SignupPage(), createBrowserClient(), Input, ref
+
+### Community 59 - "Community 59"
+Cohesion: 0.17
+Nodes (11): assignInsert, existingQuery, existingResult, lobbyQuery, mockSupabaseClient, params, roundQuery, selectionsQuery (+3 more)
+
+### Community 60 - "Community 60"
+Cohesion: 0.17
+Nodes (8): mockMemberNoProfile, mockMemberWithProfile, mockStateResponse, removeEventListenerSpy, { rerender }, { result }, storeActions, { unmount }
+
+### Community 61 - "Community 61"
+Cohesion: 0.18
+Nodes (12): GET(), POST(), adminHotspotsInsert, adminImagesInsert, adminQueueInsert, adminStrategyInsert, adminTagsInsert, mockAdminClient (+4 more)
+
+### Community 62 - "Community 62"
+Cohesion: 0.25
+Nodes (7): bansQuery, lobbyQuery, membersQuery, mockSupabaseClient, params, roundQuery, selectionsQuery
+
+### Community 63 - "Community 63"
+Cohesion: 0.20
+Nodes (9): assignmentQuery, downCountQuery, membershipQuery, mockSupabaseClient, params, upCountQuery, voteDelete, voteTableMock (+1 more)
+
+### Community 64 - "Community 64"
+Cohesion: 0.20
+Nodes (9): assignmentWithMultipleImages, baseAssignment, card, img, noImageAssignment, onClick, placeholderSvg, removedAssignment (+1 more)
+
+### Community 65 - "Community 65"
+Cohesion: 0.20
+Nodes (5): ErrorBoundary, onRetry, { rerender }, ThrowsOnRender, user
+
+### Community 66 - "Community 66"
+Cohesion: 0.31
+Nodes (7): escapeHtml(), GET(), htmlPage(), markUsed, mockAdminClient, queueQuery, strategyUpdate
+
+### Community 67 - "Community 67"
+Cohesion: 0.29
+Nodes (6): POST(), lobbyQuery, mockSupabaseClient, params, roundQuery, selectionUpsert
+
+### Community 68 - "Community 68"
+Cohesion: 0.29
+Nodes (6): POST(), lobbyQuery, mapQuery, mockSupabaseClient, params, updateQuery
+
+### Community 69 - "Community 69"
+Cohesion: 0.29
+Nodes (6): POST(), lobbyQuery, memberError, membersQuery, mockQuery, mockSupabaseClient
+
+### Community 70 - "Community 70"
+Cohesion: 0.40
+Nodes (4): Hotspot, hotspots, img, onPlaceHotspot
+
+### Community 71 - "Community 71"
+Cohesion: 0.19
+Nodes (10): ArrowRightIcon(), UsersIcon(), LobbyState, SelectionStep, SkeletonCard(), SkeletonCardProps, SkeletonGrid(), avatar (+2 more)
+
+### Community 73 - "Community 73"
+Cohesion: 0.24
+Nodes (8): GET(), POST(), banInsert, bansQuery, lobbyQuery, mockSupabaseClient, params, roundQuery
+
+### Community 74 - "Community 74"
+Cohesion: 0.40
+Nodes (4): lobbyQuery, mockSupabaseClient, params, updateQuery
+
+### Community 75 - "Community 75"
+Cohesion: 0.08
+Nodes (25): Accessibility, Background & Surface, Border Radius, Buttons, Cards, Color Strategy, Component Patterns, Dark Mode Only (+17 more)
+
+### Community 76 - "Community 76"
+Cohesion: 0.40
+Nodes (4): OfflineBanner(), OfflineBannerProps, onDismiss, user
+
+### Community 78 - "Community 78"
+Cohesion: 0.40
+Nodes (3): MockChannel, MockQueryBuilder, MockSupabaseClient
+
+### Community 79 - "Community 79"
+Cohesion: 0.25
+Nodes (7): Anti-References, Brand Tone, Product Purpose, r6Hub — Product Context, Register, Strategic Principles, Users
+
+### Community 80 - "Community 80"
+Cohesion: 0.50
+Nodes (3): LUA_AUTH_EXPR, LUA_RT_WS_EXPR, kong-entrypoint.sh script
+
+### Community 84 - "Community 84"
+Cohesion: 0.23
+Nodes (16): HomePage(), LobbyState, AlertIcon(), CopyIcon(), CrownIcon(), IconProps, LockIcon(), MapIcon() (+8 more)
+
+### Community 85 - "Community 85"
+Cohesion: 0.40
+Nodes (4): err, exported, logs, parsed
+
 ## Knowledge Gaps
-- **408 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+403 more)
+- **658 isolated node(s):** `$schema`, `style`, `rsc`, `tsx`, `config` (+653 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 0` to `Community 32`, `Community 33`, `Community 4`, `Community 19`, `Community 25`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Why does `Logger` connect `Community 1` to `Community 0`, `Community 19`, `Community 37`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `Logger` connect `Community 1` to `Community 0`, `Community 66`, `Community 67`, `Community 68`, `Community 69`, `Community 37`, `Community 71`, `Community 73`, `Community 50`, `Community 51`, `Community 84`, `Community 53`, `Community 54`, `Community 19`, `Community 56`, `Community 85`, `Community 58`, `Community 61`?**
+  _High betweenness centrality (0.059) - this node is a cross-community bridge._
+- **Why does `cn()` connect `Community 84` to `Community 0`, `Community 32`, `Community 33`, `Community 65`, `Community 4`, `Community 37`, `Community 71`, `Community 76`, `Community 50`, `Community 51`, `Community 19`, `Community 56`, `Community 25`, `Community 58`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **What connects `$schema`, `style`, `rsc` to the rest of the system?**
-  _408 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.05742574257425743 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
-  _Cohesion score 0.07759562841530054 - nodes in this community are weakly interconnected._
+  _658 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.05714285714285714 - nodes in this community are weakly interconnected._
+- **Should `Community 4` be split into smaller, more focused modules?**
+  _Cohesion score 0.04878048780487805 - nodes in this community are weakly interconnected._
+- **Should `Community 5` be split into smaller, more focused modules?**
+  _Cohesion score 0.0625 - nodes in this community are weakly interconnected._

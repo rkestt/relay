@@ -54,6 +54,7 @@ export default function LobbyPage({
   const [copied, setCopied] = useState(false);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [showStartConfirm, setShowStartConfirm] = useState(false);
 
   const { isLeader, setIsLeader, setLobbyId: storeSetLobbyId, setLobbyCode: storeSetLobbyCode } =
     useLobbyStore();
@@ -69,7 +70,7 @@ export default function LobbyPage({
     const supabase = createBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setCurrentUserId(data.user.id);
-    });
+    }, (reason) => logger.error("LobbyPage", "Session fetch failed", reason));
   }, []);
 
   // Fetch operators
@@ -77,31 +78,37 @@ export default function LobbyPage({
     const supabase = createBrowserClient();
     supabase.from("operators").select("*").then(({ data }) => {
       if (data) setOperators(data as Operator[]);
-    });
+    }, (reason) => logger.error("LobbyPage", "Operators fetch failed", reason));
   }, []);
 
   const loadLobby = useCallback(async (roomCode: string) => {
     logger.debug("LobbyPage", "loadLobby start", { roomCode });
-    const supabase = createBrowserClient();
+    try {
+      const supabase = createBrowserClient();
 
-    const { data: lobby } = await supabase
-      .from("lobbies")
-      .select("id, room_code, leader_id")
-      .eq("room_code", roomCode)
-      .single();
+      const { data: lobby } = await supabase
+        .from("lobbies")
+        .select("id, room_code, leader_id")
+        .eq("room_code", roomCode)
+        .single();
 
-    if (!lobby) {
-      logger.warn("LobbyPage", "loadLobby error - lobby not found", { roomCode });
-      setError("Lobby not found.");
+      if (!lobby) {
+        logger.warn("LobbyPage", "loadLobby error - lobby not found", { roomCode });
+        setError("Lobby not found.");
+        setLoading(false);
+        return;
+      }
+
+      setLobbyId(lobby.id);
+      storeSetLobbyId(lobby.id);
+      storeSetLobbyCode(roomCode);
+
+      localStorage.setItem(ROOM_CODE_KEY, roomCode);
+    } catch (err) {
+      logger.error("LobbyPage", "loadLobby failed", err);
+      setError(err instanceof Error ? err.message : "Failed to load lobby");
       setLoading(false);
-      return;
     }
-
-    setLobbyId(lobby.id);
-    storeSetLobbyId(lobby.id);
-    storeSetLobbyCode(roomCode);
-
-    localStorage.setItem(ROOM_CODE_KEY, roomCode);
   }, [storeSetLobbyId, storeSetLobbyCode]);
 
   const refreshState = useCallback(async (lid: string) => {
@@ -143,7 +150,7 @@ export default function LobbyPage({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard not available
+      setError("Failed to copy room code");
     }
   }, [code]);
 
@@ -186,7 +193,8 @@ export default function LobbyPage({
   const handleStartGame = useCallback(async () => {
     if (!lobbyId) return;
     if (state?.members.length === 1) {
-      if (!confirm("You are the only player. Start anyway?")) return;
+      setShowStartConfirm(true);
+      return;
     }
     logger.info("LobbyPage", "Start game click", { lobbyId });
     try {
@@ -202,6 +210,23 @@ export default function LobbyPage({
       setError(err instanceof Error ? err.message : "Failed to start game");
     }
   }, [lobbyId, refreshState, state?.members.length]);
+
+  const confirmStartGame = useCallback(async () => {
+    if (!lobbyId) return;
+    setShowStartConfirm(false);
+    logger.info("LobbyPage", "Start game confirmed (solo)", { lobbyId });
+    try {
+      const res = await fetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error);
+      }
+      await refreshState(lobbyId);
+    } catch (err) {
+      logger.error("LobbyPage", "Start game failed", err);
+      setError(err instanceof Error ? err.message : "Failed to start game");
+    }
+  }, [lobbyId, refreshState]);
 
   const handleSetBans = () => {
     logger.info("LobbyPage", "Set bans click", { code });
@@ -796,6 +821,24 @@ export default function LobbyPage({
             </Button>
             <Button variant="destructive" onClick={confirmLeave}>
               Leave
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Start Game Confirmation Dialog ─────────────────── */}
+      <Dialog open={showStartConfirm} onOpenChange={setShowStartConfirm}>
+        <DialogContent>
+          <DialogTitle>Start Game</DialogTitle>
+          <DialogDescription>
+            You are the only player in the lobby. Do you want to start anyway?
+          </DialogDescription>
+          <div className="flex gap-3 mt-4 justify-end">
+            <Button variant="ghost" onClick={() => setShowStartConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="default" onClick={confirmStartGame}>
+              Start Anyway
             </Button>
           </div>
         </DialogContent>

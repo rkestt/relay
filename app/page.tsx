@@ -126,6 +126,7 @@ export default function HomePage() {
         <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
           <div className="flex items-center justify-center w-16 h-16 rounded-2xl border border-border bg-card">
             <svg
+              aria-hidden="true"
               className="size-8 text-primary"
               viewBox="0 0 24 24"
               fill="none"
@@ -235,6 +236,7 @@ export default function HomePage() {
               disabled={loading}
             >
               <svg
+                aria-hidden="true"
                 className="size-5 mr-2"
                 viewBox="0 0 24 24"
                 fill="none"

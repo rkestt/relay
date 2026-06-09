@@ -21,6 +21,8 @@ Mini istruzioni per far girare l'app senza pensarci troppo.
 | **Start produzione** | `npm run start` |
 | **Lint** | `npm run lint` |
 
+docker compose --env-file .env.supabase up -d
+
 - Il dev server parte su **http://localhost:3000**
 - Se la 3000 è occupata, Next.js usa la 3001 automaticamente
 
