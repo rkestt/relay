@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLobbyStore } from "@/stores/lobbyStore";
 import { createBrowserClient } from "@/lib/supabase/client";
@@ -11,8 +11,10 @@ import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
-import type { LobbyMember, Profile } from "@/types";
+import type { LobbyMember, Operator, Profile } from "@/types";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AlertIcon, CheckIcon, CopyIcon, CrownIcon, MapIcon, UsersIcon } from "@/components/icons";
+import Image from "next/image";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
 
@@ -50,6 +52,8 @@ export default function LobbyPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [operators, setOperators] = useState<Operator[]>([]);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
   const { isLeader, setIsLeader, setLobbyId: storeSetLobbyId, setLobbyCode: storeSetLobbyCode } =
     useLobbyStore();
@@ -65,6 +69,14 @@ export default function LobbyPage({
     const supabase = createBrowserClient();
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setCurrentUserId(data.user.id);
+    });
+  }, []);
+
+  // Fetch operators
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase.from("operators").select("*").then(({ data }) => {
+      if (data) setOperators(data as Operator[]);
     });
   }, []);
 
@@ -135,9 +147,14 @@ export default function LobbyPage({
     }
   }, [code]);
 
-  const handleLeave = useCallback(async () => {
+  const handleLeave = useCallback(() => {
     if (!lobbyId) return;
-    if (!confirm("Leave this lobby?")) return;
+    setShowLeaveConfirm(true);
+  }, [lobbyId]);
+
+  const confirmLeave = useCallback(async () => {
+    if (!lobbyId) return;
+    setShowLeaveConfirm(false);
     logger.info("LobbyPage", "Leave lobby", { lobbyId });
     try {
       await fetch(`/api/lobby/${lobbyId}/leave`, { method: "POST" });
@@ -207,7 +224,7 @@ export default function LobbyPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground" aria-busy="true">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex flex-col gap-1.5">
             <div className="h-3 w-16 rounded bg-muted animate-pulse" />
@@ -236,7 +253,7 @@ export default function LobbyPage({
   // ── Error state ──────────────────────────────────────
   if (error || !state) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="h-5 w-24 rounded bg-muted animate-pulse" />
         </header>
@@ -275,9 +292,13 @@ export default function LobbyPage({
   }
 
   const bannedOperatorIds = new Set(state.bans.map((b) => b.operator_id));
+  const operatorMap = useMemo(() =>
+    new Map(operators.map(op => [op.id, op.name])),
+    [operators]
+  );
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div className="flex flex-col gap-1">
@@ -399,6 +420,7 @@ export default function LobbyPage({
                               src={member.profiles.avatar_url}
                               alt={member.profiles.username ?? "User"}
                               fill
+                              sizes="44px"
                               className="object-cover"
                               unoptimized={member.profiles.avatar_url.startsWith('blob:') || member.profiles.avatar_url.startsWith('data:')}
                             />
@@ -544,6 +566,7 @@ export default function LobbyPage({
                               src={ban.operators.icon_url}
                               alt={ban.operators.name}
                               fill
+                              sizes="44px"
                               className="object-contain"
                             />
                           </div>
@@ -594,6 +617,7 @@ export default function LobbyPage({
                               src={member.profiles.avatar_url}
                               alt={member.profiles.username ?? "User"}
                               fill
+                              sizes="44px"
                               className="object-cover"
                               unoptimized={member.profiles.avatar_url.startsWith('blob:') || member.profiles.avatar_url.startsWith('data:')}
                             />
@@ -658,7 +682,7 @@ export default function LobbyPage({
                           </span>
                           <span className="ml-auto text-xs text-muted-foreground">
                             {selection.operator_id
-                              ? `Op: ${selection.operator_id}`
+                              ? `Op: ${operatorMap.get(selection.operator_id) || selection.operator_id}`
                               : selection.map_id
                               ? `Map: ${selection.map_id}`
                               : "Choosing…"}
@@ -758,6 +782,24 @@ export default function LobbyPage({
           </>
         )}
       </div>
+
+      {/* ── Leave Confirmation Dialog ─────────────────────── */}
+      <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>
+        <DialogContent>
+          <DialogTitle>Leave Lobby</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to leave this lobby? You can rejoin with the room code.
+          </DialogDescription>
+          <div className="flex gap-3 mt-4 justify-end">
+            <Button variant="ghost" onClick={() => setShowLeaveConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmLeave}>
+              Leave
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

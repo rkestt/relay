@@ -363,7 +363,7 @@ export default function TasksPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex flex-col gap-1">
             <div className="h-4 w-32 rounded bg-muted animate-pulse" />
@@ -381,7 +381,7 @@ export default function TasksPage({
   // ── Error state ──────────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
@@ -409,7 +409,7 @@ export default function TasksPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>

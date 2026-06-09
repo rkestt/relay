@@ -307,7 +307,7 @@ export default function SubmitStrategyPage({
   // ── Loading state ────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="h-5 w-28 rounded bg-muted animate-pulse" />
           <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
@@ -327,7 +327,7 @@ export default function SubmitStrategyPage({
   // ── Success state ────────────────────────────────
   if (success) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-screen p-6 animate-in fade-in duration-400">
+      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-dvh p-6 animate-in fade-in duration-400">
         <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-[0_0_24px_-4px_oklch(0.70_0.18_145/0.25)]">
           <CheckIcon className="w-8 h-8 text-success animate-in zoom-in duration-300" />
         </div>
@@ -354,7 +354,7 @@ export default function SubmitStrategyPage({
 
   // ── Main form ─────────────────────────────────────
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>

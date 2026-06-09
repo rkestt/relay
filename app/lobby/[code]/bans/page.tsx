@@ -182,7 +182,7 @@ export default function BansPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ──────────────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>

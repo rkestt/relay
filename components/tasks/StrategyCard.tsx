@@ -101,6 +101,7 @@ export function StrategyCard({
               src={thumbnailUrl}
               alt={strategy.title}
               fill
+              sizes="(max-width: 640px) 100vw, 33vw"
               className="object-cover"
               unoptimized={thumbnailUrl.startsWith('blob:') || thumbnailUrl.startsWith('data:')}
             />

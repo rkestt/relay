@@ -76,7 +76,8 @@ export function MapViewer({
                 cy={cy}
                 r={3}
                 fill="none"
-                stroke="rgba(240,240,240,0.35)"
+                stroke="var(--foreground)"
+                strokeOpacity="0.35"
                 strokeWidth={0.8}
               />
               {/* Inner dot */}
@@ -84,18 +85,21 @@ export function MapViewer({
                 cx={cx}
                 cy={cy}
                 r={1.2}
-                fill="rgba(240,240,240,0.9)"
+                fill="var(--foreground)"
+                fillOpacity="0.9"
               />
               {/* Label */}
               {hotspot.label && (
                 <text
                   x={cx + 1.5}
                   y={cy + 0.5}
-                  fill="rgba(240,240,240,0.9)"
+                  fill="var(--foreground)"
+                  fillOpacity="0.9"
                   fontSize={2.5}
                   fontFamily="var(--font-sans)"
                   paintOrder="stroke"
-                  stroke="rgba(0,0,0,0.7)"
+                  stroke="var(--background)"
+                  strokeOpacity="0.7"
                   strokeWidth={0.3}
                 >
                   {hotspot.label}

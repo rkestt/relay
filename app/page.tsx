@@ -115,7 +115,7 @@ export default function HomePage() {
   }, [router, rejoinCode]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
 
       {/* ── Hero ──────────────────────────────────────── */}
       <main className="flex flex-col flex-1 items-center justify-center px-6 py-32 gap-20">

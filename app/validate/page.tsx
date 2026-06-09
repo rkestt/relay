@@ -105,7 +105,7 @@ function ValidateContent() {
   }, [state.status, router]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
         {/* Loading */}
         {state.status === "loading" && (
@@ -208,7 +208,7 @@ export default function ValidatePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-background px-6">
+        <div className="flex min-h-dvh items-center justify-center bg-background px-6">
           <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="size-8 border-2 border-border border-t-foreground rounded-full animate-spin" />

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -53,6 +54,8 @@ export default function SelectPage({
   const [locked, setLocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stepDirection, setStepDirection] = useState<"left" | "right">("right");
+  const [operatorSearch, setOperatorSearch] = useState("");
+  const [activeRoleFilter, setActiveRoleFilter] = useState<string | null>(null);
 
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
@@ -212,14 +215,29 @@ export default function SelectPage({
   }, [lobbyId, selectedMapId, selectedSiteId, selectedOperatorId, router, code]);
 
   const bannedOperatorIds = new Set(lobbyState?.bans.map((b) => b.operator_id) ?? []);
+  const operatorMap = useMemo(() =>
+    new Map(operators.map(op => [op.id, op.name])),
+    [operators]
+  );
 
   const getOperatorTags = (operatorId: string) =>
     operatorTags.filter((t) => t.operator_id === operatorId).map((t) => t.tag);
 
+  const uniqueRoleTags = [...new Set(operatorTags.map((t) => t.tag))];
+
+  const filteredOperators = operators.filter((op) => {
+    const matchesSearch =
+      !operatorSearch ||
+      op.name.toLowerCase().includes(operatorSearch.toLowerCase());
+    const matchesRole =
+      !activeRoleFilter || getOperatorTags(op.id).includes(activeRoleFilter);
+    return matchesSearch && matchesRole;
+  });
+
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
           {["site", "operator"].map((s, i) => (
             <div key={s} className="flex items-center gap-2">
@@ -239,7 +257,7 @@ export default function SelectPage({
   // ── Error state ────────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
@@ -266,7 +284,7 @@ export default function SelectPage({
   // ── Locked success state ─────────────────────────────
   if (locked) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-screen p-6 animate-in fade-in duration-400">
+      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-dvh p-6 animate-in fade-in duration-400">
         <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-[0_0_24px_-4px_oklch(0.70_0.18_145/0.25)]">
           <CheckIcon className="w-8 h-8 text-success animate-in zoom-in duration-300" />
         </div>
@@ -286,7 +304,7 @@ export default function SelectPage({
   const currentStepIndex = steps.indexOf(step);
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Step Indicator ─────────────────────────────── */}
       <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
         {steps.map((s, i) => {
@@ -329,16 +347,26 @@ export default function SelectPage({
             </div>
           );
         })}
-        {lobbyState?.currentRound?.team_side && (
-          <span className={cn(
-            "ml-auto text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded-lg",
-            lobbyState.currentRound.team_side === "attacker"
-              ? "bg-attacker/20 text-attacker"
-              : "bg-defender/20 text-defender"
-          )}>
-            {lobbyState.currentRound.team_side}
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          {lobbyState && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {lobbyState.selections.filter(s => s.locked_at).length}/{lobbyState.members.length}
+              </span>
+              <span>locked in</span>
+            </div>
+          )}
+          {lobbyState?.currentRound?.team_side && (
+            <span className={cn(
+              "text-[10px] font-bold tracking-wider uppercase px-2 py-1 rounded-lg",
+              lobbyState.currentRound.team_side === "attacker"
+                ? "bg-attacker/20 text-attacker"
+                : "bg-defender/20 text-defender"
+            )}>
+              {lobbyState.currentRound.team_side}
+            </span>
+          )}
+        </div>
       </header>
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
@@ -420,6 +448,64 @@ export default function SelectPage({
               Back to Sites
             </button>
 
+            {/* ── Search & Filter ─────────────────────────── */}
+            <div className="flex flex-col gap-3">
+              {/* Search input */}
+              <div className="relative">
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.3-4.3" />
+                </svg>
+                <Input
+                  placeholder="Search operators..."
+                  value={operatorSearch}
+                  onChange={(e) => setOperatorSearch(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+
+              {/* Role filter chips */}
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => setActiveRoleFilter(null)}
+                  className={cn(
+                    "text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-200",
+                    !activeRoleFilter
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-card text-muted-foreground border-border hover:border-primary/30"
+                  )}
+                >
+                  All
+                </button>
+                {uniqueRoleTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() =>
+                      setActiveRoleFilter(
+                        activeRoleFilter === tag ? null : tag
+                      )
+                    }
+                    className={cn(
+                      "text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-200",
+                      activeRoleFilter === tag
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-muted-foreground border-border hover:border-primary/30"
+                    )}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Attackers */}
             {(!lobbyState?.currentRound?.team_side || lobbyState.currentRound.team_side === "attacker") && (
             <div>
@@ -438,7 +524,7 @@ export default function SelectPage({
                 Attackers
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {operators
+                {filteredOperators
                   .filter((op) => op.side === "attacker")
                   .map((op) => {
                     const banned = bannedOperatorIds.has(op.id);
@@ -470,6 +556,7 @@ export default function SelectPage({
                               src={op.icon_url}
                               alt={op.name}
                               fill
+                              sizes="48px"
                               className="object-contain"
                             />
                           ) : (
@@ -523,7 +610,7 @@ export default function SelectPage({
                 Defenders
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {operators
+                {filteredOperators
                   .filter((op) => op.side === "defender")
                   .map((op) => {
                     const banned = bannedOperatorIds.has(op.id);
@@ -555,6 +642,7 @@ export default function SelectPage({
                               src={op.icon_url}
                               alt={op.name}
                               fill
+                              sizes="48px"
                               className="object-contain"
                             />
                           ) : (
@@ -589,6 +677,15 @@ export default function SelectPage({
               </div>
             </div>
             )}
+
+            {/* ── Empty filter state ──────────────────────────── */}
+            {filteredOperators.length === 0 && (
+              <EmptyState
+                title="No operators match"
+                description="Try adjusting your search or filter."
+                className="py-10"
+              />
+            )}
           </div>
         )}
 
@@ -620,7 +717,7 @@ export default function SelectPage({
                     </span>
                     <span className="ml-auto text-muted-foreground">
                       {sel.operator_id
-                        ? `Op: ${sel.operator_id}`
+                        ? `Op: ${operatorMap.get(sel.operator_id) || sel.operator_id}`
                         : sel.map_id
                         ? `Map: ${sel.map_id}`
                         : "Choosing…"}

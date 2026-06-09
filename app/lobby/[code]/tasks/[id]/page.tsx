@@ -303,7 +303,7 @@ export default function TaskDetailPage({
   // ── Loading ──────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div className="flex items-center gap-3">
             <div className="size-9 rounded-lg bg-muted animate-pulse" />
@@ -328,7 +328,7 @@ export default function TaskDetailPage({
   // ── Error ────────────────────────────────────────────
   if (error || !data) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <Button
             variant="ghost"
@@ -367,7 +367,7 @@ export default function TaskDetailPage({
   // ── Strategy removed ────────────────────────────────────
   if (!strategy) {
     return (
-      <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
         <header className="flex items-center justify-between px-5 py-4 border-b border-border">
           <Button
             variant="ghost"
@@ -398,7 +398,7 @@ export default function TaskDetailPage({
   const currentImage = images[safeIdx];
 
   return (
-    <div className="flex flex-col flex-1 min-h-screen bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <Button

@@ -90,7 +90,7 @@ export default function SignupPage() {
   // Success screen after email signup
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-6">
+      <div className="flex min-h-dvh items-center justify-center bg-background px-6">
         <div
           className={cn(
             "w-full max-w-sm bg-card border border-border rounded-xl p-8",
@@ -136,7 +136,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-6">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-6">
       <div
         className={cn(
           "w-full max-w-sm bg-card border border-border rounded-xl p-8",
