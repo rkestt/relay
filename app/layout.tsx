@@ -4,6 +4,7 @@ import "./globals.css";
 import { LogPanel } from "@/components/debug/LogPanel";
 import UserMenu from "@/components/auth/UserMenu";
 import { PageTransition } from "@/components/ui/PageTransition";
+import { CookieBanner } from "@/components/cookie/CookieBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,6 +48,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <UserMenu />
         <PageTransition>{children}</PageTransition>
+        <CookieBanner />
         <LogPanel />
       </body>
     </html>

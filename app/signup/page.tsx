@@ -19,6 +19,8 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptMarketing, setAcceptMarketing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -35,6 +37,10 @@ export default function SignupPage() {
     }
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+    if (!acceptTerms) {
+      setError("Devi accettare i termini per continuare");
       return;
     }
 
@@ -260,6 +266,67 @@ export default function SignupPage() {
               required
               className={cn("h-11", error && "border-destructive/50 focus:ring-destructive/20 focus:border-destructive")}
             />
+          </div>
+
+          {/* Privacy/Terms Checkbox */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="acceptTerms"
+              className="flex items-start gap-2 cursor-pointer"
+            >
+              <input
+                id="acceptTerms"
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-0.5 size-4 shrink-0 rounded border-border bg-background text-primary focus:ring-2 focus:ring-primary/20 focus:ring-offset-0"
+                aria-describedby={!acceptTerms && error === "Devi accettare i termini per continuare" ? "terms-error" : undefined}
+              />
+              <span className="text-sm text-muted-foreground leading-5 select-none">
+                Accetto la{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline underline-offset-2 transition-colors"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                e i{" "}
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline underline-offset-2 transition-colors"
+                >
+                  Termini di Servizio
+                </Link>
+              </span>
+            </label>
+            {!acceptTerms && error === "Devi accettare i termini per continuare" && (
+              <p id="terms-error" className="text-xs text-destructive ml-6" role="alert">
+                Devi accettare i termini per continuare
+              </p>
+            )}
+          </div>
+
+          {/* Marketing Checkbox */}
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="acceptMarketing"
+              className="flex items-start gap-2 cursor-pointer"
+            >
+              <input
+                id="acceptMarketing"
+                type="checkbox"
+                checked={acceptMarketing}
+                onChange={(e) => setAcceptMarketing(e.target.checked)}
+                className="mt-0.5 size-4 shrink-0 rounded border-border bg-background text-primary focus:ring-2 focus:ring-primary/20 focus:ring-offset-0"
+              />
+              <span className="text-sm text-muted-foreground leading-5 select-none">
+                Voglio ricevere aggiornamenti e novità via email
+              </span>
+            </label>
           </div>
 
           <Button
