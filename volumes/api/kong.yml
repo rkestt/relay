@@ -45,6 +45,26 @@ services:
           - /auth/v1/verify
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
   - name: auth-v1-open-callback
     _comment: 'Auth: /auth/v1/callback* -> http://auth:9999/callback*'
     url: http://auth:9999/callback
@@ -55,6 +75,26 @@ services:
           - /auth/v1/callback
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
   - name: auth-v1-open-authorize
     _comment: 'Auth: /auth/v1/authorize* -> http://auth:9999/authorize*'
     url: http://auth:9999/authorize
@@ -65,6 +105,26 @@ services:
           - /auth/v1/authorize
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
 
   ## Secure Auth routes
   - name: auth-v1
@@ -77,6 +137,26 @@ services:
           - /auth/v1/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: key-auth
         config:
           hide_credentials: false
@@ -106,6 +186,26 @@ services:
           - /rest/v1/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: key-auth
         config:
           hide_credentials: false
@@ -135,6 +235,26 @@ services:
           - /graphql/v1
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: key-auth
         config:
           hide_credentials: false
@@ -166,6 +286,26 @@ services:
           - /realtime/v1/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: key-auth
         config:
           hide_credentials: false
@@ -195,6 +335,26 @@ services:
           - /realtime/v1/api
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: key-auth
         config:
           hide_credentials: false
@@ -224,6 +384,26 @@ services:
           - /storage/v1/
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: request-transformer
         config:
           add:
@@ -263,6 +443,26 @@ services:
           - /
     plugins:
       - name: cors
+        config:
+          origins:
+            - "https://r6hub.yourdomain.com"
+            - "http://localhost:3000"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          headers:
+            - Authorization
+            - Content-Type
+            - X-Client-Info
+            - Apikey
+            - X-Supabase-Api-Key
+          exposed_headers:
+            - X-Supabase-Api-Key
+          max_age: 3600
+          credentials: true
       - name: basic-auth
         config:
           hide_credentials: true

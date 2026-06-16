@@ -49,8 +49,6 @@ export default function TasksPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
-  const initialized = useRef(false);
-
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
@@ -243,20 +241,27 @@ export default function TasksPage({
     }
   }, []);
 
-  // Initial fetch when lobbyId is resolved
+  // Fetch tasks when lobbyId resolves
+  const prevLastEventAt = useRef<number | null>(null);
+  const prevLastSync = useRef<number | null>(null);
   useEffect(() => {
     if (!lobbyId) return;
     loadTasks(lobbyId);
   }, [lobbyId, loadTasks]);
 
-  // Refresh on realtime / heartbeat events (skip first run — already fetched on mount)
+  // Refresh on realtime / heartbeat events (only on actual changes, not initial null→value)
   useEffect(() => {
     if (!lobbyId) return;
-    if (!initialized.current) {
-      initialized.current = true;
-      return;
+    const eventChanged =
+      prevLastEventAt.current !== null && lastEventAt !== prevLastEventAt.current;
+    const syncChanged =
+      prevLastSync.current !== null && lastSync !== prevLastSync.current;
+    prevLastEventAt.current = lastEventAt;
+    prevLastSync.current = lastSync;
+
+    if (eventChanged || syncChanged) {
+      loadTasks(lobbyId);
     }
-    loadTasks(lobbyId);
   }, [lastEventAt, lastSync, lobbyId, loadTasks]);
 
   // ── Vote handler ───────────────────────────────────────

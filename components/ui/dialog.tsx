@@ -100,7 +100,7 @@ function DialogContent({ children, className, ...props }: React.HTMLAttributes<H
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       onClick={handleBackdropClick}
       {...props}
     >
@@ -115,8 +115,8 @@ function DialogContent({ children, className, ...props }: React.HTMLAttributes<H
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 w-full max-w-lg rounded-xl border border-border bg-popover p-6 shadow-3",
-          isExiting ? "animate-scale-out" : "animate-scale-in",
+          "relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-xl border border-border bg-popover p-6 shadow-3 mx-0 sm:mx-auto",
+          isExiting ? "animate-fade-out" : "animate-in slide-in-from-bottom-4 sm:animate-scale-in duration-300",
           className
         )}
       >

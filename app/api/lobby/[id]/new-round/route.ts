@@ -1,6 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
-import { getTeamSide } from "@/lib/lobby-utils";
+import {
+  getTeamSide,
+  getMatchScore,
+  getMatchStatus,
+  canCreateNextRound,
+} from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
 
 // ──────────────────────────────────────────────
@@ -9,7 +14,7 @@ import { NextResponse } from "next/server";
 // Copies bans from the previous round to the new round.
 // ──────────────────────────────────────────────
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -25,6 +30,25 @@ export async function POST(
 
     const { id } = await params;
     logger.info("API", "POST /api/lobby/[id]/new-round start", { lobbyId: id });
+
+    // -- Parse winner_side from body ---------------------------------------
+    let body: { winner_side?: unknown };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
+
+    const winnerSide = body.winner_side;
+    if (winnerSide !== "attacker" && winnerSide !== "defender") {
+      return NextResponse.json(
+        { error: "winner_side is required and must be 'attacker' or 'defender'" },
+        { status: 400 },
+      );
+    }
 
     // -- Verify leader & fetch starting_side ----------------------------
     const { data: lobby, error: lobbyError } = await supabase
@@ -56,30 +80,59 @@ export async function POST(
       .limit(1)
       .maybeSingle();
 
-    let newRoundNumber: number;
-
-    if (currentRound) {
-      // -- Mark current round as completed --------------------------------
-      const { error: updateError } = await supabase
-        .from("rounds")
-        .update({ status: "completed" })
-        .eq("id", currentRound.id);
-
-      if (updateError) {
-        logger.error("API", "Failed to complete current round", updateError);
-        return NextResponse.json(
-          { error: "Failed to complete current round" },
-          { status: 500 },
-        );
-      }
-
-      newRoundNumber = currentRound.round_number + 1;
-    } else {
-      // No active round — create the first one
-      newRoundNumber = 1;
+    if (!currentRound) {
+      return NextResponse.json(
+        { error: "No active round to complete" },
+        { status: 400 },
+      );
     }
 
-    // -- Create new round -------------------------------------------------
+    // -- Mark current round as completed with winner_side ------------------
+    const { error: updateError } = await supabase
+      .from("rounds")
+      .update({ status: "completed", winner_side: winnerSide })
+      .eq("id", currentRound.id);
+
+    if (updateError) {
+      logger.error("API", "Failed to complete current round", updateError);
+      return NextResponse.json(
+        { error: "Failed to complete current round" },
+        { status: 500 },
+      );
+    }
+
+    // -- Fetch all completed rounds for score calculation -----------------
+    const { data: completedRounds } = await supabase
+      .from("rounds")
+      .select("winner_side")
+      .eq("lobby_id", id)
+      .eq("status", "completed");
+
+    const score = getMatchScore(completedRounds ?? []);
+    const matchStatus = getMatchStatus(score, currentRound.round_number);
+
+    // -- Check if match is over -------------------------------------------
+    if (matchStatus.isOver) {
+      await supabase.from("lobbies").update({ phase: "closed" }).eq("id", id);
+      logger.info("API", "Match over", {
+        lobbyId: id,
+        winner: matchStatus.winner,
+        score,
+      });
+      return NextResponse.json({
+        matchOver: true,
+        score,
+        winner: matchStatus.winner,
+      });
+    }
+
+    // -- Check if next round is allowed -----------------------------------
+    if (!canCreateNextRound(score, currentRound.round_number)) {
+      return NextResponse.json({ error: "Match is complete" }, { status: 409 });
+    }
+
+    // -- Create next round -------------------------------------------------
+    const newRoundNumber = currentRound.round_number + 1;
 
     const { data: newRound, error: insertError } = await supabase
       .from("rounds")
@@ -93,13 +146,11 @@ export async function POST(
       .single();
 
     if (insertError || !newRound) {
-      // Rollback: restore previous round to active (only if there was one)
-      if (currentRound) {
-        await supabase
-          .from("rounds")
-          .update({ status: "active" })
-          .eq("id", currentRound.id);
-      }
+      // Rollback: restore previous round to active
+      await supabase
+        .from("rounds")
+        .update({ status: "active", winner_side: null })
+        .eq("id", currentRound.id);
 
       logger.error("API", "Failed to create new round", insertError);
       return NextResponse.json(
@@ -109,12 +160,11 @@ export async function POST(
     }
 
     // -- Copy bans from previous round to new round -----------------------
-    if (currentRound) {
-      const { data: previousBans } = await supabase
-        .from("lobby_bans")
-        .select("operator_id, side")
-        .eq("lobby_id", id)
-        .eq("round_id", currentRound.id);
+    const { data: previousBans } = await supabase
+      .from("lobby_bans")
+      .select("operator_id, side")
+      .eq("lobby_id", id)
+      .eq("round_id", currentRound.id);
 
     if (previousBans && previousBans.length > 0) {
       const newBanRows = previousBans.map((ban) => ({
@@ -133,7 +183,6 @@ export async function POST(
         logger.error("API", "Failed to copy bans to new round", copyError);
       }
     }
-    }
 
     logger.debug("API", "POST /api/lobby/[id]/new-round success", {
       lobbyId: id,
@@ -142,6 +191,7 @@ export async function POST(
     });
     return NextResponse.json({
       round: { id: newRound.id, round_number: newRound.round_number },
+      score,
     });
   } catch (error) {
     logger.error("API", "New-round POST unexpected error", error);

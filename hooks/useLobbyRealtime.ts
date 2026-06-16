@@ -37,6 +37,8 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
   const lastEventAtRef = useRef<number | null>(null);
   const [lastEventAt, setLastEventAt] = useState<number | null>(null);
+  const disposedRef = useRef(false);
+  const channelCounterRef = useRef(0);
 
   // ── Stable store action references ──
   const setConnectionStatus = useLobbyStore((s) => s.setConnectionStatus);
@@ -49,6 +51,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
   useEffect(() => {
     const id = lobbyIdRef.current;
+    disposedRef.current = false;
     if (!id) {
       setConnectionStatus("disconnected");
       return;
@@ -77,7 +80,9 @@ export function useLobbyRealtime(lobbyId: string | null) {
       logger.info("useLobbyRealtime", "scheduleReconnect", { delay, attempt: retryCountRef.current });
 
       retryTimerRef.current = setTimeout(() => {
-        subscribe();
+        if (!disposedRef.current) {
+          subscribe();
+        }
       }, delay);
     };
 
@@ -90,7 +95,8 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
       setConnectionStatus("connecting");
 
-      const channel = supabase.channel(`lobby:${id}`, {
+      channelCounterRef.current += 1;
+      const channel = supabase.channel(`lobby:${id}:${channelCounterRef.current}`, {
         config: {
           broadcast: { self: true },
           presence: { key: "" },
@@ -254,6 +260,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
       // ── subscribe & track status ────────────────────────────
       channel.subscribe((status) => {
+        if (disposedRef.current) return;
         if (status === "SUBSCRIBED") {
           logger.info("useLobbyRealtime", "SUBSCRIBED", { lobbyId: id });
           retryCountRef.current = 0;
@@ -275,6 +282,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
     subscribe();
 
     return () => {
+      disposedRef.current = true;
       cleanupPrevious();
       setConnectionStatus("disconnected");
     };

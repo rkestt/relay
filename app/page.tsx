@@ -119,8 +119,18 @@ export default function HomePage() {
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
 
+      {/* ═══ WIP OVERLAY ═══ — fixed, sopra tutto, solo root page */}
+      <div className="fixed top-0 left-0 right-0 z-[9999] bg-[oklch(0.75_0.16_85)] text-[oklch(0.12_0_0)] text-center font-extrabold tracking-[0.15em] uppercase shadow-[0_0_30px_rgba(0,0,0,0.6)] border-b-4 border-[oklch(0.65_0.20_25)] pointer-events-none"
+           style={{
+             fontSize: "clamp(0.7rem, 2.5vw, 1.4rem)",
+             paddingBlock: "clamp(4px, 1vh, 12px)",
+             animation: "pulse-subtle 2s ease-in-out infinite",
+           }}>
+        WORK IN PROGRESS — features incomplete, data may reset anytime
+      </div>
+
       {/* ── Hero ──────────────────────────────────────── */}
-      <main className="flex flex-col flex-1 items-center justify-center px-6 py-32 gap-20">
+      <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 sm:py-32 gap-12 sm:gap-20">
 
         {/* Logomark + Title */}
         <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -142,7 +152,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <h1 className="text-5xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
               r6hub
             </h1>
             <p className="text-base text-muted-foreground font-medium">
@@ -152,7 +162,7 @@ export default function HomePage() {
         </div>
 
         {/* ── CTA Buttons ──────────────────────────────── */}
-        <div className="flex flex-col gap-3 w-full max-w-xs">
+        <div className="flex flex-col gap-3 w-full max-w-sm">
 
           {/* Starting side selector */}
           <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -163,10 +173,10 @@ export default function HomePage() {
               <Button
                 type="button"
                 variant={startingSide === "attacker" ? "default" : "ghost"}
-                size="sm"
+                size="default"
                 onClick={() => setStartingSide("attacker")}
                 className={cn(
-                  "flex-1",
+                  "flex-1 h-10",
                   startingSide === "attacker" && "bg-attacker hover:bg-attacker/90"
                 )}
               >
@@ -175,10 +185,10 @@ export default function HomePage() {
               <Button
                 type="button"
                 variant={startingSide === "defender" ? "default" : "ghost"}
-                size="sm"
+                size="default"
                 onClick={() => setStartingSide("defender")}
                 className={cn(
-                  "flex-1",
+                  "flex-1 h-10",
                   startingSide === "defender" && "bg-defender hover:bg-defender/90"
                 )}
               >
@@ -272,6 +282,42 @@ export default function HomePage() {
               </Button>
             </div>
           )}
+        </div>
+
+        {/* ── Submit Strategy (standalone) ─────────────── */}
+        <div className="flex flex-col items-center w-full max-w-sm animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
+          <div className="w-full border-t border-border/20 mb-5" />
+          <Button
+            variant="outline"
+            size="lg"
+            className={cn(
+              "w-full h-14 rounded-lg text-base font-semibold tracking-wide",
+              "border-border text-foreground/80",
+              "hover:bg-card hover:border-border hover:text-foreground",
+              "active:scale-[0.98] transition-all duration-150"
+            )}
+            onClick={() => router.push("/submit")}
+          >
+            <svg
+              aria-hidden="true"
+              className="size-5 mr-2"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            Submit Strategy
+          </Button>
+          <p className="text-xs text-muted-foreground/40 mt-2">
+            Share your tactics with the community
+          </p>
         </div>
 
         {/* Error */}

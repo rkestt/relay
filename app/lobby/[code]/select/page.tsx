@@ -335,7 +335,7 @@ export default function SelectPage({
                 )}
               </div>
               <span className={cn(
-                "text-xs hidden sm:inline font-medium",
+                "text-[10px] sm:text-xs font-medium",
                 isActive && "text-primary font-semibold",
                 isComplete && "text-success",
                 !isActive && !isComplete && "text-muted-foreground"
@@ -345,7 +345,7 @@ export default function SelectPage({
               {i < steps.length - 1 && (
                 <div
                   className={cn(
-                    "w-10 h-px transition-all duration-300",
+                    "w-6 sm:w-10 h-px transition-all duration-300",
                     isComplete ? "bg-success" : "bg-border"
                   )}
                 />
@@ -474,7 +474,7 @@ export default function SelectPage({
                   placeholder="Search operators..."
                   value={operatorSearch}
                   onChange={(e) => setOperatorSearch(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 h-11"
                 />
               </div>
 
@@ -483,7 +483,7 @@ export default function SelectPage({
                 <button
                   onClick={() => setActiveRoleFilter(null)}
                   className={cn(
-                    "text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-200",
+                    "text-sm font-medium px-3.5 py-2.5 rounded-xl border transition-all duration-200",
                     !activeRoleFilter
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-card text-muted-foreground border-border hover:border-primary/30"
@@ -500,7 +500,7 @@ export default function SelectPage({
                       )
                     }
                     className={cn(
-                      "text-xs font-medium px-2.5 py-1.5 rounded-lg border transition-all duration-200",
+                      "text-sm font-medium px-3.5 py-2.5 rounded-xl border transition-all duration-200",
                       activeRoleFilter === tag
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card text-muted-foreground border-border hover:border-primary/30"

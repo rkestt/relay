@@ -94,28 +94,37 @@ export async function POST(
       );
     }
 
+    // -- Fetch banned operators for this round ----------------------------
+    const { data: bans } = await supabase
+      .from("lobby_bans")
+      .select("operator_id")
+      .eq("lobby_id", id)
+      .eq("round_id", currentRound.id);
+
+    const bannedOperatorIds = new Set((bans ?? []).map((b) => b.operator_id));
+
     // -- Find the team's map/site selection for this round ----------------
     const { data: roundSelections } = await supabase
       .from("lobby_selections")
-      .select("map_id, site_id")
+      .select("map_id, site_id, operator_id")
       .eq("lobby_id", id)
-      .eq("round_id", currentRound.id)
-      .not("map_id", "is", null)
-      .limit(1);
+      .eq("round_id", currentRound.id);
 
     let mapId: string | null = null;
     let siteId: string | null = null;
+    const teammateOperatorIds = new Set<string>();
 
-    if (roundSelections && roundSelections.length > 0) {
-      mapId = roundSelections[0].map_id;
-      siteId = roundSelections[0].site_id;
+    for (const sel of roundSelections ?? []) {
+      if (sel.map_id && !mapId) mapId = sel.map_id;
+      if (sel.site_id && !siteId) siteId = sel.site_id;
+      if (sel.operator_id) teammateOperatorIds.add(sel.operator_id);
     }
 
     // -- Fetch approved strategies with progressive fallback -------------
     const baseQuery = () =>
       supabase
         .from("strategy_templates")
-        .select("id, title, description, image_url, created_at")
+        .select("id, title, description, image_url, created_at, operator_id")
         .eq("status", "approved");
 
     let strategies: Array<{
@@ -124,6 +133,7 @@ export async function POST(
       description: string | null;
       image_url: string | null;
       created_at: string;
+      operator_id: string;
     }> | null = null;
     let fallbackLevel = 0;
 
@@ -144,7 +154,12 @@ export async function POST(
       if (siteId) q2.eq("site_id", siteId);
       const { data: d2 } = await q2;
       if (d2 && d2.length > 0) {
-        strategies = d2;
+        // Prioritize strategies for operators teammates have chosen
+        strategies = d2.sort((a, b) => {
+          const aIsTeammate = teammateOperatorIds.has(a.operator_id) ? 0 : 1;
+          const bIsTeammate = teammateOperatorIds.has(b.operator_id) ? 0 : 1;
+          return aIsTeammate - bIsTeammate;
+        });
         fallbackLevel = 2;
       }
     }
@@ -172,6 +187,11 @@ export async function POST(
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     );
 
+    // Filter out strategies for banned operators
+    const filteredStrategies = matchingStrategies.filter(
+      (s) => !bannedOperatorIds.has(s.operator_id),
+    );
+
     // -- Check for already-assigned strategies this round -----------------
     const { data: existingAssignments } = await supabase
       .from("task_assignments")
@@ -184,7 +204,7 @@ export async function POST(
     );
 
     // Find first strategy that isn't already taken
-    const availableStrategy = matchingStrategies.find(
+    const availableStrategy = filteredStrategies.find(
       (s) => !takenStrategyIds.has(s.id),
     );
 

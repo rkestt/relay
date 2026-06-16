@@ -67,10 +67,10 @@ export async function POST(
       );
     }
 
-    // -- Verify task assignment exists and belongs to this lobby ----------
+    // -- Verify task assignment exists and user is not voting on own ------
     const { data: assignment, error: assignmentError } = await supabase
       .from("task_assignments")
-      .select("id")
+      .select("id, user_id")
       .eq("id", assignmentId)
       .eq("lobby_id", lobbyId)
       .maybeSingle();
@@ -79,6 +79,13 @@ export async function POST(
       return NextResponse.json(
         { error: "Task assignment not found in this lobby" },
         { status: 404 },
+      );
+    }
+
+    if (assignment.user_id === user.id) {
+      return NextResponse.json(
+        { error: "Cannot vote on your own assigned strategy" },
+        { status: 403 },
       );
     }
 

@@ -162,8 +162,6 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const selectionsQuery = {
       select: vi.fn(() => selectionsQuery),
       eq: vi.fn(() => selectionsQuery),
-      not: vi.fn(() => selectionsQuery),
-      limit: vi.fn(() => selectionsQuery),
     };
 
     const strategiesQuery = {
@@ -181,8 +179,6 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
     selectionsQuery.eq.mockReturnValue(selectionsQuery);
-    selectionsQuery.not.mockReturnValue(selectionsQuery);
-    selectionsQuery.limit.mockReturnValue(Promise.resolve({ data: [], error: null }));
 
     // strategiesQuery needs eq to chain for .eq("status",...).eq("operator_id",...)
     const strategiesPromise = Promise.resolve({ data: [], error: null });
@@ -233,8 +229,6 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const selectionsQuery = {
       select: vi.fn(() => selectionsQuery),
       eq: vi.fn(() => selectionsQuery),
-      not: vi.fn(() => selectionsQuery),
-      limit: vi.fn(() => selectionsQuery),
     };
 
     const strategiesQuery = {
@@ -274,8 +268,6 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
     selectionsQuery.eq.mockReturnValue(selectionsQuery);
-    selectionsQuery.not.mockReturnValue(selectionsQuery);
-    selectionsQuery.limit.mockReturnValue(Promise.resolve({ data: [{ map_id: "map-1", site_id: "site-1" }], error: null }));
 
     // strategiesQuery needs eq to chain for .eq("status",...).eq("operator_id",...)
     const strategiesResult = Promise.resolve({

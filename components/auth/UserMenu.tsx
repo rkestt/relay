@@ -2,14 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createBrowserClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const isInLobby = pathname.startsWith("/lobby/");
 
   useEffect(() => {
     const supabase = createBrowserClient();
@@ -30,7 +33,7 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
-  if (!user) return null;
+  if (!user || isInLobby) return null;
 
   const name = user.user_metadata?.name || user.email || "";
   const avatarUrl = user.user_metadata?.avatar_url;
@@ -43,10 +46,10 @@ export default function UserMenu() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50" ref={dropdownRef}>
+    <div className="fixed top-3 right-3 z-50" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="size-8 rounded-full border border-neutral-700 overflow-hidden hover:border-amber-500/50 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+        className="size-10 rounded-full border border-neutral-700 overflow-hidden hover:border-amber-500/50 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
       >
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="size-full object-cover" />

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { getMatchScore } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -48,6 +49,16 @@ export async function GET(
       .limit(1)
       .maybeSingle();
 
+    // -- Fetch all completed rounds for score -----------------------------
+    const { data: completedRounds } = await supabase
+      .from("rounds")
+      .select("id, round_number, status, team_side, winner_side")
+      .eq("lobby_id", id)
+      .eq("status", "completed")
+      .order("round_number", { ascending: true });
+
+    const score = getMatchScore(completedRounds ?? []);
+
     // -- Fetch selections & bans for the current round -------------------
     let selections: unknown[] = [];
     let bans: unknown[] = [];
@@ -83,6 +94,8 @@ export async function GET(
       currentRound: currentRound ?? null,
       selections,
       bans,
+      score,
+      completedRounds,
     });
   } catch (error) {
     logger.error("API", "Lobby state error", error);

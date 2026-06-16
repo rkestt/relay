@@ -182,7 +182,7 @@ export default function SignupPage() {
               placeholder="you@example.com"
               required
               autoFocus
-              className={error ? "border-destructive/50 focus:ring-destructive/20 focus:border-destructive" : undefined}
+              className={cn("h-11", error && "border-destructive/50 focus:ring-destructive/20 focus:border-destructive")}
             />
           </div>
 
@@ -204,14 +204,14 @@ export default function SignupPage() {
                 required
                 minLength={6}
                 className={cn(
-                  "pr-10",
+                  "pr-10 h-11",
                   error && "border-destructive/50 focus:ring-destructive/20 focus:border-destructive",
                 )}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center justify-center w-11 h-11 text-muted-foreground hover:text-foreground transition-colors rounded-lg"
                 tabIndex={-1}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -258,7 +258,7 @@ export default function SignupPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter your password"
               required
-              className={error ? "border-destructive/50 focus:ring-destructive/20 focus:border-destructive" : undefined}
+              className={cn("h-11", error && "border-destructive/50 focus:ring-destructive/20 focus:border-destructive")}
             />
           </div>
 

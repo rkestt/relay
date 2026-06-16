@@ -174,9 +174,22 @@ export default function BansPage({
 
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-4 bg-background text-foreground" aria-busy="true">
-        <div className="w-8 h-8 border-2 border-muted border-t-foreground rounded-full animate-spin" />
-        <p className="text-muted-foreground text-sm">Loading…</p>
+      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
+        </header>
+        <div className="flex flex-col gap-4 p-5">
+          <div className="h-4 w-28 rounded bg-muted animate-pulse" />
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 p-2">
+                <div className="w-12 h-12 rounded-lg bg-muted animate-pulse" />
+                <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -204,7 +217,7 @@ export default function BansPage({
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
           onClick={() => router.push(`/lobby/${code}`)}
         >
           Back

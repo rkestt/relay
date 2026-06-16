@@ -60,6 +60,7 @@ export interface Round {
   round_number: number;
   status: "active" | "completed";
   team_side: "attacker" | "defender" | null;
+  winner_side: "attacker" | "defender" | null;
   created_at: string;
 }
 

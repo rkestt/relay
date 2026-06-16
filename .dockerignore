@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+TODO.md
+AGENTS.md
+docker-compose.yml
+Dockerfile
+.env*
+!public
+scripts/
+volumes/
+supabase/
+test-scripts/
+graphify-out/
+.opencode/

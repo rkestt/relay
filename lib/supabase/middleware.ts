@@ -21,6 +21,18 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
+function addSecurityHeaders(response: NextResponse): NextResponse {
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()",
+  );
+  response.headers.set("X-XSS-Protection", "1; mode=block");
+  return response;
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -49,12 +61,12 @@ export async function updateSession(request: NextRequest) {
 
   // Allow public paths and static assets through without auth check
   if (isPublicPath(pathname)) {
-    return supabaseResponse;
+    return addSecurityHeaders(supabaseResponse);
   }
 
   // API routes handle their own auth — do not refresh session here
   if (pathname.startsWith("/api/")) {
-    return supabaseResponse;
+    return addSecurityHeaders(supabaseResponse);
   }
 
   // Refresh session — do not run between middleware and routes
@@ -66,8 +78,8 @@ export async function updateSession(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return addSecurityHeaders(NextResponse.redirect(url));
   }
 
-  return supabaseResponse;
+  return addSecurityHeaders(supabaseResponse);
 }

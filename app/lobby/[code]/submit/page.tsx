@@ -394,7 +394,10 @@ export default function SubmitStrategyPage({
 
           {/* ═══════ Form Section: Basic Info ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Basic Info</h2>
+            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <span className="size-1.5 rounded-full bg-primary/40" />
+              Basic Info
+            </h2>
             <div className="bg-card border border-border rounded-xl p-4 space-y-4">
               {/* ── Title ───────────────────────────────── */}
               <section className="flex flex-col gap-1.5">
@@ -442,13 +445,13 @@ export default function SubmitStrategyPage({
                   rows={4}
                   maxLength={2000}
                   className={cn(
-                    "flex w-full rounded-xl border px-3 py-2.5 text-sm transition-all duration-200 resize-none",
-                    "bg-input border-border text-foreground",
-                    "placeholder:text-muted-foreground",
-                    "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                    "flex w-full rounded-xl border px-3.5 py-3 text-sm transition-all duration-200 resize-none min-h-[100px]",
+                    "bg-input/50 border-border text-foreground",
+                    "placeholder:text-muted-foreground/60",
+                    "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:bg-input/80"
                   )}
                 />
-                <p className="text-xs text-muted-foreground mt-1 text-right">
+                <p className="text-xs text-muted-foreground/40 mt-1 text-right">
                   {description.length}/2000
                 </p>
               </section>
@@ -457,7 +460,10 @@ export default function SubmitStrategyPage({
 
           {/* ═══════ Form Section: Map/Site/Operator ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Map, Site &amp; Operator</h2>
+            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <span className="size-1.5 rounded-full bg-primary/40" />
+              Map, Site &amp; Operator
+            </h2>
             <div className="bg-card border border-border rounded-xl p-4 space-y-4">
               {/* ── Map ──────────────────────────── */}
               <section className="flex flex-col gap-1.5">
@@ -588,7 +594,7 @@ export default function SubmitStrategyPage({
           {/* ═══════ Form Section: Tags ═══════ */}
           <div className="flex flex-col gap-2">
             <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Tags</h2>
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <div className="bg-card border border-border rounded-xl p-3 space-y-3">
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="tags"
@@ -697,8 +703,8 @@ export default function SubmitStrategyPage({
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
                   "active:scale-[0.99]",
                   imagePreviews.length > 0
-                    ? "border-border bg-card"
-                    : "border-border bg-background hover:border-border"
+                    ? "border-border bg-card hover:bg-card/80"
+                    : "border-muted bg-background hover:border-muted-foreground/20 hover:bg-card/30"
                 )}
               >
                 <div className="w-12 h-12 rounded-2xl border border-border bg-card flex items-center justify-center">
@@ -738,7 +744,7 @@ export default function SubmitStrategyPage({
           {selectedMap && (
             <div className="flex flex-col gap-2">
               <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Hotspots</h2>
-              <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <div className="bg-card border border-border rounded-xl p-3 space-y-3">
                 <section className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
@@ -835,7 +841,7 @@ export default function SubmitStrategyPage({
           )}
 
           {/* ── Submit ──────────────────────────────── */}
-          <div className="mt-2 pt-2 sticky bottom-0 pb-2 bg-background">
+          <div className="sticky bottom-0 pt-4 pb-3 bg-background border-t border-border/30 mt-2">
             <Button
               size="lg"
               className={cn(

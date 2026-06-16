@@ -37,6 +37,14 @@ interface LobbyState {
     side: "attacker" | "defender";
     operators: { id: string; name: string; side: "attacker" | "defender"; icon_url: string | null } | null;
   }[];
+  score: { attacker: number; defender: number };
+  completedRounds: {
+    id: string;
+    round_number: number;
+    status: string;
+    team_side: "attacker" | "defender" | null;
+    winner_side: "attacker" | "defender" | null;
+  }[];
 }
 
 export default function LobbyPage({
@@ -55,6 +63,8 @@ export default function LobbyPage({
   const [operators, setOperators] = useState<Operator[]>([]);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
+  const [showRoundWinnerModal, setShowRoundWinnerModal] = useState(false);
+  const [matchResult, setMatchResult] = useState<{ winner: string; score: { attacker: number; defender: number } } | null>(null);
 
   const { isLeader, setIsLeader, setLobbyId: storeSetLobbyId, setLobbyCode: storeSetLobbyCode } =
     useLobbyStore();
@@ -63,7 +73,8 @@ export default function LobbyPage({
   useEffect(() => {
     logger.info("LobbyPage", "LobbyPage mount");
     params.then(({ code: c }) => setCode(c));
-  }, [params]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch session
   useEffect(() => {
@@ -179,16 +190,27 @@ export default function LobbyPage({
     [operators]
   );
 
-  const handleNewRound = useCallback(async () => {
+  const handleNewRound = useCallback(() => {
+    setShowRoundWinnerModal(true);
+  }, []);
+
+  const handleRoundWinner = useCallback(async (winnerSide: "attacker" | "defender") => {
     if (!lobbyId) return;
-    logger.info("LobbyPage", "New round click", { lobbyId });
+    setShowRoundWinnerModal(false);
     try {
-      const res = await fetch(`/api/lobby/${lobbyId}/new-round`, { method: "POST" });
+      const res = await fetch(`/api/lobby/${lobbyId}/new-round`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ winner_side: winnerSide }),
+      });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error);
       }
-      logger.debug("LobbyPage", "New round successful, refetching state");
+      const data = await res.json();
+      if (data.matchOver) {
+        setMatchResult({ winner: data.winner, score: data.score });
+      }
       await refreshState(lobbyId);
     } catch (err) {
       logger.error("LobbyPage", "New round failed", err);
@@ -353,6 +375,11 @@ export default function LobbyPage({
               <span className="text-xs text-muted-foreground">
                 Round {state.currentRound.round_number}
               </span>
+              {state.score && (
+                <span className="text-xs font-bold text-muted-foreground">
+                  ({state.score.attacker} - {state.score.defender})
+                </span>
+              )}
               {state.currentRound.team_side && (
                 <span className={cn(
                   "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded",
@@ -559,9 +586,71 @@ export default function LobbyPage({
               </div>
             )}
           </section>
+        ) : state.lobby.phase === "closed" ? (
+          /* ── MATCH COMPLETE ─────────────────────────────── */
+          <section className="flex flex-col items-center justify-center flex-1 gap-6 animate-in fade-in duration-300">
+            <div className="flex flex-col items-center gap-2">
+              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
+                Match Complete
+              </span>
+              <div className="flex items-center gap-4">
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-attacker">Attackers</span>
+                  <span className="text-4xl font-black text-attacker">{state.score?.attacker ?? 0}</span>
+                </div>
+                <span className="text-2xl font-bold text-muted-foreground">—</span>
+                <div className="flex flex-col items-center">
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-defender">Defenders</span>
+                  <span className="text-4xl font-black text-defender">{state.score?.defender ?? 0}</span>
+                </div>
+              </div>
+            </div>
+            {matchResult?.winner && (
+              <div className={cn(
+                "px-6 py-3 rounded-xl border font-bold text-lg tracking-wide",
+                matchResult.winner === "attacker"
+                  ? "bg-attacker/10 border-attacker/30 text-attacker"
+                  : "bg-defender/10 border-defender/30 text-defender"
+              )}>
+                {matchResult.winner === "attacker" ? "Attackers" : "Defenders"} Win!
+              </div>
+            )}
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 rounded-xl text-sm font-semibold"
+              onClick={() => router.push("/")}
+            >
+              Back to Home
+            </Button>
+          </section>
         ) : (
           /* ── PLAYING PHASE ─────────────────────────────── */
           <>
+            {/* ── Score Display ────────────────────────────── */}
+            {state.score && (
+              <section className="animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-card border border-border">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-attacker">Attackers</span>
+                    <span className="text-3xl font-black text-attacker">{state.score.attacker}</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-xs font-bold text-muted-foreground">—</span>
+                    <span className="text-[10px] font-medium text-muted-foreground">
+                      {state.currentRound
+                        ? (state.currentRound.round_number <= 6 ? "Regulation" : "Overtime")
+                        : ""}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-defender">Defenders</span>
+                    <span className="text-3xl font-black text-defender">{state.score.defender}</span>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {/* ── Banned Operators ──────────────────────────── */}
             {state.bans.length > 0 && (
               <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -787,8 +876,8 @@ export default function LobbyPage({
               </section>
             )}
 
-            {/* ── Select Operator CTA ──────────────────────── */}
-            <section className="mt-2">
+            {/* ── Round Actions ──────────────────────────── */}
+            <section className="flex flex-col gap-3 mt-2">
               <Button
                 size="lg"
                 className={cn(
@@ -804,6 +893,37 @@ export default function LobbyPage({
                 }}
               >
                 Select Operator
+              </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className={cn(
+                  "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
+                  "border-primary/30 text-primary",
+                  "hover:bg-primary/10 hover:text-primary-hover",
+                  "active:scale-[0.99]",
+                  "transition-all duration-200"
+                )}
+                onClick={() => {
+                  logger.info("LobbyPage", "Submit strategy click", { code });
+                  router.push(`/lobby/${code}/submit`);
+                }}
+              >
+                <svg
+                  className="size-5 mr-2"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+                Submit Strategy
               </Button>
             </section>
           </>
@@ -823,6 +943,30 @@ export default function LobbyPage({
             </Button>
             <Button variant="destructive" onClick={confirmLeave}>
               Leave
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Round Winner Modal ──────────────────────────── */}
+      <Dialog open={showRoundWinnerModal} onOpenChange={setShowRoundWinnerModal}>
+        <DialogContent>
+          <DialogTitle>Who won this round?</DialogTitle>
+          <DialogDescription>
+            Select the winning side to proceed to the next round.
+          </DialogDescription>
+          <div className="flex gap-3 mt-4">
+            <Button
+              className="flex-1 h-14 rounded-xl text-base font-bold bg-attacker/20 text-attacker border border-attacker/30 hover:bg-attacker/30"
+              onClick={() => handleRoundWinner("attacker")}
+            >
+              Attackers
+            </Button>
+            <Button
+              className="flex-1 h-14 rounded-xl text-base font-bold bg-defender/20 text-defender border border-defender/30 hover:bg-defender/30"
+              onClick={() => handleRoundWinner("defender")}
+            >
+              Defenders
             </Button>
           </div>
         </DialogContent>

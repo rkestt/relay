@@ -320,9 +320,61 @@ services:
     networks:
       - supabase-network
 
+  # ─── Next.js App ──────────────────────────────────────────
+  nextjs:
+    container_name: r6hub-nextjs
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    expose:
+      - "3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      kong:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    networks:
+      - supabase-network
+      - app-network
+
+  # ─── Caddy (Reverse Proxy + TLS) ─────────────────────────
+  caddy:
+    container_name: r6hub-caddy
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      nextjs:
+        condition: service_healthy
+    networks:
+      - app-network
+      - supabase-network
+
 volumes:
   db-config:
+  caddy_data:
+  caddy_config:
 
 networks:
   supabase-network:
     name: supabase-network
+  app-network:
+    name: app-network

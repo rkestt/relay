@@ -1,0 +1,28 @@
+# r6Hub VPS Caddyfile
+# Set DOMAIN env var or use localhost for dev
+{$DOMAIN:localhost} {
+	# TLS - Caddy auto-provisions Let's Encrypt certs for real domains
+	# For local dev, use: DOMAIN=localhost:80
+
+	# Next.js app
+	handle /* {
+		reverse_proxy nextjs:3000
+	}
+
+	# Supabase API (Kong)
+	handle /auth/* {
+		reverse_proxy kong:8000
+	}
+	handle /rest/* {
+		reverse_proxy kong:8000
+	}
+	handle /storage/* {
+		reverse_proxy kong:8000
+	}
+	handle /functions/* {
+		reverse_proxy kong:8000
+	}
+	handle /realtime/* {
+		reverse_proxy realtime:4000
+	}
+}

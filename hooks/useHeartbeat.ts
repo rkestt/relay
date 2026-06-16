@@ -38,7 +38,6 @@ export function useHeartbeat(lobbyId: string | null) {
   const setCurrentRound = useLobbyStore((s) => s.setCurrentRound);
   const setSelections = useLobbyStore((s) => s.setSelections);
   const setBans = useLobbyStore((s) => s.setBans);
-  const setConnectionStatus = useLobbyStore((s) => s.setConnectionStatus);
 
   // ── fetch & store replace ──────────────────────────────────
 
@@ -89,8 +88,6 @@ export function useHeartbeat(lobbyId: string | null) {
       setCurrentRound(data.currentRound);
       setSelections(data.selections);
       setBans(data.bans);
-      setConnectionStatus("connected");
-
       setLastSync(Date.now());
 
       logger.info("useHeartbeat", "sync ok");
@@ -124,6 +121,8 @@ export function useHeartbeat(lobbyId: string | null) {
   useEffect(() => {
     if (!lobbyId) return;
 
+    let cancelled = false;
+
     const handleVisibility = () => {
       if (document.hidden) {
         pausedRef.current = true;
@@ -131,16 +130,21 @@ export function useHeartbeat(lobbyId: string | null) {
       } else {
         pausedRef.current = false;
         // Immediate sync when coming back, then resume interval
-        sync().finally(() => startInterval());
+        sync().finally(() => {
+          if (!cancelled) startInterval();
+        });
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
 
     // Initial sync & start interval
-    sync().then(() => startInterval());
+    sync().then(() => {
+      if (!cancelled) startInterval();
+    });
 
     return () => {
+      cancelled = true;
       document.removeEventListener("visibilitychange", handleVisibility);
       stopInterval();
     };

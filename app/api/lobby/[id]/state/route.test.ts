@@ -13,6 +13,10 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("@/lib/lobby-utils", () => ({
+  getMatchScore: vi.fn(() => ({ attacker: 0, defender: 0 })),
+}));
+
 import { GET } from "@/app/api/lobby/[id]/state/route";
 
 describe("GET /api/lobby/[id]/state", () => {
@@ -84,13 +88,32 @@ describe("GET /api/lobby/[id]/state", () => {
       eq: vi.fn(() => membersQuery),
     };
 
-    const roundQuery = {
-      select: vi.fn(() => roundQuery),
-      eq: vi.fn(() => roundQuery),
-      order: vi.fn(() => roundQuery),
-      limit: vi.fn(() => roundQuery),
+    const activeRoundQuery = {
+      select: vi.fn(() => activeRoundQuery),
+      eq: vi.fn(() => activeRoundQuery),
+      order: vi.fn(() => activeRoundQuery),
+      limit: vi.fn(() => activeRoundQuery),
       maybeSingle: vi.fn(() =>
         Promise.resolve({ data: { id: "round-1", round_number: 1, status: "active" }, error: null }),
+      ),
+    };
+
+    const completedRoundsQuery = {
+      select: vi.fn(() => completedRoundsQuery),
+      eq: vi.fn(() => completedRoundsQuery),
+      order: vi.fn(() =>
+        Promise.resolve({
+          data: [
+            {
+              id: "round-0",
+              round_number: 0,
+              status: "completed",
+              team_side: "attacker",
+              winner_side: "defender",
+            },
+          ],
+          error: null,
+        }),
       ),
     };
 
@@ -104,25 +127,30 @@ describe("GET /api/lobby/[id]/state", () => {
       eq: vi.fn(() => bansQuery),
     };
 
+    let roundsCallCount = 0;
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "lobbies") return lobbyQuery;
       if (table === "lobby_members") return membersQuery;
-      if (table === "rounds") return roundQuery;
+      if (table === "rounds") {
+        roundsCallCount++;
+        if (roundsCallCount === 1) return activeRoundQuery;
+        return completedRoundsQuery;
+      }
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "lobby_bans") return bansQuery;
       return { select: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn(), order: vi.fn(), limit: vi.fn() };
     });
 
     membersQuery.select.mockReturnValue(membersQuery);
-    membersQuery.eq.mockReturnValue(Promise.resolve({ data: [{ id: "m1", user_id: "user-1", joined_at: "2025-01-01", profiles: { id: "user-1", username: "Player1", avatar_url: null } }], error: null }));
+    (membersQuery.eq as any).mockReturnValue(Promise.resolve({ data: [{ id: "m1", user_id: "user-1", joined_at: "2025-01-01", profiles: { id: "user-1", username: "Player1", avatar_url: null } }], error: null }));
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
-    selectionsQuery.eq.mockImplementation(() => ({
+    (selectionsQuery.eq as any).mockImplementation(() => ({
       eq: vi.fn(() => Promise.resolve({ data: [{ id: "sel-1", map_id: "map-1", operator_id: "op-1" }], error: null })),
     }));
 
     bansQuery.select.mockReturnValue(bansQuery);
-    bansQuery.eq.mockImplementation(() => ({
+    (bansQuery.eq as any).mockImplementation(() => ({
       eq: vi.fn(() => Promise.resolve({ data: [{ id: "ban-1", operator_id: "op-2", operators: { id: "op-2", name: "Twitch", side: "attacker", icon_url: "" } }], error: null })),
     }));
 
@@ -138,6 +166,9 @@ describe("GET /api/lobby/[id]/state", () => {
     expect(body.currentRound).toBeDefined();
     expect(body.selections).toHaveLength(1);
     expect(body.bans).toHaveLength(1);
+    expect(body.score).toEqual({ attacker: 0, defender: 0 });
+    expect(body.completedRounds).toHaveLength(1);
+    expect(body.completedRounds[0].winner_side).toBe("defender");
   });
 
   it("returns empty arrays when no round exists", async () => {
@@ -159,23 +190,34 @@ describe("GET /api/lobby/[id]/state", () => {
       eq: vi.fn(() => membersQuery),
     };
 
-    const roundQuery = {
-      select: vi.fn(() => roundQuery),
-      eq: vi.fn(() => roundQuery),
-      order: vi.fn(() => roundQuery),
-      limit: vi.fn(() => roundQuery),
+    const activeRoundQuery = {
+      select: vi.fn(() => activeRoundQuery),
+      eq: vi.fn(() => activeRoundQuery),
+      order: vi.fn(() => activeRoundQuery),
+      limit: vi.fn(() => activeRoundQuery),
       maybeSingle: vi.fn(() => Promise.resolve({ data: null, error: null })),
     };
 
+    const completedRoundsQuery = {
+      select: vi.fn(() => completedRoundsQuery),
+      eq: vi.fn(() => completedRoundsQuery),
+      order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+    };
+
+    let roundsCallCount = 0;
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "lobbies") return lobbyQuery;
       if (table === "lobby_members") return membersQuery;
-      if (table === "rounds") return roundQuery;
+      if (table === "rounds") {
+        roundsCallCount++;
+        if (roundsCallCount === 1) return activeRoundQuery;
+        return completedRoundsQuery;
+      }
       return { select: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn(), order: vi.fn(), limit: vi.fn() };
     });
 
     membersQuery.select.mockReturnValue(membersQuery);
-    membersQuery.eq.mockReturnValue(Promise.resolve({ data: [], error: null }));
+    (membersQuery.eq as any).mockReturnValue(Promise.resolve({ data: [], error: null }));
 
     const response = await GET(
       new Request("http://localhost/api/lobby/lobby-1/state"),
@@ -187,5 +229,7 @@ describe("GET /api/lobby/[id]/state", () => {
     expect(body.currentRound).toBeNull();
     expect(body.selections).toEqual([]);
     expect(body.bans).toEqual([]);
+    expect(body.score).toEqual({ attacker: 0, defender: 0 });
+    expect(body.completedRounds).toEqual([]);
   });
 });

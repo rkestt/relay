@@ -352,6 +352,20 @@
 }
 
 /* ═══════════════════════════════════════════
+   Mobile Touch Feedback
+   ═══════════════════════════════════════════ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Add subtle tap feedback for interactive elements on touch devices */
+  button:active,
+  [role="button"]:active,
+  a:active {
+    opacity: 0.7;
+    transition: opacity 0.1s ease-out;
+  }
+}
+
+/* ═══════════════════════════════════════════
    Accessibility: Reduced Motion
    ═══════════════════════════════════════════ */
 

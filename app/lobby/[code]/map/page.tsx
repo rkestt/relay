@@ -237,7 +237,7 @@ export default function LobbyMapPage({
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
           onClick={() => router.push(`/lobby/${code}`)}
         >
           Back
