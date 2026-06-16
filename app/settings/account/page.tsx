@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 
-const ExportData = dynamic(() => import("@/components/settings/ExportData"), {
+const ExportData = dynamic(() => import("@/components/settings/ExportData").then(mod => mod.ExportData), {
   loading: () => (
     <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
       <div className="h-5 w-40 rounded bg-muted" />
@@ -10,7 +10,7 @@ const ExportData = dynamic(() => import("@/components/settings/ExportData"), {
   ),
 });
 
-const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount"), {
+const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount").then(mod => mod.DeleteAccount), {
   loading: () => (
     <div className="rounded-xl border border-red-200 bg-card p-6 space-y-4 animate-pulse">
       <div className="h-5 w-32 rounded bg-muted" />

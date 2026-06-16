@@ -1,17 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import dynamic from "next/dynamic";
 import UserMenu from "@/components/auth/UserMenu";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import { LogPanel } from "@/components/debug/LogPanel";
 import { generateMetadata } from "@/lib/seo/metadata";
-
-const LogPanel = dynamic(() => import("@/components/debug/LogPanel"), {
-  ssr: false,
-  loading: () => null,
-});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

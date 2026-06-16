@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
 
-const MapViewer = dynamic(() => import("@/components/maps/MapViewer"), {
+const MapViewer = dynamic(() => import("@/components/maps/MapViewer").then(mod => mod.MapViewer), {
   ssr: false,
   loading: () => (
     <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
