@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { lockSelectionSchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // POST  /api/lobby/[id]/lock-selection
@@ -27,11 +28,7 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/lock-selection start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
-    let body: {
-      map_id?: unknown;
-      site_id?: unknown;
-      operator_id?: unknown;
-    };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -41,7 +38,12 @@ export async function POST(
       );
     }
 
-    let { map_id, site_id, operator_id } = body;
+    const validation = validateRequest(lockSelectionSchema, body);
+    if (!validation.success) {
+      return validation.error;
+    }
+
+    let { map_id, site_id, operator_id } = validation.data;
 
     // If map_id not provided, fall back to the lobby's map_id
     let effectiveMapId = map_id;
@@ -54,26 +56,6 @@ export async function POST(
       if (lobby?.map_id) {
         effectiveMapId = lobby.map_id;
       }
-    }
-
-    // Validate types if provided
-    if (map_id !== undefined && typeof map_id !== "string") {
-      return NextResponse.json(
-        { error: "map_id must be a string if provided" },
-        { status: 400 },
-      );
-    }
-    if (site_id !== undefined && typeof site_id !== "string") {
-      return NextResponse.json(
-        { error: "site_id must be a string if provided" },
-        { status: 400 },
-      );
-    }
-    if (operator_id !== undefined && typeof operator_id !== "string") {
-      return NextResponse.json(
-        { error: "operator_id must be a string if provided" },
-        { status: 400 },
-      );
     }
 
     logger.info("API", "POST /api/lobby/[id]/lock-selection body", { lobbyId: id, map_id, effectiveMapId, site_id, operator_id });

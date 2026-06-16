@@ -31,6 +31,9 @@ Thumbs.db
 # Vercel
 .vercel
 
+# Backups
+backups/
+
 # Supabase
 .supabase
 .env.supabase

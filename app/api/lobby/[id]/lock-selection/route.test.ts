@@ -103,7 +103,7 @@ describe("POST /api/lobby/[id]/lock-selection", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("map_id must be a string if provided");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 400 when no active round found", async () => {

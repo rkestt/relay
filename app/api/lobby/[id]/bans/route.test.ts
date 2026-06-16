@@ -158,7 +158,7 @@ describe("POST /api/lobby/[id]/bans", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toContain("operator_id");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 404 when lobby not found", async () => {

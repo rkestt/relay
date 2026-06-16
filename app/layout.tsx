@@ -1,10 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { LogPanel } from "@/components/debug/LogPanel";
+import dynamic from "next/dynamic";
 import UserMenu from "@/components/auth/UserMenu";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import { generateMetadata } from "@/lib/seo/metadata";
+
+const LogPanel = dynamic(() => import("@/components/debug/LogPanel"), {
+  ssr: false,
+  loading: () => null,
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +24,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "r6hub — Tactical Sync",
-  description: "Second-screen tactical companion for Rainbow Six Siege. Coordinate your team in real-time.",
+  ...generateMetadata({
+    title: "r6hub - Rainbow Six Siege Strategy Platform",
+    description:
+      "Piattaforma per gestire lobby e strategie Rainbow Six Siege. Crea lobby, condividi strategie, collabora con il team.",
+    image: "/og-default.png",
+  }),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -47,7 +58,9 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <UserMenu />
-        <PageTransition>{children}</PageTransition>
+        <AnalyticsProvider>
+          <PageTransition>{children}</PageTransition>
+        </AnalyticsProvider>
         <CookieBanner />
         <LogPanel />
       </body>

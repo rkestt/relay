@@ -7,6 +7,7 @@ import {
   canCreateNextRound,
 } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
+import { winnerSideSchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // POST  /api/lobby/[id]/new-round
@@ -32,7 +33,7 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/new-round start", { lobbyId: id });
 
     // -- Parse winner_side from body ---------------------------------------
-    let body: { winner_side?: unknown };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -42,13 +43,12 @@ export async function POST(
       );
     }
 
-    const winnerSide = body.winner_side;
-    if (winnerSide !== "attacker" && winnerSide !== "defender") {
-      return NextResponse.json(
-        { error: "winner_side is required and must be 'attacker' or 'defender'" },
-        { status: 400 },
-      );
+    const validation = validateRequest(winnerSideSchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
+
+    const { winner_side: winnerSide } = validation.data;
 
     // -- Verify leader & fetch starting_side ----------------------------
     const { data: lobby, error: lobbyError } = await supabase

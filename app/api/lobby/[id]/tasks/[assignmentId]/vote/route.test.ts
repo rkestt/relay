@@ -76,7 +76,7 @@ describe("POST /api/lobby/[id]/tasks/[assignmentId]/vote", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toContain("vote_type must be");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 403 when user is not a lobby member", async () => {

@@ -8,7 +8,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
 import { Badge } from "@/components/ui/badge";
-import { MapViewer } from "@/components/maps/MapViewer";
+import dynamic from "next/dynamic";
+
+const MapViewer = dynamic(() => import("@/components/maps/MapViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
+      <span className="text-xs text-muted-foreground">Loading map…</span>
+    </div>
+  ),
+});
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map, Site, Operator } from "@/types";
 import imageCompression from "browser-image-compression";

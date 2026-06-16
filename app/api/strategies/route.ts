@@ -1,7 +1,9 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 import crypto from "crypto";
+import { createStrategySchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // POST /api/strategies — submit a new strategy
@@ -20,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // -- Parse & validate body ------------------------------------------
-    let body: Record<string, unknown>;
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -30,35 +32,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const validation = validateRequest(createStrategySchema, body);
+    if (!validation.success) {
+      return validation.error;
+    }
+
     const { title, map_id, site_id, operator_id, description, tags, image_url, hotspots, images } =
-      body;
+      validation.data;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
 
-    if (!title || typeof title !== "string") {
-      return NextResponse.json(
-        { error: "title is required" },
-        { status: 400 },
-      );
-    }
-    if (!map_id || typeof map_id !== "string") {
-      return NextResponse.json(
-        { error: "map_id is required" },
-        { status: 400 },
-      );
-    }
-    if (!site_id || typeof site_id !== "string") {
-      return NextResponse.json(
-        { error: "site_id is required" },
-        { status: 400 },
-      );
-    }
-    if (!operator_id || typeof operator_id !== "string") {
-      return NextResponse.json(
-        { error: "operator_id is required" },
-        { status: 400 },
-      );
-    }
     const imageUrl = Array.isArray(images) && images.length > 0
       ? images[0]
       : image_url;
@@ -215,7 +198,6 @@ export async function POST(request: Request) {
     // -- Call Discord webhook -------------------------------------------
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
     if (webhookUrl) {
-      try {
         const tagList = Array.isArray(tags)
           ? tags.filter((t): t is string => typeof t === "string").join(", ")
           : "None";
@@ -245,18 +227,33 @@ export async function POST(request: Request) {
           embed.description = description;
         }
 
-        await fetch(webhookUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ embeds: [embed] }),
-        });
-      } catch (webhookError) {
-        logger.error("API", "Failed to call Discord webhook", webhookError);
-        // Non-fatal
-      }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        try {
+          await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ embeds: [embed] }),
+            signal: controller.signal,
+          });
+        } catch (webhookError: unknown) {
+          if (webhookError instanceof Error && webhookError.name === "AbortError") {
+            logger.warn("API", "Discord webhook timeout after 5s");
+          } else {
+            logger.error("API", "Failed to call Discord webhook", webhookError);
+          }
+        } finally {
+          clearTimeout(timeoutId);
+        }
     }
 
     logger.debug("API", "POST /api/strategies success", { strategyId: strategy.id, status: strategy.status });
+
+    // Invalidate cache so new strategy appears immediately
+    revalidatePath("/strategies");
+    revalidateTag("strategies", "max");
+
     return NextResponse.json(
       { strategy: { id: strategy.id, status: strategy.status } },
       { status: 201 },
@@ -307,7 +304,12 @@ export async function GET(request: Request) {
     }
 
     logger.debug("API", "GET /api/strategies response", { strategyCount: strategies?.length ?? 0 });
-    return NextResponse.json({ strategies: strategies ?? [] });
+    return NextResponse.json({ strategies: strategies ?? [] }, {
+      headers: {
+        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        "CDN-Cache-Control": "public, s-maxage=60",
+      },
+    });
   } catch (error) {
     logger.error("API", "Strategy fetch unexpected error", error);
     return NextResponse.json(

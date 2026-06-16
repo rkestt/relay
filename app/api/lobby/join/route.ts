@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { joinLobbySchema, validateRequest } from "@/lib/validations";
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
     }
 
     // -- Parse & validate body ------------------------------------------
-    let body: { room_code?: unknown };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -26,15 +27,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const { room_code } = body;
-    if (!room_code || typeof room_code !== "string" || room_code.trim().length === 0) {
-      return NextResponse.json(
-        { error: "room_code is required" },
-        { status: 400 },
-      );
+    const validation = validateRequest(joinLobbySchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
 
-    const normalizedCode = room_code.trim().toUpperCase();
+    const { room_code: normalizedCode } = validation.data;
     logger.info("API", "POST /api/lobby/join start", { room_code: normalizedCode });
 
     // -- Look up lobby by room_code -------------------------------------

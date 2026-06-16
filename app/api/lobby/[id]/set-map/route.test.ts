@@ -152,7 +152,7 @@ describe("POST /api/lobby/[id]/set-map", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("map_id is required");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 404 when map not found", async () => {

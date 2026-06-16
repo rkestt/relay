@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { setMapSchema, validateRequest } from "@/lib/validations";
 
 export async function POST(
   request: Request,
@@ -39,11 +40,12 @@ export async function POST(
     }
 
     const body = await request.json();
-    const { map_id } = body;
-
-    if (!map_id || typeof map_id !== "string") {
-      return NextResponse.json({ error: "map_id is required" }, { status: 400 });
+    const validation = validateRequest(setMapSchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
+
+    const { map_id } = validation.data;
 
     // Verify the map exists
     const { data: map, error: mapError } = await supabase

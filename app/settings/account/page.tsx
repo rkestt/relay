@@ -1,5 +1,23 @@
-import { DeleteAccount } from "@/components/settings/DeleteAccount";
-import { ExportData } from "@/components/settings/ExportData";
+import dynamic from "next/dynamic";
+
+const ExportData = dynamic(() => import("@/components/settings/ExportData"), {
+  loading: () => (
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
+      <div className="h-5 w-40 rounded bg-muted" />
+      <div className="h-3 w-64 rounded bg-muted/60" />
+      <div className="h-10 w-36 rounded-lg bg-muted" />
+    </div>
+  ),
+});
+
+const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount"), {
+  loading: () => (
+    <div className="rounded-xl border border-red-200 bg-card p-6 space-y-4 animate-pulse">
+      <div className="h-5 w-32 rounded bg-muted" />
+      <div className="h-10 w-44 rounded-lg bg-muted" />
+    </div>
+  ),
+});
 
 export default function AccountSettingsPage() {
   return (

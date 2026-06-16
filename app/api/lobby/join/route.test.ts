@@ -68,7 +68,7 @@ describe("POST /api/lobby/join", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("room_code is required");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 404 when lobby not found", async () => {

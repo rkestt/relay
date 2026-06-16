@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { voteSchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // POST  /api/lobby/[id]/tasks/[assignmentId]/vote
@@ -30,7 +31,7 @@ export async function POST(
     });
 
     // -- Parse & validate body -------------------------------------------
-    let body: { vote_type?: unknown };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -40,17 +41,12 @@ export async function POST(
       );
     }
 
-    const { vote_type } = body;
-
-    if (vote_type !== null && vote_type !== "up" && vote_type !== "down") {
-      return NextResponse.json(
-        {
-          error:
-            "vote_type must be \"up\", \"down\", or null (null removes vote)",
-        },
-        { status: 400 },
-      );
+    const validation = validateRequest(voteSchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
+
+    const { vote_type } = validation.data;
 
     // -- Verify lobby membership -----------------------------------------
     const { data: membership } = await supabase

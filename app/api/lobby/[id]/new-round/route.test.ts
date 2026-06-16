@@ -128,7 +128,7 @@ describe("POST /api/lobby/[id]/new-round", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("winner_side is required and must be 'attacker' or 'defender'");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 200 and creates new round successfully (with previous round)", async () => {

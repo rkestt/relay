@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { assignTaskSchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // POST  /api/lobby/[id]/assign-tasks
@@ -27,7 +28,7 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/assign-tasks start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
-    let body: { user_id?: unknown; operator_id?: unknown };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -37,19 +38,12 @@ export async function POST(
       );
     }
 
-    const { user_id, operator_id } = body;
-
-    if (
-      !user_id ||
-      typeof user_id !== "string" ||
-      !operator_id ||
-      typeof operator_id !== "string"
-    ) {
-      return NextResponse.json(
-        { error: "user_id (string) and operator_id (string) are required" },
-        { status: 400 },
-      );
+    const validation = validateRequest(assignTaskSchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
+
+    const { user_id, operator_id } = validation.data;
 
     logger.info("API", "POST /api/lobby/[id]/assign-tasks body", { lobbyId: id, targetUserId: user_id, operator_id });
 

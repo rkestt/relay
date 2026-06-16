@@ -164,7 +164,7 @@ describe("POST /api/strategies", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("title is required");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 400 when map_id is missing", async () => {
@@ -182,7 +182,7 @@ describe("POST /api/strategies", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe("map_id is required");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 400 when image_url is missing", async () => {
@@ -194,7 +194,7 @@ describe("POST /api/strategies", () => {
     const response = await POST(
       new Request("http://localhost/api/strategies", {
         method: "POST",
-        body: JSON.stringify({ title: "Test", map_id: "map-1", site_id: "site-1", operator_id: "op-1" }),
+        body: JSON.stringify({ title: "Test Strategy", map_id: "map-1", site_id: "site-1", operator_id: "op-1" }),
       }),
     );
 

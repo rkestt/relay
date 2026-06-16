@@ -7,9 +7,18 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
-import { MapViewer } from "@/components/maps/MapViewer";
+import dynamic from "next/dynamic";
 import { VoteButtons } from "@/components/tasks/VoteButtons";
 import Image from "next/image";
+
+const MapViewer = dynamic(() => import("@/components/maps/MapViewer"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
+      <span className="text-xs text-muted-foreground">Loading map…</span>
+    </div>
+  ),
+});
 import type {
   StrategyTemplate,
   StrategyHotspot,

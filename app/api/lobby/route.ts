@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { getTeamSide } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
+import { createLobbySchema, validateRequest } from "@/lib/validations";
 
 // 30-character alphabet excluding 0, O, 1, I, l
 const ALPHABET = "ABCDEFGHJKLMNPQRSTVWXYZ23456789";
@@ -55,13 +56,16 @@ export async function POST(request: Request) {
     }
 
     // -- Parse body for starting_side -----------------------------------
-    let body: { starting_side?: unknown } = {};
+    let body: unknown = {};
     try {
       body = await request.json();
     } catch {
       // body is optional; default will be attacker
     }
-    const startingSide = body.starting_side === "defender" ? "defender" : "attacker";
+    const validation = validateRequest(createLobbySchema, body);
+    const startingSide = validation.success
+      ? validation.data.starting_side ?? "attacker"
+      : "attacker";
 
     // -- Generate room code with retries on unique collision -------------
     let lastError: unknown;

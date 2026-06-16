@@ -76,7 +76,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toContain("user_id (string) and operator_id (string) are required");
+    expect(body.error).toBe("Dati non validi");
   });
 
   it("returns 404 when lobby not found", async () => {
@@ -159,6 +159,11 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
       ),
     };
 
+    const bansQuery = {
+      select: vi.fn(() => bansQuery),
+      eq: vi.fn(() => bansQuery),
+    };
+
     const selectionsQuery = {
       select: vi.fn(() => selectionsQuery),
       eq: vi.fn(() => selectionsQuery),
@@ -172,9 +177,18 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "lobbies") return lobbyQuery;
       if (table === "rounds") return roundQuery;
+      if (table === "lobby_bans") return bansQuery;
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "strategy_templates") return strategiesQuery;
       return { select: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
+    });
+
+    bansQuery.select.mockReturnValue(bansQuery);
+    bansQuery.eq.mockReturnValue(bansQuery);
+    const bansPromise = Promise.resolve({ data: [], error: null });
+    Object.assign(bansQuery, {
+      then: bansPromise.then.bind(bansPromise),
+      catch: bansPromise.catch.bind(bansPromise),
     });
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
@@ -199,7 +213,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     expect(response.status).toBe(404);
     const body = await response.json();
-    expect(body.error).toContain("No approved strategies found");
+    expect(body.error).toContain("No strategies available");
   });
 
   it("returns 200 and assigns a strategy successfully (self-assign)", async () => {
@@ -224,6 +238,11 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
       maybeSingle: vi.fn(() =>
         Promise.resolve({ data: { id: "round-1" }, error: null }),
       ),
+    };
+
+    const bansQuery = {
+      select: vi.fn(() => bansQuery),
+      eq: vi.fn(() => bansQuery),
     };
 
     const selectionsQuery = {
@@ -256,6 +275,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "lobbies") return lobbyQuery;
       if (table === "rounds") return roundQuery;
+      if (table === "lobby_bans") return bansQuery;
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "strategy_templates") return strategiesQuery;
       if (table === "task_assignments") {
@@ -264,6 +284,14 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
         return existingQuery;
       }
       return { select: vi.fn(), insert: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
+    });
+
+    bansQuery.select.mockReturnValue(bansQuery);
+    bansQuery.eq.mockReturnValue(bansQuery);
+    const bansResult = Promise.resolve({ data: [], error: null });
+    Object.assign(bansQuery, {
+      then: bansResult.then.bind(bansResult),
+      catch: bansResult.catch.bind(bansResult),
     });
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);

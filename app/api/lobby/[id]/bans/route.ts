@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
+import { banOperatorSchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
 // GET  /api/lobby/[id]/bans
@@ -72,7 +73,7 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/bans start", { lobbyId: id });
 
     // -- Parse & validate body -------------------------------------------
-    let body: { operator_id?: unknown; side?: unknown };
+    let body: unknown;
     try {
       body = await request.json();
     } catch {
@@ -82,21 +83,13 @@ export async function POST(
       );
     }
 
-    const { operator_id, side } = body;
-    logger.info("API", "POST /api/lobby/[id]/bans body", { lobbyId: id, operator_id, side });
-
-    if (
-      !operator_id ||
-      typeof operator_id !== "string" ||
-      !side ||
-      typeof side !== "string" ||
-      !["attacker", "defender"].includes(side)
-    ) {
-      return NextResponse.json(
-        { error: "operator_id (string) and side ('attacker'|'defender') are required" },
-        { status: 400 },
-      );
+    const validation = validateRequest(banOperatorSchema, body);
+    if (!validation.success) {
+      return validation.error;
     }
+
+    const { operator_id, side } = validation.data;
+    logger.info("API", "POST /api/lobby/[id]/bans body", { lobbyId: id, operator_id, side });
 
     // -- Verify leader ---------------------------------------------------
     const { data: lobby, error: lobbyError } = await supabase
