@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import * as Sentry from "@sentry/nextjs";
 
 export default function Error({
   error,
@@ -13,6 +14,11 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error("Application error:", error);
+    Sentry.captureException(error, {
+      extra: {
+        digest: error.digest,
+      },
+    });
   }, [error]);
 
   return (

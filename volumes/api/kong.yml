@@ -1,3 +1,5 @@
+# IMPORTANTE: Sostituire "https://r6hub.yourdomain.com" con dominio production
+# prima del deploy. Configurare anche NEXT_PUBLIC_SITE_URL in .env
 _format_version: '2.1'
 _transform: true
 

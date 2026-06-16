@@ -8,7 +8,7 @@ interface MetadataProps {
   type?: "website" | "article";
 }
 
-const BASE_URL = "https://r6hub.yourdomain.com";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://r6hub.yourdomain.com";
 
 export function generateMetadata({
   title,
@@ -17,10 +17,10 @@ export function generateMetadata({
   url = "",
   type = "website",
 }: MetadataProps): Metadata {
-  const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
+  const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   const fullImageUrl = image.startsWith("http")
     ? image
-    : `${BASE_URL}${image}`;
+    : `${baseUrl}${image}`;
 
   return {
     title,

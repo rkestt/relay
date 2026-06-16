@@ -21,14 +21,15 @@ const nextConfig: NextConfig = withPWA({
     ],
   },
   async headers() {
+    const isDev = process.env.NODE_ENV === "development";
+    const cspValue = `default-src 'self'; script-src 'self' ${isDev ? "'unsafe-eval' " : ""}'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co ws://localhost:*; font-src 'self' data:; frame-ancestors 'none';`;
     return [
       {
         source: "/(.*)",
         headers: [
           {
             key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co ws://localhost:*; font-src 'self' data:; frame-ancestors 'none';",
+            value: cspValue,
           },
           {
             key: "Strict-Transport-Security",
