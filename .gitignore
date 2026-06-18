@@ -55,3 +55,7 @@ graphify-out/
 # Test output
 dogfood-output/
 *.png
+
+vps-credentials.txt
+
+vps-credentials.txt
