@@ -11,6 +11,11 @@ interface LogEntry {
     message: string;
     stack?: string;
     name?: string;
+    /** Raw type of the thrown value — added for diagnostics */
+    _type?: string;
+    /** Raw keys present on the thrown object */
+    _keys?: string;
+    [key: string]: unknown;
   };
 }
 
@@ -55,6 +60,58 @@ function formatTime(ts: number): string {
     second: "2-digit",
     fractionalSecondDigits: 3,
   });
+}
+
+/**
+ * Normalize a thrown value into a serializable LogEntry['error'].
+ * Handles Error instances, strings, objects, and edge cases like `{}`.
+ */
+function normalizeError(error: unknown): LogEntry["error"] {
+  if (error instanceof Error) {
+    // Some errors (e.g. Supabase AuthRetryableFetchError) have a useless message
+    // like "{}" or "". Fall back to the constructor name so the log is diagnostic.
+    const rawMsg = error.message;
+    const msg = !rawMsg || /^\s*[{}\[\]]+\s*$/.test(rawMsg)
+      ? `[${error.constructor?.name ?? "Error"}: no detail]`
+      : rawMsg;
+    return {
+      message: msg,
+      stack: error.stack,
+      name: error.name,
+      _type: error.constructor?.name ?? "Error",
+      ...("code" in error ? { code: String((error as Record<string, unknown>).code) } : {}),
+      ...("details" in error ? { details: String((error as Record<string, unknown>).details) } : {}),
+      ...("hint" in error ? { hint: String((error as Record<string, unknown>).hint) } : {}),
+    };
+  }
+
+  if (typeof error === "string") {
+    return { message: error, _type: "string" };
+  }
+
+  if (error === null || error === undefined) {
+    return undefined;
+  }
+
+  if (typeof error === "object") {
+    const obj = error as Record<string, unknown>;
+    const hasMessage = "message" in obj;
+    const normalized: LogEntry["error"] & Record<string, unknown> = {
+      message: hasMessage ? String(obj.message) : `[${obj.constructor?.name ?? "Object"}]`,
+      _type: obj.constructor?.name ?? "Object",
+      _keys: Object.keys(obj).join(","),
+    };
+    // Preserve ALL enumerable properties (survives JSON.stringify unlike undefined values)
+    for (const key of Object.keys(obj)) {
+      if (key !== "message" && key !== "_type" && key !== "_keys") {
+        normalized[key] = obj[key];
+      }
+    }
+    return normalized;
+  }
+
+  // Primitive (number, boolean, symbol, bigint)
+  return { message: String(error), _type: typeof error };
 }
 
 class Logger {
@@ -102,8 +159,8 @@ class Logger {
     }[entry.level];
 
     if (isClient()) {
-      if (entry.error) {
-        console.error(`%c${prefix}`, style, entry.message, entry.error, entry.data ?? "");
+      if (entry.level === "error") {
+        console.error(`%c${prefix}`, style, entry.message, entry.error ?? entry.data ?? "", entry.data ?? "");
       } else if (entry.level === "warn") {
         console.warn(`%c${prefix}`, style, entry.message, entry.data ?? "");
       } else if (entry.level === "debug") {
@@ -131,11 +188,7 @@ class Logger {
       tag,
       message,
       data: data ?? undefined,
-      error: error instanceof Error
-        ? { message: error.message, stack: error.stack, name: error.name }
-        : typeof error === "string"
-          ? { message: error }
-          : undefined,
+      error: normalizeError(error),
     };
     this.push(entry);
     this.toConsole(entry);
