@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
+import { handleApiError } from "@/lib/api-error";
 import { PlusIcon, RefreshIcon, AlertIcon } from "@/components/icons";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
@@ -40,15 +42,12 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/lobby", {
+      const res = await apiFetch("/api/lobby", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ starting_side: startingSide }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to create lobby");
-      }
+      await handleApiError(res);
       const { lobby } = await res.json();
       logger.info("Landing", "Lobby created", { room_code: lobby.room_code, startingSide: lobby.starting_side });
       localStorage.setItem(ROOM_CODE_KEY, lobby.room_code);
@@ -67,15 +66,12 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/lobby/join", {
+      const res = await apiFetch("/api/lobby/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ room_code: roomCode.trim().toUpperCase() }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to join lobby");
-      }
+      await handleApiError(res);
       const { lobby } = await res.json();
       logger.info("Landing", "Lobby joined", { room_code: lobby.room_code });
       localStorage.setItem(ROOM_CODE_KEY, lobby.room_code);
@@ -94,17 +90,18 @@ export default function HomePage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/lobby/join", {
+      const res = await apiFetch("/api/lobby/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ room_code: rejoinCode }),
       });
-      if (!res.ok) {
+      if (res.status === 404) {
         localStorage.removeItem(ROOM_CODE_KEY);
         setRejoinCode(null);
-        const data = await res.json();
-        throw new Error(data.error ?? "Failed to rejoin lobby");
+        setError("Lobby no longer exists");
+        return;
       }
+      await handleApiError(res);
       const { lobby } = await res.json();
       logger.info("Landing", "Rejoin successful", { room_code: lobby.room_code });
       router.push(`/lobby/${lobby.room_code}`);

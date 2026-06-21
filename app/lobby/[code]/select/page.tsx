@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Image from "next/image";
 import type { Map, Site, Operator, OperatorTag } from "@/types";
@@ -68,7 +69,7 @@ export default function SelectPage({
 
   const refreshLobbyState = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/lobby/${id}/state`);
+      const res = await apiFetch(`/api/lobby/${id}/state`);
       if (res.ok) {
         const data: LobbyState = await res.json();
         setLobbyState(data);
@@ -176,7 +177,7 @@ export default function SelectPage({
       if (selectedSiteId) body.site_id = selectedSiteId;
       if (selectedOperatorId) body.operator_id = selectedOperatorId;
 
-      const res = await fetch(`/api/lobby/${lobbyId}/lock-selection`, {
+      const res = await apiFetch(`/api/lobby/${lobbyId}/lock-selection`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -193,7 +194,7 @@ export default function SelectPage({
         const currentUserId = userData?.user?.id;
         if (currentUserId) {
           logger.info("SelectPage", "Auto-assigning task", { operatorId: selectedOperatorId });
-          const assignRes = await fetch(`/api/lobby/${lobbyId}/assign-tasks`, {
+          const assignRes = await apiFetch(`/api/lobby/${lobbyId}/assign-tasks`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ user_id: currentUserId, operator_id: selectedOperatorId }),

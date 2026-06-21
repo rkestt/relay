@@ -24,17 +24,17 @@ describe("getTeamSide()", () => {
   });
 
   it("returns correct sides for overtime rounds 7-9", () => {
-    // Round 7 = opposite of starting (same as half 2)
-    expect(getTeamSide("attacker", 7)).toBe("defender");
-    // Round 8 = switch
-    expect(getTeamSide("attacker", 8)).toBe("attacker");
-    // Round 9 = switch
-    expect(getTeamSide("attacker", 9)).toBe("defender");
+    // Round 7 = switch from round 6 (opposite of starting)
+    expect(getTeamSide("attacker", 7)).toBe("attacker");
+    // Round 8 = switch back
+    expect(getTeamSide("attacker", 8)).toBe("defender");
+    // Round 9 = switch again
+    expect(getTeamSide("attacker", 9)).toBe("attacker");
 
     // Mirror for defender start
-    expect(getTeamSide("defender", 7)).toBe("attacker");
-    expect(getTeamSide("defender", 8)).toBe("defender");
-    expect(getTeamSide("defender", 9)).toBe("attacker");
+    expect(getTeamSide("defender", 7)).toBe("defender");
+    expect(getTeamSide("defender", 8)).toBe("attacker");
+    expect(getTeamSide("defender", 9)).toBe("defender");
   });
 
   it("produces correct full sequence", () => {
@@ -48,9 +48,9 @@ describe("getTeamSide()", () => {
       "defender",
       "defender",
       "defender",
-      "defender",
       "attacker",
       "defender",
+      "attacker",
     ]);
   });
 });

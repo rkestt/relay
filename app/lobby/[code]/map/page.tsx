@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Image from "next/image";
 import type { Map } from "@/types";
@@ -119,7 +120,7 @@ export default function LobbyMapPage({
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch(`/api/lobby/${lobbyId}/set-map`, {
+      const res = await apiFetch(`/api/lobby/${lobbyId}/set-map`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ map_id: selectedMapId }),

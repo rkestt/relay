@@ -49,7 +49,7 @@ Get-Content $EnvFile | ForEach-Object {
 
 $pgPassword = $envVars["POSTGRES_PASSWORD"]
 $pgPort = $envVars["POSTGRES_DIRECT_PORT"]
-if (-not $pgPort) { $pgPort = "54324" }
+if (-not $pgPort) { $pgPort = "54834" }
 
 if (-not $pgPassword) {
     Write-Host "ERROR: POSTGRES_PASSWORD not found in $EnvFile" -ForegroundColor Red

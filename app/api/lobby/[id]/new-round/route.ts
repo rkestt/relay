@@ -48,7 +48,7 @@ export async function POST(
       return validation.error;
     }
 
-    const { winner_side: winnerSide } = validation.data;
+    const { winner_side: winnerSide, team_side } = validation.data;
 
     // -- Verify leader & fetch starting_side ----------------------------
     const { data: lobby, error: lobbyError } = await supabase
@@ -134,13 +134,19 @@ export async function POST(
     // -- Create next round -------------------------------------------------
     const newRoundNumber = currentRound.round_number + 1;
 
+    // Overtime: side chosen manually (random in real R6S)
+    // Regulation: calculated from starting_side
+    const teamSide = newRoundNumber >= 7 && team_side
+      ? team_side
+      : getTeamSide(startingSide, newRoundNumber);
+
     const { data: newRound, error: insertError } = await supabase
       .from("rounds")
       .insert({
         lobby_id: id,
         round_number: newRoundNumber,
         status: "active",
-        team_side: getTeamSide(startingSide, newRoundNumber),
+        team_side: teamSide,
       })
       .select("id, round_number, team_side")
       .single();

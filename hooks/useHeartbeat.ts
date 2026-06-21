@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { useLobbyStore } from "@/stores/lobbyStore";
 import type { LobbyBan, LobbyMember, LobbySelection, Round } from "@/types";
 
@@ -48,7 +49,7 @@ export function useHeartbeat(lobbyId: string | null) {
     try {
       logger.info("useHeartbeat", "sync start", { lobbyId: id });
 
-      const res = await fetch(`/api/lobby/${id}/state`);
+      const res = await apiFetch(`/api/lobby/${id}/state`);
       if (!res.ok) {
         logger.warn("useHeartbeat", "state fetch failed", { status: res.status });
         return;

@@ -6,6 +6,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import Image from "next/image";
@@ -90,7 +91,7 @@ export default function BansPage({
           return;
         }
 
-        const res = await fetch(`/api/lobby/${lobby.id}/state`);
+        const res = await apiFetch(`/api/lobby/${lobby.id}/state`);
         if (!res.ok) throw new Error("Failed to fetch state");
         const data: LobbyState = await res.json();
         logger.info("BansPage", "Bans fetched", { banCount: data.bans.length });
@@ -110,7 +111,7 @@ export default function BansPage({
   // ── Refresh bans from server ────────────────────────────
   const refreshBans = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/lobby/${id}/state`);
+      const res = await apiFetch(`/api/lobby/${id}/state`);
       if (res.ok) {
         const data: LobbyState = await res.json();
         setBans(data.bans);
@@ -140,7 +141,7 @@ export default function BansPage({
       setBanning(true);
       setError(null);
       try {
-        const res = await fetch(`/api/lobby/${lobbyId}/bans`, {
+        const res = await apiFetch(`/api/lobby/${lobbyId}/bans`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ operator_id: operatorId, side }),
@@ -153,7 +154,7 @@ export default function BansPage({
         setLastBannedId(operatorId);
         setTimeout(() => setLastBannedId(null), 400);
         // Refresh bans
-        const stateRes = await fetch(`/api/lobby/${lobbyId}/state`);
+        const stateRes = await apiFetch(`/api/lobby/${lobbyId}/state`);
         if (stateRes.ok) {
           const data: LobbyState = await stateRes.json();
           setBans(data.bans);

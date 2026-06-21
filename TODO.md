@@ -1,4 +1,10 @@
-# r6hub — TODO
+# Aggiunti da Andrea
+- Search in ban operators per cercare gli operatori
+
+## Post-MVP
+- colori custom per i team (come quelli di r6)
+- bottone home (che riporta nella dashboard della lobby) in ogni pagina utile
+
 
 ## Next Steps (Ready to Execute)
 

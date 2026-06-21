@@ -63,6 +63,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -93,6 +97,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -123,6 +131,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -155,6 +167,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -204,6 +220,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -253,6 +273,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -304,6 +328,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -353,6 +381,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -402,6 +434,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600
@@ -461,6 +497,10 @@ services:
             - X-Client-Info
             - Apikey
             - X-Supabase-Api-Key
+            - x-supabase-api-version
+            - accept-profile
+            - content-profile
+            - x-retry-count
           exposed_headers:
             - X-Supabase-Api-Key
           max_age: 3600

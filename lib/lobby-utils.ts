@@ -1,10 +1,9 @@
 /**
- * Returns the team side for a given round number based on R6S ranked rules.
+ * Returns the team side for regulation rounds based on R6S ranked rules.
  * Rounds 1-3: startingSide (block 1)
  * Rounds 4-6: opposite (block 2)
- * Round 7 (OT1): opposite (same as block 2)
- * Round 8 (OT2): startingSide (switch)
- * Round 9 (OT3): opposite (switch)
+ * Overtime (rounds 7-9): side chosen manually by the leader (random in real R6S)
+ * This function is still used as fallback for OT but the actual side comes from user input.
  */
 export function getTeamSide(
   startingSide: "attacker" | "defender",
@@ -16,10 +15,10 @@ export function getTeamSide(
   if (roundNumber <= 3) return startingSide;
   if (roundNumber <= 6) return opposite;
 
-  // Overtime: alternate every round, starting from opposite
-  if (roundNumber === 7) return opposite;
-  if (roundNumber === 8) return startingSide;
-  if (roundNumber === 9) return opposite;
+  // Overtime: alternate every round, start opposite of round 6
+  if (roundNumber === 7) return startingSide;
+  if (roundNumber === 8) return opposite;
+  if (roundNumber === 9) return startingSide;
 
   // Fallback (should never happen in valid match)
   return startingSide;

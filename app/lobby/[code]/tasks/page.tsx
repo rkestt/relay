@@ -6,6 +6,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { cn } from "@/lib/utils";
@@ -109,7 +110,7 @@ export default function TasksPage({
         return;
       }
 
-      const stateRes = await fetch(`/api/lobby/${id}/state`);
+      const stateRes = await apiFetch(`/api/lobby/${id}/state`);
       if (!stateRes.ok) {
         throw new Error("Failed to fetch lobby state");
       }
@@ -303,7 +304,7 @@ export default function TasksPage({
       );
 
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/lobby/${lobbyId}/tasks/${assignmentId}/vote`,
           {
             method: "POST",
@@ -484,20 +485,7 @@ export default function TasksPage({
                 </svg>
               }
               title="No strategies yet"
-              description="Be the first to submit! Strategies appear after selecting an operator in a round."
-              action={
-                <Button
-                  variant="default"
-                  size="sm"
-                  className="h-11 rounded-xl"
-                  onClick={() => {
-                    if (!code) return;
-                    router.push(`/lobby/${code}/submit`);
-                  }}
-                >
-                  Submit Strategy
-                </Button>
-              }
+              description="Strategies appear after selecting an operator in a round."
               className="py-20"
             />
           ) : (

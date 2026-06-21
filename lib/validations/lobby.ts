@@ -31,6 +31,7 @@ export const winnerSideSchema = z.object({
   winner_side: z.enum(['attacker', 'defender'], {
     message: 'winner_side richiesto (attacker/defender)',
   }),
+  team_side: z.enum(['attacker', 'defender']).optional(),
 });
 
 export const voteSchema = z.object({

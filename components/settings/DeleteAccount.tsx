@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { apiFetch } from "@/lib/fetch";
 
 export function DeleteAccount() {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -15,9 +16,10 @@ export function DeleteAccount() {
     if (confirmText !== "ELIMINA") return;
 
     setLoading(true);
-    const response = await fetch("/api/user/account", { method: "DELETE" });
+    const response = await apiFetch("/api/user/account", { method: "DELETE" });
 
     if (response.ok) {
+      localStorage.removeItem("r6hub_room_code");
       router.push("/");
       router.refresh();
     } else {

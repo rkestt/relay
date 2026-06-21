@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -10,6 +11,7 @@ import { logger } from "@/lib/logger";
 import { AlertIcon, DiscordIcon } from "@/components/icons";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -59,8 +61,16 @@ export default function SignupPage() {
       logger.info("SignupPage", "Signup successful", {
         email,
         userId: data.user?.id,
+        hasSession: !!data.session,
       });
-      setSuccess(true);
+
+      // If session is null → email confirmation required (GoTrue sent magic link).
+      // If session exists → autoconfirm=true, user is already authenticated.
+      if (data.session) {
+        router.push("/");
+      } else {
+        setSuccess(true);
+      }
     } catch (err) {
       logger.error("SignupPage", "Signup failed", err);
       setError(err instanceof Error ? err.message : "Failed to create account");

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
 
@@ -277,7 +278,7 @@ export default function SubmitStrategyPage() {
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const res = await fetch("/api/strategies", {
+      const res = await apiFetch("/api/strategies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

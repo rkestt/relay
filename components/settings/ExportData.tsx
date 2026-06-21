@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DownloadIcon } from "@/components/icons";
+import { apiFetch } from "@/lib/fetch";
 
 export function ExportData() {
   const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ export function ExportData() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/user/export");
+      const response = await apiFetch("/api/user/export");
 
       if (!response.ok) {
         throw new Error("Export failed");

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 import dynamic from "next/dynamic";
 import { VoteButtons } from "@/components/tasks/VoteButtons";
 import Image from "next/image";
@@ -27,7 +28,7 @@ import type {
   Profile,
   Map,
 } from "@/types";
-import { AlertIcon, ArrowRightIcon, BackArrowIcon, UserIcon } from "@/components/icons";
+import { AlertIcon, ArrowRightIcon, BackArrowIcon, CheckIcon, SpinnerIcon, UserIcon } from "@/components/icons";
 
 interface DetailData {
   assignment: TaskAssignment & {
@@ -54,7 +55,15 @@ export default function TaskDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [finishing, setFinishing] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
+
+  // ── Finish round: return to lobby home ─────────
+  const handleFinish = useCallback(() => {
+    if (finishing) return;
+    setFinishing(true);
+    router.push(`/lobby/${code}`);
+  }, [finishing, router, code]);
 
   useEffect(() => {
     logger.info("TaskDetailPage", "Mount");
@@ -256,7 +265,7 @@ export default function TaskDetailPage({
       );
 
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/lobby/${lobbyId}/tasks/${assignmentId}/vote`,
           {
             method: "POST",
@@ -420,17 +429,32 @@ export default function TaskDetailPage({
             Back
         </Button>
 
-        <h1 className="text-base font-bold truncate max-w-[50%]">
+        <h1 className="text-base font-bold truncate max-w-[40%]">
           {strategy.title}
         </h1>
 
-        <VoteButtons
-          score={score}
-          userVote={data.userVote}
-          onVote={handleVote}
-          orientation="horizontal"
-          size="md"
-        />
+        <div className="flex items-center gap-3">
+          <VoteButtons
+            score={score}
+            userVote={data.userVote}
+            onVote={handleVote}
+            orientation="horizontal"
+            size="md"
+          />
+          <Button
+            size="sm"
+            onClick={handleFinish}
+            disabled={finishing}
+            className="h-9 min-w-[90px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-95 hidden md:inline-flex"
+          >
+            {finishing ? (
+              <SpinnerIcon className="size-4 mr-1.5" />
+            ) : (
+              <CheckIcon className="size-4 mr-1.5" />
+            )}
+            Finish
+          </Button>
+        </div>
       </header>
 
       {/* ── Content ────────────────────────────────────── */}
@@ -621,7 +645,7 @@ export default function TaskDetailPage({
 
       {/* ── Sticky Vote Bar (mobile) ────────────────────── */}
       <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur-sm p-3 md:hidden">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-between gap-2">
           <VoteButtons
             score={score}
             userVote={data.userVote}
@@ -629,6 +653,19 @@ export default function TaskDetailPage({
             orientation="horizontal"
             size="md"
           />
+          <Button
+            size="sm"
+            onClick={handleFinish}
+            disabled={finishing}
+            className="h-11 min-w-[100px] rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-95"
+          >
+            {finishing ? (
+              <SpinnerIcon className="size-4 mr-1.5" />
+            ) : (
+              <CheckIcon className="size-4 mr-1.5" />
+            )}
+            Finish
+          </Button>
         </div>
       </div>
     </div>

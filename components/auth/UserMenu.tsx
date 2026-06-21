@@ -43,6 +43,7 @@ export default function UserMenu() {
   async function handleSignOut() {
     const supabase = createBrowserClient();
     await supabase.auth.signOut();
+    localStorage.removeItem("r6hub_room_code");
     router.push("/login");
   }
 

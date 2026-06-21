@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
 
 // ──────────────────────────────────────────────
 // Strip HTML tags from a string
@@ -59,7 +60,7 @@ function ValidateContent() {
 
     (async () => {
       try {
-        const res = await fetch(
+        const res = await apiFetch(
           `/api/validate?token=${encodeURIComponent(token)}&strategyId=${encodeURIComponent(strategyId)}&action=${encodeURIComponent(action)}`,
         );
 
@@ -98,7 +99,7 @@ function ValidateContent() {
   useEffect(() => {
     if (state.status === "success") {
       const timer = setTimeout(() => {
-        router.push("/lobby");
+        router.push("/");
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -155,9 +156,9 @@ function ValidateContent() {
               variant="outline"
               size="lg"
               className="w-full h-11"
-              onClick={() => router.push("/lobby")}
+              onClick={() => router.push("/")}
             >
-              Go to Lobby
+              Go to Home
             </Button>
           </div>
         )}
