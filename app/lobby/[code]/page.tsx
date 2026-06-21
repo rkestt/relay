@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
+import { apiFetch } from "@/lib/fetch";
+import { handleApiError, errorMessage } from "@/lib/api-error";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
@@ -64,6 +66,8 @@ export default function LobbyPage({
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [showStartConfirm, setShowStartConfirm] = useState(false);
   const [showRoundWinnerModal, setShowRoundWinnerModal] = useState(false);
+  const [showOvertimeSideModal, setShowOvertimeSideModal] = useState(false);
+  const [pendingWinnerSide, setPendingWinnerSide] = useState<"attacker" | "defender" | null>(null);
   const [matchResult, setMatchResult] = useState<{ winner: string; score: { attacker: number; defender: number } } | null>(null);
 
   const { isLeader, setIsLeader, setLobbyId: storeSetLobbyId, setLobbyCode: storeSetLobbyCode } =
@@ -124,11 +128,8 @@ export default function LobbyPage({
 
   const refreshState = useCallback(async (lid: string) => {
     logger.debug("LobbyPage", "refreshState start", { lobbyId: lid });
-    const res = await fetch(`/api/lobby/${lid}/state`);
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.error ?? "Failed to fetch lobby state");
-    }
+    const res = await apiFetch(`/api/lobby/${lid}/state`);
+    await handleApiError(res);
     const data: LobbyState = await res.json();
     logger.info("LobbyPage", "refreshState ok", { lobbyId: lid, members: data.members.length });
     setState(data);
@@ -137,16 +138,65 @@ export default function LobbyPage({
 
   useEffect(() => {
     if (!code || !currentUserId) return;
-    loadLobby(code);
-  }, [code, currentUserId, loadLobby]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = createBrowserClient();
+        const { data: lobby } = await supabase
+          .from("lobbies")
+          .select("id, room_code, leader_id")
+          .eq("room_code", code)
+          .single();
+
+        if (cancelled) return;
+
+        if (!lobby) {
+          logger.warn("LobbyPage", "loadLobby error - lobby not found", { code });
+          setError("Lobby not found.");
+          setLoading(false);
+          return;
+        }
+
+        setLobbyId(lobby.id);
+        storeSetLobbyId(lobby.id);
+        storeSetLobbyCode(code);
+        localStorage.setItem(ROOM_CODE_KEY, code);
+      } catch (err) {
+        if (cancelled) return;
+        logger.error("LobbyPage", "loadLobby failed", err);
+        setError(err instanceof Error ? err.message : "Failed to load lobby");
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [code, currentUserId, storeSetLobbyId, storeSetLobbyCode]);
 
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
 
   useEffect(() => {
-    if (lobbyId && (lastEventAt || lastSync)) {
-      refreshState(lobbyId);
-    }
+    if (!lobbyId || (!lastEventAt && !lastSync)) return;
+    let cancelled = false;
+    (async () => {
+      logger.debug("LobbyPage", "refreshState start", { lobbyId });
+      const res = await apiFetch(`/api/lobby/${lobbyId}/state`);
+      if (cancelled) return;
+      if (!res.ok) {
+        const data = await res.json();
+        logger.warn("LobbyPage", "refreshState failed", { status: res.status, error: data.error });
+        return;
+      }
+      const data: LobbyState = await res.json();
+      if (cancelled) return;
+      logger.info("LobbyPage", "refreshState ok", { lobbyId, members: data.members.length });
+      setState(data);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [lobbyId, lastEventAt, lastSync]);
 
   useEffect(() => {
@@ -175,7 +225,7 @@ export default function LobbyPage({
     setShowLeaveConfirm(false);
     logger.info("LobbyPage", "Leave lobby", { lobbyId });
     try {
-      await fetch(`/api/lobby/${lobbyId}/leave`, { method: "POST" });
+      await apiFetch(`/api/lobby/${lobbyId}/leave`, { method: "POST" });
       localStorage.removeItem(ROOM_CODE_KEY);
       router.push("/");
     } catch (err) {
@@ -197,26 +247,93 @@ export default function LobbyPage({
   const handleRoundWinner = useCallback(async (winnerSide: "attacker" | "defender") => {
     if (!lobbyId) return;
     setShowRoundWinnerModal(false);
+
+    // Detect OT: round 6 ends with 3-3 → next round is OT
+    const currentRoundNum = state?.currentRound?.round_number ?? 0;
+    const curScore = state?.score ?? { attacker: 0, defender: 0 };
+    const newAttacker = curScore.attacker + (winnerSide === "attacker" ? 1 : 0);
+    const newDefender = curScore.defender + (winnerSide === "defender" ? 1 : 0);
+    const isOT = currentRoundNum >= 6 && newAttacker === 3 && newDefender === 3;
+
+    if (isOT) {
+      // Round 6 completed → show side picker for OT before creating round 7
+      setPendingWinnerSide(winnerSide);
+      setShowOvertimeSideModal(true);
+      // Mark round 6 as completed via API first
+      try {
+        const res = await apiFetch(`/api/lobby/${lobbyId}/new-round`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ winner_side: winnerSide }),
+        });
+        await handleApiError(res);
+        const data = await res.json();
+        if (data.matchOver) {
+          setMatchResult({ winner: data.winner, score: data.score });
+        }
+        await refreshState(lobbyId);
+      } catch (err) {
+        const msg = errorMessage(err, "Failed to complete round");
+        logger.error("LobbyPage", "New round (regulation) failed", err, {
+          winnerSide,
+          currentRoundNum,
+          isOT,
+        });
+        setError(msg);
+      }
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/lobby/${lobbyId}/new-round`, {
+      const res = await apiFetch(`/api/lobby/${lobbyId}/new-round`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ winner_side: winnerSide }),
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
-      }
+      await handleApiError(res);
       const data = await res.json();
       if (data.matchOver) {
         setMatchResult({ winner: data.winner, score: data.score });
       }
       await refreshState(lobbyId);
     } catch (err) {
-      logger.error("LobbyPage", "New round failed", err);
-      setError(err instanceof Error ? err.message : "Failed to start new round");
+      const msg = errorMessage(err, "Failed to start new round");
+      logger.error("LobbyPage", "New round failed", err, {
+        winnerSide,
+        currentRoundNum,
+        isOT,
+      });
+      setError(msg);
     }
-  }, [lobbyId, refreshState]);
+  }, [lobbyId, refreshState, state?.currentRound?.round_number, state?.score]);
+
+  const handleOvertimeSide = useCallback(async (teamSide: "attacker" | "defender") => {
+    if (!lobbyId || !pendingWinnerSide) return;
+    setShowOvertimeSideModal(false);
+    try {
+      const res = await apiFetch(`/api/lobby/${lobbyId}/new-round`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          winner_side: pendingWinnerSide,
+          team_side: teamSide,
+        }),
+      });
+      await handleApiError(res);
+      const data = await res.json();
+      if (data.matchOver) {
+        setMatchResult({ winner: data.winner, score: data.score });
+      }
+      await refreshState(lobbyId);
+    } catch (err) {
+      const msg = errorMessage(err, "Failed to start overtime round");
+      logger.error("LobbyPage", "Overtime new round failed", err, {
+        pendingWinnerSide,
+        teamSide,
+      });
+      setError(msg);
+    }
+  }, [lobbyId, pendingWinnerSide, refreshState]);
 
   const handleStartGame = useCallback(async () => {
     if (!lobbyId) return;
@@ -226,16 +343,14 @@ export default function LobbyPage({
     }
     logger.info("LobbyPage", "Start game click", { lobbyId });
     try {
-      const res = await fetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
-      }
+      const res = await apiFetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
+      await handleApiError(res);
       logger.debug("LobbyPage", "Start game successful, refetching state");
       await refreshState(lobbyId);
     } catch (err) {
+      const msg = errorMessage(err, "Failed to start game");
       logger.error("LobbyPage", "Start game failed", err);
-      setError(err instanceof Error ? err.message : "Failed to start game");
+      setError(msg);
     }
   }, [lobbyId, refreshState, state?.members.length]);
 
@@ -244,15 +359,13 @@ export default function LobbyPage({
     setShowStartConfirm(false);
     logger.info("LobbyPage", "Start game confirmed (solo)", { lobbyId });
     try {
-      const res = await fetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error);
-      }
+      const res = await apiFetch(`/api/lobby/${lobbyId}/start`, { method: "POST" });
+      await handleApiError(res);
       await refreshState(lobbyId);
     } catch (err) {
+      const msg = errorMessage(err, "Failed to start game");
       logger.error("LobbyPage", "Start game failed", err);
-      setError(err instanceof Error ? err.message : "Failed to start game");
+      setError(msg);
     }
   }, [lobbyId, refreshState]);
 
@@ -895,36 +1008,7 @@ export default function LobbyPage({
                 Select Operator
               </Button>
 
-              <Button
-                variant="outline"
-                size="lg"
-                className={cn(
-                  "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-                  "border-primary/30 text-primary",
-                  "hover:bg-primary/10 hover:text-primary-hover",
-                  "active:scale-[0.99]",
-                  "transition-all duration-200"
-                )}
-                onClick={() => {
-                  logger.info("LobbyPage", "Submit strategy click", { code });
-                  router.push(`/lobby/${code}/submit`);
-                }}
-              >
-                <svg
-                  className="size-5 mr-2"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="17 8 12 3 7 8" />
-                  <line x1="12" y1="3" x2="12" y2="15" />
-                </svg>
-                Submit Strategy
-              </Button>
+
             </section>
           </>
         )}
@@ -965,6 +1049,30 @@ export default function LobbyPage({
             <Button
               className="flex-1 h-14 rounded-xl text-base font-bold bg-defender/20 text-defender border border-defender/30 hover:bg-defender/30"
               onClick={() => handleRoundWinner("defender")}
+            >
+              Defenders
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Overtime Side Modal ──────────────────────────── */}
+      <Dialog open={showOvertimeSideModal} onOpenChange={setShowOvertimeSideModal}>
+        <DialogContent>
+          <DialogTitle>Overtime!</DialogTitle>
+          <DialogDescription>
+            Round 7 — which side did your team get?
+          </DialogDescription>
+          <div className="flex gap-3 mt-4">
+            <Button
+              className="flex-1 h-14 rounded-xl text-base font-bold bg-attacker/20 text-attacker border border-attacker/30 hover:bg-attacker/30"
+              onClick={() => handleOvertimeSide("attacker")}
+            >
+              Attackers
+            </Button>
+            <Button
+              className="flex-1 h-14 rounded-xl text-base font-bold bg-defender/20 text-defender border border-defender/30 hover:bg-defender/30"
+              onClick={() => handleOvertimeSide("defender")}
             >
               Defenders
             </Button>
