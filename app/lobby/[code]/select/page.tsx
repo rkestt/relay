@@ -244,8 +244,8 @@ export default function SelectPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center gap-2 px-5 py-4 border-b border-border lg:hidden">
           {["site", "operator"].map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-muted animate-pulse" />
@@ -264,8 +264,8 @@ export default function SelectPage({
   // ── Error state ────────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
@@ -291,7 +291,7 @@ export default function SelectPage({
   // ── Locked success state ─────────────────────────────
   if (locked) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-dvh p-6 animate-in fade-in duration-400">
+      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-dvh lg:h-full p-6 animate-in fade-in duration-400">
         <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-[0_0_24px_-4px_oklch(0.70_0.18_145/0.25)]">
           <CheckIcon className="w-8 h-8 text-success animate-in zoom-in duration-300" />
         </div>
@@ -311,9 +311,9 @@ export default function SelectPage({
   const currentStepIndex = steps.indexOf(step);
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
       {/* ── Step Indicator ─────────────────────────────── */}
-      <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-2 px-5 py-4 border-b border-border lg:hidden">
         {steps.map((s, i) => {
           const isComplete = i < currentStepIndex;
           const isActive = step === s;

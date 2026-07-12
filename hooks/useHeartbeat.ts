@@ -9,7 +9,7 @@ import type { LobbyBan, LobbyMember, LobbySelection, Round } from "@/types";
 const HEARTBEAT_INTERVAL = 30_000; // 30 seconds
 
 interface LobbyStateResponse {
-  lobby: { id: string; room_code: string; leader_id: string; status: string };
+  lobby: { id: string; room_code: string; leader_id: string; status: string; phase: "waiting" | "playing" | "closed"; map_id: string | null };
   members: (LobbyMember & { profiles: { username: string; avatar_url: string | null } | null })[];
   currentRound: Round | null;
   selections: LobbySelection[];
@@ -34,6 +34,9 @@ export function useHeartbeat(lobbyId: string | null) {
   // ── Stable store action references ──
   const setLobbyId = useLobbyStore((s) => s.setLobbyId);
   const setLobbyCode = useLobbyStore((s) => s.setLobbyCode);
+  const setLeaderId = useLobbyStore((s) => s.setLeaderId);
+  const setPhase = useLobbyStore((s) => s.setPhase);
+  const setMapId = useLobbyStore((s) => s.setMapId);
   const setMembers = useLobbyStore((s) => s.setMembers);
   const setMemberProfile = useLobbyStore((s) => s.setMemberProfile);
   const setCurrentRound = useLobbyStore((s) => s.setCurrentRound);
@@ -66,6 +69,9 @@ export function useHeartbeat(lobbyId: string | null) {
       // Server is authoritative – replace store state
       setLobbyId(data.lobby.id);
       setLobbyCode(data.lobby.room_code);
+      setLeaderId(data.lobby.leader_id);
+      setPhase(data.lobby.phase);
+      setMapId(data.lobby.map_id);
 
       // Flatten members + profiles
       setMembers(

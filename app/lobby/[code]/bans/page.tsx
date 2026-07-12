@@ -175,8 +175,8 @@ export default function BansPage({
 
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="h-5 w-24 rounded bg-muted animate-pulse" />
           <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
         </header>
@@ -196,9 +196,9 @@ export default function BansPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
         <div>
           <h1 className="text-base font-semibold text-foreground">Set Bans</h1>
           <div className="flex items-center gap-2">

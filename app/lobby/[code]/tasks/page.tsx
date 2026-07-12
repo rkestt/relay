@@ -374,8 +374,8 @@ export default function TasksPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="flex flex-col gap-1">
             <div className="h-4 w-32 rounded bg-muted animate-pulse" />
             <div className="h-3 w-28 rounded bg-muted/60 animate-pulse" />
@@ -392,8 +392,8 @@ export default function TasksPage({
   // ── Error state ──────────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="h-5 w-20 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
@@ -420,9 +420,9 @@ export default function TasksPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
         <div>
           <h1 className="text-base font-bold text-foreground">
             Strategies Feed

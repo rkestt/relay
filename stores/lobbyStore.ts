@@ -14,6 +14,9 @@ interface LobbyState {
   lobbyId: string | null;
   lobbyCode: string | null;
   isLeader: boolean;
+  leaderId: string | null;
+  phase: "waiting" | "playing" | "closed" | null;
+  mapId: string | null;
 
   // ── Members ──
   members: LobbyMember[];
@@ -34,6 +37,9 @@ interface LobbyState {
   setLobbyId: (id: string) => void;
   setLobbyCode: (code: string) => void;
   setIsLeader: (isLeader: boolean) => void;
+  setLeaderId: (id: string) => void;
+  setPhase: (phase: "waiting" | "playing" | "closed") => void;
+  setMapId: (id: string | null) => void;
   setMembers: (members: LobbyMember[]) => void;
   upsertMember: (member: LobbyMember) => void;
   removeMember: (userId: string) => void;
@@ -54,6 +60,9 @@ const initialState = {
   lobbyId: null,
   lobbyCode: null,
   isLeader: false,
+  leaderId: null,
+  phase: null,
+  mapId: null,
   members: [],
   memberProfiles: new Map(),
   currentRound: null,
@@ -79,6 +88,21 @@ export const useLobbyStore = create<LobbyState>()((set) => ({
   setIsLeader: (isLeader) => {
     logger.debug("lobbyStore", "setIsLeader", { isLeader });
     set({ isLeader });
+  },
+
+  setLeaderId: (leaderId) => {
+    logger.debug("lobbyStore", "setLeaderId", { leaderId });
+    set({ leaderId });
+  },
+
+  setPhase: (phase) => {
+    logger.debug("lobbyStore", "setPhase", { phase });
+    set({ phase });
+  },
+
+  setMapId: (mapId) => {
+    logger.debug("lobbyStore", "setMapId", { mapId });
+    set({ mapId });
   },
 
   setMembers: (members) => {

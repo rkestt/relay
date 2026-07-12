@@ -146,8 +146,8 @@ export default function LobbyMapPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="h-5 w-32 rounded bg-muted animate-pulse" />
           <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
         </header>
@@ -162,8 +162,8 @@ export default function LobbyMapPage({
   // ── Non-leader waiting state ─────────────────────────
   if (!isLeader && lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
           <Button
             variant="ghost"
@@ -201,8 +201,8 @@ export default function LobbyMapPage({
   // ── Error state ──────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
           <div className="h-5 w-24 rounded bg-muted animate-pulse" />
         </header>
         <EmptyState
@@ -228,9 +228,9 @@ export default function LobbyMapPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh lg:h-full bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-border lg:hidden">
         <div>
           <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
           <p className="text-xs text-muted-foreground">Room {code}</p>
