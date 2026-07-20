@@ -195,7 +195,7 @@ describe("POST /api/lobby/join", () => {
     // Simulate unique violation
     const memberError = { code: "23505", message: "duplicate key value violates unique constraint" };
     membersQuery.insert.mockReturnValue(
-      Promise.resolve({ data: null, error: memberError }),
+      Promise.resolve({ data: null, error: memberError }) as unknown as Promise<{ data: null; error: null }>,
     );
 
     const response = await POST(
