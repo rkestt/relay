@@ -2,7 +2,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 // ──────────────────────────────────────────────
 // GET /api/validate — handle Discord validation links

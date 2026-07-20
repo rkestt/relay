@@ -3,14 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/useIsClient";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { XIcon } from "@/components/icons";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 
@@ -20,20 +15,16 @@ export function CookieBanner() {
   const [showModal, setShowModal] = useState(false);
   const [analyticsChecked, setAnalyticsChecked] = useState(false);
   const [marketingChecked, setMarketingChecked] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
 
   const modalRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
 
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Re-initialize checkboxes from existing consent when modal opens
   useEffect(() => {
     if (showModal && consent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnalyticsChecked(consent.analytics);
       setMarketingChecked(consent.marketing);
     } else if (showModal) {

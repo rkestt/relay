@@ -144,6 +144,7 @@ export default function SubmitStrategyPage() {
   // ── Load sites when map changes ───────────────────
   useEffect(() => {
     if (!selectedMapId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSites([]);
       setSelectedSiteId("");
       return;

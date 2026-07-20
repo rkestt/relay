@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BackArrowIcon, CheckIcon } from "@/components/icons";
@@ -12,15 +13,12 @@ export default function CookieSettingsPage() {
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   // Sync local toggles with stored consent
   useEffect(() => {
     if (consent) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnalytics(consent.analytics);
       setMarketing(consent.marketing);
     }

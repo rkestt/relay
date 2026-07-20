@@ -457,8 +457,6 @@ export default function LobbyPage({
     );
   }
 
-  const bannedOperatorIds = new Set(state.bans.map((b) => b.operator_id));
-
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}

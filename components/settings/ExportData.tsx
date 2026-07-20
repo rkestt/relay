@@ -28,7 +28,7 @@ export function ExportData() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
+    } catch {
       alert("Errore durante l'esportazione dei dati");
     } finally {
       setLoading(false);

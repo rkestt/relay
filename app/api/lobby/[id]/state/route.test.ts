@@ -142,15 +142,15 @@ describe("GET /api/lobby/[id]/state", () => {
     });
 
     membersQuery.select.mockReturnValue(membersQuery);
-    (membersQuery.eq as any).mockReturnValue(Promise.resolve({ data: [{ id: "m1", user_id: "user-1", joined_at: "2025-01-01", profiles: { id: "user-1", username: "Player1", avatar_url: null } }], error: null }));
+    (membersQuery.eq as unknown as ReturnType<typeof vi.fn>).mockReturnValue(Promise.resolve({ data: [{ id: "m1", user_id: "user-1", joined_at: "2025-01-01", profiles: { id: "user-1", username: "Player1", avatar_url: null } }], error: null }));
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
-    (selectionsQuery.eq as any).mockImplementation(() => ({
+    (selectionsQuery.eq as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       eq: vi.fn(() => Promise.resolve({ data: [{ id: "sel-1", map_id: "map-1", operator_id: "op-1" }], error: null })),
     }));
 
     bansQuery.select.mockReturnValue(bansQuery);
-    (bansQuery.eq as any).mockImplementation(() => ({
+    (bansQuery.eq as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       eq: vi.fn(() => Promise.resolve({ data: [{ id: "ban-1", operator_id: "op-2", operators: { id: "op-2", name: "Twitch", side: "attacker", icon_url: "" } }], error: null })),
     }));
 
@@ -217,7 +217,7 @@ describe("GET /api/lobby/[id]/state", () => {
     });
 
     membersQuery.select.mockReturnValue(membersQuery);
-    (membersQuery.eq as any).mockReturnValue(Promise.resolve({ data: [], error: null }));
+    (membersQuery.eq as unknown as ReturnType<typeof vi.fn>).mockReturnValue(Promise.resolve({ data: [], error: null }));
 
     const response = await GET(
       new Request("http://localhost/api/lobby/lobby-1/state"),

@@ -159,6 +159,7 @@ export function useHeartbeat(lobbyId: string | null) {
     document.addEventListener("visibilitychange", handleVisibility);
 
     // Initial sync & start interval
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     sync().then(() => {
       if (!cancelled) startInterval();
     });

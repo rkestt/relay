@@ -47,7 +47,7 @@ function Dialog({ children, open: openProp, defaultOpen = false, onOpenChange }:
   );
 }
 
-function DialogTrigger({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+function DialogTrigger({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   const { onOpenChange } = useDialogContext();
   return (
     <button
@@ -68,6 +68,7 @@ function DialogContent({ children, className, ...props }: React.HTMLAttributes<H
   // Handle open/close with animation
   React.useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsVisible(true);
       setIsExiting(false);
     } else if (isVisible) {

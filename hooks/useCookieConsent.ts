@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 export interface CookieConsent {
   necessary: boolean;
@@ -12,21 +12,15 @@ export interface CookieConsent {
 const STORAGE_KEY = "cookie-consent";
 
 export function useCookieConsent() {
-  const [consent, setConsent] = useState<CookieConsent | null>(null);
-  const [showBanner, setShowBanner] = useState(false);
-
-  useEffect(() => {
+  const [consent, setConsent] = useState<CookieConsent | null>(() => {
+    if (typeof window === "undefined") return null;
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      try {
-        setConsent(JSON.parse(stored));
-      } catch {
-        setShowBanner(true);
-      }
-    } else {
-      setShowBanner(true);
+      try { return JSON.parse(stored) as CookieConsent; } catch { return null; }
     }
-  }, []);
+    return null;
+  });
+  const [showBanner, setShowBanner] = useState(() => consent === null);
 
   const acceptAll = useCallback(() => {
     const newConsent: CookieConsent = {

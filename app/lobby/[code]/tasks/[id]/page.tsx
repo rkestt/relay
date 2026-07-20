@@ -238,6 +238,7 @@ export default function TaskDetailPage({
 
   useEffect(() => {
     if (!lobbyId || !assignmentId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDetail(lobbyId, assignmentId);
   }, [lobbyId, assignmentId, loadDetail]);
 

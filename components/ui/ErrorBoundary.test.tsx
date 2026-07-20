@@ -15,6 +15,7 @@ afterAll(() => {
 });
 
 class ThrowsOnRender extends Component<{ message: string }> {
+  // eslint-disable-next-line react/require-render-return
   render(): ReactNode {
     throw new Error(this.props.message);
   }
@@ -60,7 +61,7 @@ describe("ErrorBoundary", () => {
     const onRetry = vi.fn();
     const user = userEvent.setup();
 
-    const { rerender } = render(
+    render(
       <ErrorBoundary onRetry={onRetry}>
         <ThrowsOnRender message="Test error" />
       </ErrorBoundary>

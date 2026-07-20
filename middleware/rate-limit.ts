@@ -10,6 +10,16 @@ export async function rateLimitMiddleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const method = request.method;
 
+  // Skip rate limiting in development or for localhost
+  if (
+    process.env.NODE_ENV === "development" ||
+    ip === "127.0.0.1" ||
+    ip === "::1" ||
+    ip === "unknown"
+  ) {
+    return NextResponse.next();
+  }
+
   // Apply strict rate limiting to auth-related paths
   if (
     path.startsWith("/auth/") ||

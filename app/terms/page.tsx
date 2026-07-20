@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackArrowIcon } from "@/components/icons";
 
@@ -278,11 +278,7 @@ const sections = [
 ];
 
 export default function TermsPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   const lastUpdated = mounted
     ? new Date().toLocaleDateString("it-IT", {

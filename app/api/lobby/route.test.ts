@@ -67,11 +67,6 @@ describe("POST /api/lobby", () => {
     });
 
     // Fail the second call to profiles (insert)
-    const insertProfileQuery = {
-      insert: vi.fn(() => ({
-        ...profileInsertQuery,
-      })),
-    };
     // Override: profile select returns null, profile insert fails
     mockSupabaseClient.from.mockReset();
     mockSupabaseClient.from.mockImplementation((table: string) => {

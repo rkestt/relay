@@ -70,7 +70,7 @@ describe("GET /api/strategies", () => {
     const usedFilters: string[] = [];
     const strategiesQuery = {
       select: vi.fn(() => strategiesQuery),
-      eq: vi.fn((field: string, _val: unknown) => {
+      eq: vi.fn((field: string) => {
         usedFilters.push(field);
         return strategiesQuery;
       }),

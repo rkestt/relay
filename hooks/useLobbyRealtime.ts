@@ -42,7 +42,6 @@ export function useLobbyRealtime(lobbyId: string | null) {
     lobbyIdRef.current = lobbyId;
   }, [lobbyId]);
 
-  const lastEventAtRef = useRef<number | null>(null);
   const [lastEventAt, setLastEventAt] = useState<number | null>(null);
   const disposedRef = useRef(false);
   const channelCounterRef = useRef(0);

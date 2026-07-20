@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 
@@ -47,6 +46,7 @@ function ValidateContent() {
         strategyId: !!strategyId,
         action: !!action,
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({
         status: "error",
         title: "Invalid Request",

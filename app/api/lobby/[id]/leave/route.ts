@@ -22,7 +22,7 @@ export async function POST(
     const { id } = await params;
 
     // -- Delete current user from lobby_members --------------------------
-    const { error: deleteError, count } = await withTimeout(
+    const { error: deleteError } = await withTimeout(
       supabase
         .from("lobby_members")
         .delete()

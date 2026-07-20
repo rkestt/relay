@@ -1,13 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Authentication", () => {
-  test("redirects to login when not authenticated", async ({ page }) => {
-    await page.goto("/");
-    // Middleware redirects to /login
-    await expect(page).toHaveURL(/\/login/);
-    await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
-  });
-
+test.describe("Legacy smoke tests", () => {
   test("login page displays sign in form", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();

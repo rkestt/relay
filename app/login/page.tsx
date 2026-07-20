@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/useIsClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
@@ -18,10 +19,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [discordLoading, setDiscordLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useIsClient();
 
   useEffect(() => {
-    setMounted(true);
     logger.info("LoginPage", "LoginPage mount");
   }, []);
 

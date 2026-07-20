@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackArrowIcon, LockIcon } from "@/components/icons";
 
@@ -13,9 +13,9 @@ const sections = [
     content: (
       <div className="space-y-2">
         <p>
-          Il titolare del trattamento dei dati è r6hub (di seguito, "piattaforma").
+           Il titolare del trattamento dei dati è r6hub (di seguito, &ldquo;piattaforma&rdquo;).
           Per qualsiasi richiesta relativa ai tuoi dati personali, puoi contattarci
-          all'indirizzo email:{" "}
+          all&rsquo;indirizzo email:{" "}
           <a
             href="mailto:privacy@r6hub.app"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
@@ -36,7 +36,7 @@ const sections = [
     content: (
       <div className="space-y-3">
         <p>
-          Durante l'utilizzo della piattaforma, raccogliamo i seguenti dati
+          Durante l&rsquo;utilizzo della piattaforma, raccogliamo i seguenti dati
           personali:
         </p>
         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
@@ -300,11 +300,7 @@ const sections = [
 ];
 
 export default function PrivacyPage() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useIsClient();
 
   const lastUpdated = mounted
     ? new Date().toLocaleDateString("it-IT", {

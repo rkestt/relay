@@ -203,7 +203,7 @@ describe("POST /api/lobby/[id]/tasks/[assignmentId]/vote", () => {
         }
         // For count queries, differentiate by eq value (need double-eq chain for .eq("task_assignment_id",...).eq("vote_type",...))
         return {
-          select: vi.fn((_cols: unknown, _opts?: unknown) => ({
+          select: vi.fn(() => ({
             eq: vi.fn(() => ({
               eq: vi.fn((field: string, value: string) => {
                 if (value === "up") return Promise.resolve({ count: 3, error: null, data: null });
@@ -268,7 +268,7 @@ describe("POST /api/lobby/[id]/tasks/[assignmentId]/vote", () => {
               eq: vi.fn(() => Promise.resolve({ error: null })),
             })),
           })),
-          select: vi.fn((_cols: unknown, _opts?: unknown) => ({
+          select: vi.fn(() => ({
             eq: vi.fn(() => ({
               eq: vi.fn((_field: string, value: string) => {
                 if (value === "up") return Promise.resolve({ count: 2, error: null, data: null });

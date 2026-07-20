@@ -198,7 +198,7 @@ describe("POST /api/lobby/[id]/new-round", () => {
     });
 
     bansQuery.select.mockReturnValue(bansQuery);
-    (bansQuery.eq as any).mockImplementation(() => ({
+    vi.mocked(bansQuery.eq).mockImplementation(() => ({
       eq: vi.fn(() => Promise.resolve({ data: null, error: null })),
     }));
 

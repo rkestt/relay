@@ -31,6 +31,7 @@ export function LogPanel() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
     const interval = setInterval(refresh, 1000);
     return () => clearInterval(interval);

@@ -1,6 +1,6 @@
 // generate-mock-data.mjs - Generates 00021_mock_data.sql
 // Run: node scripts/generate-mock-data.mjs
-import { writeFileSync, mkdirSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,14 +10,6 @@ const outFile = join(__dirname, '..', 'supabase', 'migrations', '00021_mock_data
 const lines = [];
 
 function add(s) { lines.push(s); }
-function addRaw(s) { lines.push(s); }
-
-// UUID helper: generates eXXXXXXX-0000-0000-0000-YYYYYYYYYYYY
-// where X is the prefix (e.g., '1000000') and num is the sequential number
-function makeUuid(prefix, num) {
-  const hex = num.toString(16).padStart(12, '0').slice(0, 12);
-  return `${prefix}-0000-0000-0000-${hex}`;
-}
 
 // Header
 add(`-- ============================================================

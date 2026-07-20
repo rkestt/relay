@@ -9,7 +9,6 @@ import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
-import { cn } from "@/lib/utils";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
@@ -247,6 +246,7 @@ export default function TasksPage({
   const prevLastSync = useRef<number | null>(null);
   useEffect(() => {
     if (!lobbyId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadTasks(lobbyId);
   }, [lobbyId, loadTasks]);
 

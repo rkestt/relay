@@ -7,7 +7,6 @@ import type {
   TaskAssignment,
   StrategyTemplate,
   StrategyHotspot,
-  StrategyImage,
 } from "@/types";
 
 interface StrategyCardProps {

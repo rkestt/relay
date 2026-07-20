@@ -10,7 +10,7 @@ import { apiFetch } from "@/lib/fetch";
 import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import Image from "next/image";
-import type { Operator, OperatorTag, LobbyBan } from "@/types";
+import type { Operator, LobbyBan } from "@/types";
 import { CheckIcon } from "@/components/icons";
 
 interface LobbyBanWithOperator extends LobbyBan {
@@ -33,7 +33,6 @@ export default function BansPage({
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [isLeader, setIsLeader] = useState(false);
   const [operators, setOperators] = useState<Operator[]>([]);
-  const [operatorTags, setOperatorTags] = useState<OperatorTag[]>([]);
   const [bans, setBans] = useState<LobbyBanWithOperator[]>([]);
   const [currentRound, setCurrentRound] = useState<{ round_number: number; team_side: "attacker" | "defender" | null } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,7 @@ export default function BansPage({
     ]).then(([opsData, tagsData]) => {
       logger.debug("BansPage", "Operators and tags loaded", { operators: opsData.length, tags: tagsData.length });
       setOperators(opsData as Operator[]);
-      setOperatorTags(tagsData as OperatorTag[]);
+      // tags intentionally discarded — only used for filter UI (not yet implemented)
     });
   }, []);
 
@@ -129,6 +128,7 @@ export default function BansPage({
   // Refresh bans when realtime or heartbeat detects changes
   useEffect(() => {
     if (!lobbyId || (!lastEventAt && !lastSync)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshBans(lobbyId);
   }, [lobbyId, lastEventAt, lastSync, refreshBans]);
 

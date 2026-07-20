@@ -18,6 +18,7 @@ export function OfflineBanner({
 
   // Auto-reappear when status changes to non-connected
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (status !== "connected") setDismissed(false);
   }, [status]);
 

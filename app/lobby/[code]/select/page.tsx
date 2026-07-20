@@ -41,7 +41,7 @@ export default function SelectPage({
   const [code, setCode] = useState<string>("");
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [step, setStep] = useState<SelectionStep>("site");
-  const [maps, setMaps] = useState<Map[]>([]);
+  const [, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [operatorTags, setOperatorTags] = useState<OperatorTag[]>([]);
@@ -148,12 +148,14 @@ export default function SelectPage({
   // Refresh lobby state on realtime events or heartbeat
   useEffect(() => {
     if (!lobbyId || (!lastEventAt && !lastSync)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshLobbyState(lobbyId);
   }, [lobbyId, lastEventAt, lastSync, refreshLobbyState]);
 
   // Filter sites by selected map
   useEffect(() => {
     if (!selectedMapId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSites([]);
       return;
     }
