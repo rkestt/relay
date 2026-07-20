@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./test/setup.ts"],
     include: ["**/*.test.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "out"],
+    exclude: ["node_modules", ".next", "out", ".opencode", "volumes"],
     alias: {
       "@": path.resolve(__dirname, "."),
     },

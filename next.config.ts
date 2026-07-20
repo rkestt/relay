@@ -4,13 +4,20 @@ import { withSentryConfig } from '@sentry/nextjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
+  reactStrictMode: true,
   output: 'standalone',
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "localhost",
+      },
+    ],
+    formats: ["image/webp", "image/avif"],
   },
   experimental: {
     scrollRestoration: true,
@@ -23,7 +30,7 @@ const config = withSentryConfig(nextConfig, {
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: '/monitoring',
-  hideSourceMaps: true,
+  sourcemaps: { disable: true },
   disableLogger: true,
   automaticVercelMonitors: true,
 });

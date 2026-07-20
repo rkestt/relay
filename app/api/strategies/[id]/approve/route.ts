@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
@@ -24,10 +25,14 @@ export async function POST(
     const { id } = await params;
 
     // -- Update strategy status to approved -----------------------------
-    const { error: updateError } = await supabase
-      .from("strategy_templates")
-      .update({ status: "approved" })
-      .eq("id", id);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from("strategy_templates")
+        .update({ status: "approved" })
+        .eq("id", id),
+      15000,
+      "approve strategy",
+    );
 
     if (updateError) {
       logger.error("API", "Failed to approve strategy:", updateError);

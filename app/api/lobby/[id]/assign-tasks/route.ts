@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { assignTaskSchema, validateRequest } from "@/lib/validations";
@@ -48,11 +49,15 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/assign-tasks body", { lobbyId: id, targetUserId: user_id, operator_id });
 
     // -- Verify authorization --------------------------------------------
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("leader_id")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("leader_id")
+        .eq("id", id)
+        .single(),
+      10000,
+      "verify lobby leader"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -72,14 +77,18 @@ export async function POST(
     }
 
     // -- Find current active round ---------------------------------------
-    const { data: currentRound } = await supabase
-      .from("rounds")
-      .select("id")
-      .eq("lobby_id", id)
-      .eq("status", "active")
-      .order("round_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: currentRound } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("id")
+        .eq("lobby_id", id)
+        .eq("status", "active")
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      10000,
+      "find current round"
+    );
 
     if (!currentRound) {
       return NextResponse.json(
@@ -89,20 +98,28 @@ export async function POST(
     }
 
     // -- Fetch banned operators for this round ----------------------------
-    const { data: bans } = await supabase
-      .from("lobby_bans")
-      .select("operator_id")
-      .eq("lobby_id", id)
-      .eq("round_id", currentRound.id);
+    const { data: bans } = await withTimeout(
+      supabase
+        .from("lobby_bans")
+        .select("operator_id")
+        .eq("lobby_id", id)
+        .eq("round_id", currentRound.id),
+      10000,
+      "fetch bans for assign"
+    );
 
     const bannedOperatorIds = new Set((bans ?? []).map((b) => b.operator_id));
 
     // -- Find the team's map/site selection for this round ----------------
-    const { data: roundSelections } = await supabase
-      .from("lobby_selections")
-      .select("map_id, site_id, operator_id")
-      .eq("lobby_id", id)
-      .eq("round_id", currentRound.id);
+    const { data: roundSelections } = await withTimeout(
+      supabase
+        .from("lobby_selections")
+        .select("map_id, site_id, operator_id")
+        .eq("lobby_id", id)
+        .eq("round_id", currentRound.id),
+      10000,
+      "fetch round selections"
+    );
 
     let mapId: string | null = null;
     let siteId: string | null = null;
@@ -135,7 +152,7 @@ export async function POST(
     const q1 = baseQuery().eq("operator_id", operator_id);
     if (mapId) q1.eq("map_id", mapId);
     if (siteId) q1.eq("site_id", siteId);
-    const { data: d1 } = await q1;
+    const { data: d1 } = await withTimeout(q1, 10000, "strategy search level 1");
     if (d1 && d1.length > 0) {
       strategies = d1;
       fallbackLevel = 1;
@@ -146,7 +163,7 @@ export async function POST(
       const q2 = baseQuery();
       if (mapId) q2.eq("map_id", mapId);
       if (siteId) q2.eq("site_id", siteId);
-      const { data: d2 } = await q2;
+      const { data: d2 } = await withTimeout(q2, 10000, "strategy search level 2");
       if (d2 && d2.length > 0) {
         // Prioritize strategies for operators teammates have chosen
         strategies = d2.sort((a, b) => {
@@ -160,7 +177,7 @@ export async function POST(
 
     // Level 3: operator_id only (right operator, any map/site)
     if (!strategies && (mapId || siteId)) {
-      const { data: d3 } = await baseQuery().eq("operator_id", operator_id);
+      const { data: d3 } = await withTimeout(baseQuery().eq("operator_id", operator_id), 10000, "strategy search level 3");
       if (d3 && d3.length > 0) {
         strategies = d3;
         fallbackLevel = 3;
@@ -187,11 +204,15 @@ export async function POST(
     );
 
     // -- Check for already-assigned strategies this round -----------------
-    const { data: existingAssignments } = await supabase
-      .from("task_assignments")
-      .select("strategy_id")
-      .eq("lobby_id", id)
-      .eq("round_id", currentRound.id);
+    const { data: existingAssignments } = await withTimeout(
+      supabase
+        .from("task_assignments")
+        .select("strategy_id")
+        .eq("lobby_id", id)
+        .eq("round_id", currentRound.id),
+      10000,
+      "fetch existing assignments"
+    );
 
     const takenStrategyIds = new Set(
       (existingAssignments ?? []).map((a) => a.strategy_id),
@@ -213,16 +234,20 @@ export async function POST(
     }
 
     // -- Assign the strategy ----------------------------------------------
-    const { data: assignment, error: assignError } = await supabase
-      .from("task_assignments")
-      .insert({
-        lobby_id: id,
-        user_id,
-        round_id: currentRound.id,
-        strategy_id: availableStrategy.id,
-      })
-      .select()
-      .single();
+    const { data: assignment, error: assignError } = await withTimeout(
+      supabase
+        .from("task_assignments")
+        .insert({
+          lobby_id: id,
+          user_id,
+          round_id: currentRound.id,
+          strategy_id: availableStrategy.id,
+        })
+        .select()
+        .single(),
+      15000,
+      "assign task"
+    );
 
     if (assignError) {
       // Handle unique constraint violation (race condition)

@@ -1,13 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
+import { withTimeout } from '@/lib/supabase/timeout';
 
 export async function GET() {
   const supabase = await createClient();
 
   // Check DB connection
-  const { error: dbError } = await supabase
-    .from('profiles')
-    .select('count', { count: 'exact', head: true })
-    .limit(1);
+  const { error: dbError } = await withTimeout(
+    supabase
+      .from('profiles')
+      .select('count', { count: 'exact', head: true })
+      .limit(1),
+    5000,
+    'health check database'
+  );
 
   // Check Supabase Auth
   const { error: authError } = await supabase.auth.getUser();

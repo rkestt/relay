@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { joinLobbySchema, validateRequest } from "@/lib/validations";
@@ -36,11 +37,15 @@ export async function POST(request: Request) {
     logger.info("API", "POST /api/lobby/join start", { room_code: normalizedCode });
 
     // -- Look up lobby by room_code -------------------------------------
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("id, room_code, status")
-      .eq("room_code", normalizedCode)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("id, room_code, status")
+        .eq("room_code", normalizedCode)
+        .single(),
+      10000,
+      "find lobby by code"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -54,9 +59,13 @@ export async function POST(request: Request) {
     }
 
     // -- Insert into lobby_members (handle already-member gracefully) ----
-    const { error: memberError } = await supabase
-      .from("lobby_members")
-      .insert({ lobby_id: lobby.id, user_id: user.id });
+    const { error: memberError } = await withTimeout(
+      supabase
+        .from("lobby_members")
+        .insert({ lobby_id: lobby.id, user_id: user.id }),
+      15000,
+      "join lobby"
+    );
 
     if (memberError) {
       // Unique violation (code 23505) means the user is already a member — that's fine

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { authRateLimit, apiRateLimit } from "@/lib/rate-limit";
 
-export function rateLimitMiddleware(request: NextRequest) {
+export async function rateLimitMiddleware(request: NextRequest) {
   const ip =
     request.headers.get("x-forwarded-for") ??
     request.headers.get("x-real-ip") ??
@@ -16,7 +16,8 @@ export function rateLimitMiddleware(request: NextRequest) {
     path.startsWith("/login") ||
     path.startsWith("/signup")
   ) {
-    const { success, remaining, resetTime } = authRateLimit.check(ip);
+    const { success, limit, remaining, reset } =
+      await authRateLimit.limit(ip);
 
     if (!success) {
       return new NextResponse(
@@ -25,11 +26,11 @@ export function rateLimitMiddleware(request: NextRequest) {
           status: 429,
           headers: {
             "Content-Type": "application/json",
-            "X-RateLimit-Limit": "5",
+            "X-RateLimit-Limit": limit.toString(),
             "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": resetTime.toString(),
+            "X-RateLimit-Reset": reset.toString(),
             "Retry-After": Math.ceil(
-              (resetTime - Date.now()) / 1000,
+              reset - Date.now() / 1000,
             ).toString(),
           },
         },
@@ -38,9 +39,9 @@ export function rateLimitMiddleware(request: NextRequest) {
 
     // Add rate limit headers to successful responses
     const response = NextResponse.next();
-    response.headers.set("X-RateLimit-Limit", "5");
+    response.headers.set("X-RateLimit-Limit", limit.toString());
     response.headers.set("X-RateLimit-Remaining", remaining.toString());
-    response.headers.set("X-RateLimit-Reset", resetTime.toString());
+    response.headers.set("X-RateLimit-Reset", reset.toString());
     return response;
   }
 
@@ -49,7 +50,8 @@ export function rateLimitMiddleware(request: NextRequest) {
     (path.startsWith("/api/strategies") && method === "POST") ||
     (path.startsWith("/api/lobby") && method === "POST")
   ) {
-    const { success, remaining, resetTime } = apiRateLimit.check(ip);
+    const { success, limit, remaining, reset } =
+      await apiRateLimit.limit(ip);
 
     if (!success) {
       return new NextResponse(
@@ -58,11 +60,11 @@ export function rateLimitMiddleware(request: NextRequest) {
           status: 429,
           headers: {
             "Content-Type": "application/json",
-            "X-RateLimit-Limit": "60",
+            "X-RateLimit-Limit": limit.toString(),
             "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": resetTime.toString(),
+            "X-RateLimit-Reset": reset.toString(),
             "Retry-After": Math.ceil(
-              (resetTime - Date.now()) / 1000,
+              reset - Date.now() / 1000,
             ).toString(),
           },
         },
@@ -70,9 +72,9 @@ export function rateLimitMiddleware(request: NextRequest) {
     }
 
     const response = NextResponse.next();
-    response.headers.set("X-RateLimit-Limit", "60");
+    response.headers.set("X-RateLimit-Limit", limit.toString());
     response.headers.set("X-RateLimit-Remaining", remaining.toString());
-    response.headers.set("X-RateLimit-Reset", resetTime.toString());
+    response.headers.set("X-RateLimit-Reset", reset.toString());
     return response;
   }
 

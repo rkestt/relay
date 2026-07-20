@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { getTeamSide } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
@@ -33,21 +34,29 @@ export async function POST(request: Request) {
     }
 
     // -- Ensure profile exists (FK constraint on lobbies.leader_id) -----
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("id", user.id)
-      .single();
+    const { data: profile, error: profileError } = await withTimeout(
+      supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .single(),
+      10000,
+      "check profile exists"
+    );
 
     if (profileError || !profile) {
       logger.warn("API", "Profile missing for authenticated user, auto-creating", { userId: user.id });
-      const { error: createProfileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          username: user.user_metadata?.username ?? `guest-${user.id.slice(0, 8)}`,
-          avatar_url: user.user_metadata?.avatar_url ?? null,
-        });
+      const { error: createProfileError } = await withTimeout(
+        supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            username: user.user_metadata?.username ?? `guest-${user.id.slice(0, 8)}`,
+            avatar_url: user.user_metadata?.avatar_url ?? null,
+          }),
+        15000,
+        "auto-create profile"
+      );
 
       if (createProfileError) {
         logger.error("API", "Failed to auto-create profile", createProfileError, { userId: user.id });
@@ -72,11 +81,15 @@ export async function POST(request: Request) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       const roomCode = generateRoomCode();
 
-      const { data: lobby, error: insertError } = await supabase
-        .from("lobbies")
-        .insert({ room_code: roomCode, leader_id: user.id, starting_side: startingSide, phase: 'waiting' })
-        .select("id, room_code, leader_id, starting_side, phase")
-        .single();
+      const { data: lobby, error: insertError } = await withTimeout(
+        supabase
+          .from("lobbies")
+          .insert({ room_code: roomCode, leader_id: user.id, starting_side: startingSide, phase: 'waiting' })
+          .select("id, room_code, leader_id, starting_side, phase")
+          .single(),
+        15000,
+        "create lobby"
+      );
 
       if (insertError) {
         logger.warn("API", `Lobby insert attempt ${attempt + 1}/${MAX_RETRIES} failed`, {
@@ -89,13 +102,21 @@ export async function POST(request: Request) {
 
       if (!insertError && lobby) {
         // -- Insert creator into lobby_members ---------------------------
-        const { error: memberError } = await supabase
-          .from("lobby_members")
-          .insert({ lobby_id: lobby.id, user_id: user.id });
+        const { error: memberError } = await withTimeout(
+          supabase
+            .from("lobby_members")
+            .insert({ lobby_id: lobby.id, user_id: user.id }),
+          15000,
+          "insert lobby member"
+        );
 
         if (memberError) {
           // Rollback: delete the lobby if adding the member fails
-          await supabase.from("lobbies").delete().eq("id", lobby.id);
+          await withTimeout(
+            supabase.from("lobbies").delete().eq("id", lobby.id),
+            15000,
+            "rollback delete lobby"
+          );
           logger.error("API", "Failed to add creator to lobby_members", memberError);
           return NextResponse.json(
             { error: "Failed to join lobby" },
@@ -104,19 +125,31 @@ export async function POST(request: Request) {
         }
 
         // -- Create initial round (round 1) ------------------------------
-        const { error: roundError } = await supabase
-          .from("rounds")
-          .insert({
-            lobby_id: lobby.id,
-            round_number: 1,
-            status: "active",
-            team_side: getTeamSide(startingSide, 1),
-          });
+        const { error: roundError } = await withTimeout(
+          supabase
+            .from("rounds")
+            .insert({
+              lobby_id: lobby.id,
+              round_number: 1,
+              status: "active",
+              team_side: getTeamSide(startingSide, 1),
+            }),
+          15000,
+          "create initial round"
+        );
 
         if (roundError) {
           // Rollback: delete lobby and member if round creation fails
-          await supabase.from("lobby_members").delete().eq("lobby_id", lobby.id);
-          await supabase.from("lobbies").delete().eq("id", lobby.id);
+          await withTimeout(
+            supabase.from("lobby_members").delete().eq("lobby_id", lobby.id),
+            15000,
+            "rollback delete lobby members"
+          );
+          await withTimeout(
+            supabase.from("lobbies").delete().eq("id", lobby.id),
+            15000,
+            "rollback delete lobby"
+          );
           logger.error("API", "Failed to create initial round", roundError);
           return NextResponse.json(
             { error: "Failed to initialize lobby" },

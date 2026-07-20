@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { banOperatorSchema, validateRequest } from "@/lib/validations";
@@ -25,10 +26,14 @@ export async function GET(
     const { id } = await params;
     logger.info("API", "GET /api/lobby/[id]/bans start", { lobbyId: id });
 
-    const { data: bans, error } = await supabase
-      .from("lobby_bans")
-      .select("*, operators (id, name, side, icon_url)")
-      .eq("lobby_id", id);
+    const { data: bans, error } = await withTimeout(
+      supabase
+        .from("lobby_bans")
+        .select("*, operators (id, name, side, icon_url)")
+        .eq("lobby_id", id),
+      10000,
+      "fetch bans"
+    );
 
     if (error) {
       logger.error("API", "Failed to fetch bans", error);
@@ -92,11 +97,15 @@ export async function POST(
     logger.info("API", "POST /api/lobby/[id]/bans body", { lobbyId: id, operator_id, side });
 
     // -- Verify leader ---------------------------------------------------
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("leader_id")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("leader_id")
+        .eq("id", id)
+        .single(),
+      10000,
+      "verify lobby leader"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -110,14 +119,18 @@ export async function POST(
     }
 
     // -- Find current active round ---------------------------------------
-    const { data: currentRound } = await supabase
-      .from("rounds")
-      .select("id")
-      .eq("lobby_id", id)
-      .eq("status", "active")
-      .order("round_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: currentRound } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("id")
+        .eq("lobby_id", id)
+        .eq("status", "active")
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      10000,
+      "find current round for ban"
+    );
 
     if (!currentRound) {
       return NextResponse.json(
@@ -127,16 +140,20 @@ export async function POST(
     }
 
     // -- Insert ban ------------------------------------------------------
-    const { data: ban, error: insertError } = await supabase
-      .from("lobby_bans")
-      .insert({
-        lobby_id: id,
-        operator_id,
-        side,
-        round_id: currentRound.id,
-      })
-      .select("*, operators (id, name, side, icon_url)")
-      .single();
+    const { data: ban, error: insertError } = await withTimeout(
+      supabase
+        .from("lobby_bans")
+        .insert({
+          lobby_id: id,
+          operator_id,
+          side,
+          round_id: currentRound.id,
+        })
+        .select("*, operators (id, name, side, icon_url)")
+        .single(),
+      15000,
+      "insert ban"
+    );
 
     if (insertError) {
       // Handle unique constraint violation (duplicate ban)

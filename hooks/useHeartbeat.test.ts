@@ -12,11 +12,15 @@ const storeActions = {
   setSelections: vi.fn(),
   setBans: vi.fn(),
   setConnectionStatus: vi.fn(),
+  connectionStatus: "disconnected",
 };
 
 vi.mock("@/stores/lobbyStore", () => ({
-  useLobbyStore: vi.fn((selector: (s: typeof storeActions) => unknown) =>
-    selector(storeActions),
+  useLobbyStore: Object.assign(
+    vi.fn((selector: (s: typeof storeActions) => unknown) =>
+      selector(storeActions),
+    ),
+    { getState: vi.fn(() => storeActions) },
   ),
 }));
 
@@ -55,6 +59,7 @@ import { useHeartbeat } from "./useHeartbeat";
 describe("useHeartbeat", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    storeActions.connectionStatus = "disconnected";
     vi.useRealTimers();
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -83,11 +88,12 @@ describe("useHeartbeat", () => {
     renderHook(() => useHeartbeat("lobby-1"));
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/api/lobby/lobby-1/state");
+      expect(global.fetch).toHaveBeenCalledWith("/api/lobby/lobby-1/state", expect.any(Object));
     });
   });
 
   it("maps response data into the store", async () => {
+    storeActions.connectionStatus = "disconnected";
     const { result } = renderHook(() => useHeartbeat("lobby-1"));
 
     await waitFor(() => {
@@ -112,6 +118,29 @@ describe("useHeartbeat", () => {
     expect(storeActions.setConnectionStatus).toHaveBeenCalledWith("connected");
 
     // lastSync should be set
+    expect(result.current.lastSync).toBeGreaterThan(0);
+  });
+
+  it("skips data update when realtime is connected", async () => {
+    storeActions.connectionStatus = "connected";
+    const { result } = renderHook(() => useHeartbeat("lobby-1"));
+
+    await waitFor(() => {
+      expect(storeActions.setLobbyId).toHaveBeenCalledWith("lobby-1");
+    });
+
+    // Lobby metadata still updated
+    expect(storeActions.setLobbyCode).toHaveBeenCalledWith("ABC");
+    expect(storeActions.setCurrentRound).toHaveBeenCalledWith(mockStateResponse.currentRound);
+
+    // Data updates are SKIPPED because realtime is active
+    expect(storeActions.setMembers).not.toHaveBeenCalled();
+    expect(storeActions.setMemberProfile).not.toHaveBeenCalled();
+    expect(storeActions.setSelections).not.toHaveBeenCalled();
+    expect(storeActions.setBans).not.toHaveBeenCalled();
+    expect(storeActions.setConnectionStatus).not.toHaveBeenCalled();
+
+    // lastSync should still be set
     expect(result.current.lastSync).toBeGreaterThan(0);
   });
 

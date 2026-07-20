@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -16,12 +17,12 @@ export async function GET(request: Request) {
     { data: taskAssignments },
     { data: taskVotes },
   ] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase.from("lobbies").select("*").eq("leader_id", user.id),
-    supabase.from("lobby_members").select("*").eq("user_id", user.id),
-    supabase.from("strategy_templates").select("*").eq("created_by", user.id),
-    supabase.from("task_assignments").select("*").eq("user_id", user.id),
-    supabase.from("task_votes").select("*").eq("user_id", user.id),
+    withTimeout(supabase.from("profiles").select("*").eq("id", user.id).single(), 10000, "export profile"),
+    withTimeout(supabase.from("lobbies").select("*").eq("leader_id", user.id), 10000, "export lobbies"),
+    withTimeout(supabase.from("lobby_members").select("*").eq("user_id", user.id), 10000, "export memberships"),
+    withTimeout(supabase.from("strategy_templates").select("*").eq("created_by", user.id), 10000, "export strategies"),
+    withTimeout(supabase.from("task_assignments").select("*").eq("user_id", user.id), 10000, "export assignments"),
+    withTimeout(supabase.from("task_votes").select("*").eq("user_id", user.id), 10000, "export votes"),
   ]);
 
   const exportData = {

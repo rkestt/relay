@@ -1,66 +1,118 @@
+import { Ratelimit, type Duration } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 import { LRUCache } from "lru-cache";
+
+export type RateLimitResult = {
+  success: boolean;
+  limit: number;
+  remaining: number;
+  reset: number; // Unix timestamp in seconds
+};
 
 type RateLimitConfig = {
   interval: number; // milliseconds
   maxRequests: number;
+  prefix: string;
 };
 
-export function rateLimit(config: RateLimitConfig) {
+// ── Upstash Redis implementation (production) ──
+function createUpstashRatelimit(config: RateLimitConfig) {
+  const redis = new Redis({
+    url: process.env.UPSTASH_REDIS_REST_URL || "",
+    token: process.env.UPSTASH_REDIS_REST_TOKEN || "",
+  });
+
+  // Convert ms to a human-readable window string for Upstash
+  const totalSeconds = Math.round(config.interval / 1000);
+  const windowStr =
+    totalSeconds >= 86400
+      ? `${Math.round(totalSeconds / 86400)} d`
+      : totalSeconds >= 3600
+        ? `${Math.round(totalSeconds / 3600)} h`
+        : totalSeconds >= 60
+          ? `${Math.round(totalSeconds / 60)} m`
+          : `${totalSeconds} s`;
+
+  const ratelimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(config.maxRequests, windowStr as Duration),
+    analytics: true,
+    prefix: config.prefix,
+  });
+
+  return {
+    limit: async (identifier: string): Promise<RateLimitResult> => {
+      const { success, limit, remaining, reset } =
+        await ratelimit.limit(identifier);
+      return { success, limit, remaining, reset };
+    },
+  };
+}
+
+// ── In-memory fallback (dev / no Upstash configured) ──
+function createInMemoryRatelimit(config: RateLimitConfig) {
   const cache = new LRUCache<string, { count: number; resetTime: number }>({
     max: 1000,
     ttl: config.interval,
   });
 
   return {
-    check: (key: string) => {
+    limit: async (identifier: string): Promise<RateLimitResult> => {
       const now = Date.now();
-      const record = cache.get(key);
+      const record = cache.get(identifier);
 
-      if (!record) {
-        cache.set(key, {
-          count: 1,
-          resetTime: now + config.interval,
-        });
+      if (!record || now > record.resetTime) {
+        const resetTime = now + config.interval;
+        cache.set(identifier, { count: 1, resetTime });
         return {
           success: true,
+          limit: config.maxRequests,
           remaining: config.maxRequests - 1,
-          resetTime: now + config.interval,
-        };
-      }
-
-      if (now > record.resetTime) {
-        cache.set(key, {
-          count: 1,
-          resetTime: now + config.interval,
-        });
-        return {
-          success: true,
-          remaining: config.maxRequests - 1,
-          resetTime: now + config.interval,
+          reset: Math.floor(resetTime / 1000),
         };
       }
 
       if (record.count >= config.maxRequests) {
-        return { success: false, remaining: 0, resetTime: record.resetTime };
+        return {
+          success: false,
+          limit: config.maxRequests,
+          remaining: 0,
+          reset: Math.floor(record.resetTime / 1000),
+        };
       }
 
       record.count++;
-      cache.set(key, record);
+      cache.set(identifier, record);
       return {
         success: true,
+        limit: config.maxRequests,
         remaining: config.maxRequests - record.count,
-        resetTime: record.resetTime,
+        reset: Math.floor(record.resetTime / 1000),
       };
     },
   };
 }
 
-// Preset per auth endpoints
-export const authRateLimit = rateLimit({
+// ── Factory: picks Upstash when env is configured, otherwise in-memory ──
+function createRatelimit(config: RateLimitConfig) {
+  if (process.env.UPSTASH_REDIS_REST_URL) {
+    return createUpstashRatelimit(config);
+  }
+  return createInMemoryRatelimit(config);
+}
+
+// ── Presets ──
+
+/** 5 requests per 15 minutes — for auth endpoints */
+export const authRateLimit = createRatelimit({
   interval: 15 * 60 * 1000,
   maxRequests: 5,
-}); // 5 requests per 15 min
-export const apiRateLimit = rateLimit({
+  prefix: "ratelimit:auth",
+});
+
+/** 60 requests per minute — for API endpoints */
+export const apiRateLimit = createRatelimit({
   interval: 60 * 1000,
   maxRequests: 60,
-}); // 60 requests per min
+  prefix: "ratelimit:api",
+});

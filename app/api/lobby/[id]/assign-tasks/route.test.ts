@@ -193,6 +193,11 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
     selectionsQuery.eq.mockReturnValue(selectionsQuery);
+    const selectionsPromise = Promise.resolve({ data: [], error: null });
+    Object.assign(selectionsQuery, {
+      then: selectionsPromise.then.bind(selectionsPromise),
+      catch: selectionsPromise.catch.bind(selectionsPromise),
+    });
 
     // strategiesQuery needs eq to chain for .eq("status",...).eq("operator_id",...)
     const strategiesPromise = Promise.resolve({ data: [], error: null });
@@ -296,6 +301,11 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
 
     selectionsQuery.select.mockReturnValue(selectionsQuery);
     selectionsQuery.eq.mockReturnValue(selectionsQuery);
+    const selectionsResult = Promise.resolve({ data: [], error: null });
+    Object.assign(selectionsQuery, {
+      then: selectionsResult.then.bind(selectionsResult),
+      catch: selectionsResult.catch.bind(selectionsResult),
+    });
 
     // strategiesQuery needs eq to chain for .eq("status",...).eq("operator_id",...)
     const strategiesResult = Promise.resolve({

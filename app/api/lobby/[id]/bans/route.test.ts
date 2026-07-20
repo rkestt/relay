@@ -57,7 +57,7 @@ describe("GET /api/lobby/[id]/bans", () => {
           { id: "b1", operator_id: "op-1", side: "attacker", operators: { id: "op-1", name: "Ash", side: "attacker", icon_url: "" } },
         ],
         error: null,
-      }),
+      }) as unknown as typeof bansQuery,
     );
 
     const response = await GET(
@@ -84,7 +84,7 @@ describe("GET /api/lobby/[id]/bans", () => {
 
     mockSupabaseClient.from.mockReturnValue(bansQuery);
     bansQuery.select.mockReturnValue(bansQuery);
-    bansQuery.eq.mockReturnValue(Promise.resolve({ data: null, error: null }));
+    bansQuery.eq.mockReturnValue(Promise.resolve({ data: null, error: null }) as unknown as typeof bansQuery);
 
     const response = await GET(
       new Request("http://localhost/api/lobby/lobby-1/bans"),

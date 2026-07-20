@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
@@ -50,13 +51,17 @@ export async function GET(request: Request) {
     }
 
     // Look up the validation queue entry by token hash
-    const { data: entry, error: queueError } = await supabase
-      .from("validation_queue")
-      .select("*")
-      .eq("token_hash", token)
-      .eq("strategy_id", strategyId)
-      .eq("action", normalizedAction)
-      .single();
+    const { data: entry, error: queueError } = await withTimeout(
+      supabase
+        .from("validation_queue")
+        .select("*")
+        .eq("token_hash", token)
+        .eq("strategy_id", strategyId)
+        .eq("action", normalizedAction)
+        .single(),
+      10000,
+      "lookup validation queue entry",
+    );
 
     if (queueError || !entry) {
       return new NextResponse(
@@ -84,10 +89,14 @@ export async function GET(request: Request) {
     // -- Update strategy status -----------------------------------------
     const newStatus = normalizedAction === "approve" ? "approved" : "rejected";
 
-    const { error: updateError } = await supabase
-      .from("strategy_templates")
-      .update({ status: newStatus })
-      .eq("id", strategyId);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from("strategy_templates")
+        .update({ status: newStatus })
+        .eq("id", strategyId),
+      15000,
+      "update strategy status",
+    );
 
     if (updateError) {
       logger.error("API", "Failed to update strategy status", updateError);
@@ -98,10 +107,14 @@ export async function GET(request: Request) {
     }
 
     // -- Mark token as used ---------------------------------------------
-    const { error: markError } = await supabase
-      .from("validation_queue")
-      .update({ used_at: new Date().toISOString() })
-      .eq("id", entry.id);
+    const { error: markError } = await withTimeout(
+      supabase
+        .from("validation_queue")
+        .update({ used_at: new Date().toISOString() })
+        .eq("id", entry.id),
+      15000,
+      "mark validation token used",
+    );
 
     if (markError) {
       logger.error("API", "Failed to mark validation token as used", markError);

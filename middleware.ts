@@ -4,7 +4,7 @@ import { rateLimitMiddleware } from "@/middleware/rate-limit";
 
 export async function middleware(request: NextRequest) {
   // Apply rate limiting first
-  const rateLimitResponse = rateLimitMiddleware(request);
+  const rateLimitResponse = await rateLimitMiddleware(request);
   if (rateLimitResponse.status === 429) {
     return rateLimitResponse;
   }

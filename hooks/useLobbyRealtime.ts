@@ -23,17 +23,24 @@ const MAX_RECONNECT_DELAY = 30_000; // 30 seconds
  * Handles reconnect with exponential backoff.
  */
 export function useLobbyRealtime(lobbyId: string | null) {
-  const supabaseRef = useRef<ReturnType<typeof createBrowserClient> | null>(null);
-  if (!supabaseRef.current) {
-    supabaseRef.current = createBrowserClient();
-  }
-  const supabase = supabaseRef.current;
+  type SupabaseClient = ReturnType<typeof createBrowserClient>;
 
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const supabaseRef = useRef<SupabaseClient | null>(null);
+
+  useEffect(() => {
+    if (!supabaseRef.current) {
+      supabaseRef.current = createBrowserClient();
+    }
+  }, []);
+
+  const channelRef = useRef<ReturnType<SupabaseClient["channel"]> | null>(null);
   const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lobbyIdRef = useRef(lobbyId);
-  lobbyIdRef.current = lobbyId;
+
+  useEffect(() => {
+    lobbyIdRef.current = lobbyId;
+  }, [lobbyId]);
 
   const lastEventAtRef = useRef<number | null>(null);
   const [lastEventAt, setLastEventAt] = useState<number | null>(null);
@@ -65,7 +72,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
         retryTimerRef.current = null;
       }
       if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
+        supabaseRef.current!.removeChannel(channelRef.current);
         channelRef.current = null;
       }
     };
@@ -96,7 +103,7 @@ export function useLobbyRealtime(lobbyId: string | null) {
       setConnectionStatus("connecting");
 
       channelCounterRef.current += 1;
-      const channel = supabase.channel(`lobby:${id}:${channelCounterRef.current}`, {
+      const channel = supabaseRef.current!.channel(`lobby:${id}:${channelCounterRef.current}`, {
         config: {
           broadcast: { self: true },
           presence: { key: "" },

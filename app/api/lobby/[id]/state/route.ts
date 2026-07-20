@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { getMatchScore } from "@/lib/lobby-utils";
 import { NextResponse } from "next/server";
@@ -23,39 +24,55 @@ export async function GET(
     logger.info("API", "GET /api/lobby/[id]/state start", { lobbyId: id });
 
     // -- Fetch lobby (RLS verifies user is a member or leader) ----------
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("*")
+        .eq("id", id)
+        .single(),
+      10000,
+      "fetch lobby"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
     }
 
     // -- Fetch members with profile info ---------------------------------
-    const { data: members } = await supabase
-      .from("lobby_members")
-      .select("id, user_id, joined_at, profiles (id, username, avatar_url)")
-      .eq("lobby_id", id);
+    const { data: members } = await withTimeout(
+      supabase
+        .from("lobby_members")
+        .select("id, user_id, joined_at, profiles (id, username, avatar_url)")
+        .eq("lobby_id", id),
+      10000,
+      "fetch lobby members"
+    );
 
     // -- Fetch current round (highest round_number where status = 'active')
-    const { data: currentRound } = await supabase
-      .from("rounds")
-      .select("*")
-      .eq("lobby_id", id)
-      .eq("status", "active")
-      .order("round_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: currentRound } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("*")
+        .eq("lobby_id", id)
+        .eq("status", "active")
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      10000,
+      "fetch current round"
+    );
 
     // -- Fetch all completed rounds for score -----------------------------
-    const { data: completedRounds } = await supabase
-      .from("rounds")
-      .select("id, round_number, status, team_side, winner_side")
-      .eq("lobby_id", id)
-      .eq("status", "completed")
-      .order("round_number", { ascending: true });
+    const { data: completedRounds } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("id, round_number, status, team_side, winner_side")
+        .eq("lobby_id", id)
+        .eq("status", "completed")
+        .order("round_number", { ascending: true }),
+      10000,
+      "fetch completed rounds"
+    );
 
     const score = getMatchScore(completedRounds ?? []);
 
@@ -64,19 +81,27 @@ export async function GET(
     let bans: unknown[] = [];
 
     if (currentRound) {
-      const { data: selectionsData } = await supabase
-        .from("lobby_selections")
-        .select("*")
-        .eq("lobby_id", id)
-        .eq("round_id", currentRound.id);
+      const { data: selectionsData } = await withTimeout(
+        supabase
+          .from("lobby_selections")
+          .select("*")
+          .eq("lobby_id", id)
+          .eq("round_id", currentRound.id),
+        10000,
+        "fetch selections"
+      );
 
       selections = selectionsData ?? [];
 
-      const { data: bansData } = await supabase
-        .from("lobby_bans")
-        .select("*, operators (id, name, side, icon_url)")
-        .eq("lobby_id", id)
-        .eq("round_id", currentRound.id);
+      const { data: bansData } = await withTimeout(
+        supabase
+          .from("lobby_bans")
+          .select("*, operators (id, name, side, icon_url)")
+          .eq("lobby_id", id)
+          .eq("round_id", currentRound.id),
+        10000,
+        "fetch bans"
+      );
 
       bans = bansData ?? [];
     }

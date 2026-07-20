@@ -144,9 +144,7 @@ describe("POST /api/lobby/join", () => {
     };
 
     const membersQuery = {
-      insert: vi.fn(() => membersQuery),
-      select: vi.fn(() => membersQuery),
-      single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+      insert: vi.fn(() => Promise.resolve({ data: null, error: null })),
     };
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
@@ -185,9 +183,7 @@ describe("POST /api/lobby/join", () => {
     };
 
     const membersQuery = {
-      insert: vi.fn(() => membersQuery),
-      select: vi.fn(() => membersQuery),
-      single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+      insert: vi.fn(() => Promise.resolve({ data: null, error: null })),
     };
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
@@ -198,13 +194,9 @@ describe("POST /api/lobby/join", () => {
 
     // Simulate unique violation
     const memberError = { code: "23505", message: "duplicate key value violates unique constraint" };
-    membersQuery.insert.mockReturnValue({
-      ...membersQuery,
-      select: vi.fn(() => ({
-        ...membersQuery,
-        single: vi.fn(() => Promise.resolve({ data: null, error: memberError })),
-      })),
-    });
+    membersQuery.insert.mockReturnValue(
+      Promise.resolve({ data: null, error: memberError }),
+    );
 
     const response = await POST(
       new Request("http://localhost/api/lobby/join", {
