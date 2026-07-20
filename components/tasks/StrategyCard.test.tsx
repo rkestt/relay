@@ -166,7 +166,8 @@ describe("StrategyCard", () => {
 
     const img = screen.getByRole("img", { name: /test strategy/i });
     expect(img).toBeInTheDocument();
-    expect(img).toHaveAttribute("src", "https://example.com/thumb.png");
+    // next/image wraps the src with /_next/image?url=...
+    expect(decodeURIComponent(img.getAttribute("src")!)).toContain("example.com/thumb.png");
   });
 
   it("renders placeholder when no thumbnail", () => {

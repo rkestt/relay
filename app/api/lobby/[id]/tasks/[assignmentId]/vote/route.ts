@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { voteSchema, validateRequest } from "@/lib/validations";
@@ -49,12 +50,16 @@ export async function POST(
     const { vote_type } = validation.data;
 
     // -- Verify lobby membership -----------------------------------------
-    const { data: membership } = await supabase
-      .from("lobby_members")
-      .select("id")
-      .eq("lobby_id", lobbyId)
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: membership } = await withTimeout(
+      supabase
+        .from("lobby_members")
+        .select("id")
+        .eq("lobby_id", lobbyId)
+        .eq("user_id", user.id)
+        .maybeSingle(),
+      10000,
+      "verify lobby membership"
+    );
 
     if (!membership) {
       return NextResponse.json(
@@ -64,12 +69,16 @@ export async function POST(
     }
 
     // -- Verify task assignment exists and user is not voting on own ------
-    const { data: assignment, error: assignmentError } = await supabase
-      .from("task_assignments")
-      .select("id, user_id")
-      .eq("id", assignmentId)
-      .eq("lobby_id", lobbyId)
-      .maybeSingle();
+    const { data: assignment, error: assignmentError } = await withTimeout(
+      supabase
+        .from("task_assignments")
+        .select("id, user_id")
+        .eq("id", assignmentId)
+        .eq("lobby_id", lobbyId)
+        .maybeSingle(),
+      10000,
+      "verify task assignment"
+    );
 
     if (assignmentError || !assignment) {
       return NextResponse.json(
@@ -87,19 +96,23 @@ export async function POST(
 
     // -- Upsert or delete vote --------------------------------------------
     if (vote_type === "up" || vote_type === "down") {
-      const { error: upsertError } = await supabase
-        .from("task_votes")
-        .upsert(
-          {
-            task_assignment_id: assignmentId,
-            user_id: user.id,
-            vote_type,
-          },
-          {
-            onConflict: "task_assignment_id, user_id",
-            ignoreDuplicates: false,
-          },
-        );
+      const { error: upsertError } = await withTimeout(
+        supabase
+          .from("task_votes")
+          .upsert(
+            {
+              task_assignment_id: assignmentId,
+              user_id: user.id,
+              vote_type,
+            },
+            {
+              onConflict: "task_assignment_id, user_id",
+              ignoreDuplicates: false,
+            },
+          ),
+        15000,
+        "upsert vote"
+      );
 
       if (upsertError) {
         logger.error("API", "Failed to upsert vote", upsertError);
@@ -117,11 +130,15 @@ export async function POST(
       });
     } else {
       // vote_type === null → remove vote
-      const { error: deleteError } = await supabase
-        .from("task_votes")
-        .delete()
-        .eq("task_assignment_id", assignmentId)
-        .eq("user_id", user.id);
+      const { error: deleteError } = await withTimeout(
+        supabase
+          .from("task_votes")
+          .delete()
+          .eq("task_assignment_id", assignmentId)
+          .eq("user_id", user.id),
+        15000,
+        "delete vote"
+      );
 
       if (deleteError) {
         logger.error("API", "Failed to delete vote", deleteError);
@@ -139,17 +156,25 @@ export async function POST(
     }
 
     // -- Recalculate vote counts ------------------------------------------
-    const { count: upCount, error: upError } = await supabase
-      .from("task_votes")
-      .select("id", { count: "exact", head: true })
-      .eq("task_assignment_id", assignmentId)
-      .eq("vote_type", "up");
+    const { count: upCount, error: upError } = await withTimeout(
+      supabase
+        .from("task_votes")
+        .select("id", { count: "exact", head: true })
+        .eq("task_assignment_id", assignmentId)
+        .eq("vote_type", "up"),
+      10000,
+      "count upvotes"
+    );
 
-    const { count: downCount, error: downError } = await supabase
-      .from("task_votes")
-      .select("id", { count: "exact", head: true })
-      .eq("task_assignment_id", assignmentId)
-      .eq("vote_type", "down");
+    const { count: downCount, error: downError } = await withTimeout(
+      supabase
+        .from("task_votes")
+        .select("id", { count: "exact", head: true })
+        .eq("task_assignment_id", assignmentId)
+        .eq("vote_type", "down"),
+      10000,
+      "count downvotes"
+    );
 
     if (upError || downError) {
       logger.error("API", "Failed to count votes", { upError, downError });

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { lockSelectionSchema, validateRequest } from "@/lib/validations";
@@ -43,16 +44,20 @@ export async function POST(
       return validation.error;
     }
 
-    let { map_id, site_id, operator_id } = validation.data;
+    const { map_id, site_id, operator_id } = validation.data;
 
     // If map_id not provided, fall back to the lobby's map_id
     let effectiveMapId = map_id;
     if (!effectiveMapId) {
-      const { data: lobby } = await supabase
-        .from("lobbies")
-        .select("map_id")
-        .eq("id", id)
-        .maybeSingle();
+      const { data: lobby } = await withTimeout(
+        supabase
+          .from("lobbies")
+          .select("map_id")
+          .eq("id", id)
+          .maybeSingle(),
+        10000,
+        "fetch lobby map_id"
+      );
       if (lobby?.map_id) {
         effectiveMapId = lobby.map_id;
       }
@@ -72,14 +77,18 @@ export async function POST(
     }
 
     // -- Find current active round ---------------------------------------
-    const { data: currentRound } = await supabase
-      .from("rounds")
-      .select("id")
-      .eq("lobby_id", id)
-      .eq("status", "active")
-      .order("round_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: currentRound } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("id")
+        .eq("lobby_id", id)
+        .eq("status", "active")
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      10000,
+      "find current round for lock"
+    );
 
     if (!currentRound) {
       return NextResponse.json(
@@ -101,14 +110,18 @@ export async function POST(
     if (operator_id !== undefined) payload.locked_at = new Date().toISOString();
 
     // -- Upsert selection ------------------------------------------------
-    const { data: selection, error: upsertError } = await supabase
-      .from("lobby_selections")
-      .upsert(payload, {
-        onConflict: "lobby_id, user_id, round_id",
-        ignoreDuplicates: false,
-      })
-      .select()
-      .single();
+    const { data: selection, error: upsertError } = await withTimeout(
+      supabase
+        .from("lobby_selections")
+        .upsert(payload, {
+          onConflict: "lobby_id, user_id, round_id",
+          ignoreDuplicates: false,
+        })
+        .select()
+        .single(),
+      15000,
+      "upsert selection"
+    );
 
     if (upsertError) {
       logger.error("API", "Failed to upsert selection", upsertError);

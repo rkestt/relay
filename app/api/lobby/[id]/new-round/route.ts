@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import {
   getTeamSide,
@@ -51,11 +52,15 @@ export async function POST(
     const { winner_side: winnerSide, team_side } = validation.data;
 
     // -- Verify leader & fetch starting_side ----------------------------
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("leader_id, starting_side")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("leader_id, starting_side")
+        .eq("id", id)
+        .single(),
+      10000,
+      "verify lobby leader"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -71,14 +76,18 @@ export async function POST(
     const startingSide = (lobby.starting_side as "attacker" | "defender") ?? "attacker";
 
     // -- Find current active round ---------------------------------------
-    const { data: currentRound } = await supabase
-      .from("rounds")
-      .select("id, round_number")
-      .eq("lobby_id", id)
-      .eq("status", "active")
-      .order("round_number", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { data: currentRound } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("id, round_number")
+        .eq("lobby_id", id)
+        .eq("status", "active")
+        .order("round_number", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      10000,
+      "find current round"
+    );
 
     if (!currentRound) {
       return NextResponse.json(
@@ -88,10 +97,14 @@ export async function POST(
     }
 
     // -- Mark current round as completed with winner_side ------------------
-    const { error: updateError } = await supabase
-      .from("rounds")
-      .update({ status: "completed", winner_side: winnerSide })
-      .eq("id", currentRound.id);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from("rounds")
+        .update({ status: "completed", winner_side: winnerSide })
+        .eq("id", currentRound.id),
+      15000,
+      "complete round"
+    );
 
     if (updateError) {
       logger.error("API", "Failed to complete current round", updateError);
@@ -102,18 +115,26 @@ export async function POST(
     }
 
     // -- Fetch all completed rounds for score calculation -----------------
-    const { data: completedRounds } = await supabase
-      .from("rounds")
-      .select("winner_side")
-      .eq("lobby_id", id)
-      .eq("status", "completed");
+    const { data: completedRounds } = await withTimeout(
+      supabase
+        .from("rounds")
+        .select("winner_side")
+        .eq("lobby_id", id)
+        .eq("status", "completed"),
+      10000,
+      "fetch completed rounds"
+    );
 
     const score = getMatchScore(completedRounds ?? []);
     const matchStatus = getMatchStatus(score, currentRound.round_number);
 
     // -- Check if match is over -------------------------------------------
     if (matchStatus.isOver) {
-      await supabase.from("lobbies").update({ phase: "closed" }).eq("id", id);
+      await withTimeout(
+        supabase.from("lobbies").update({ phase: "closed" }).eq("id", id),
+        15000,
+        "close lobby"
+      );
       logger.info("API", "Match over", {
         lobbyId: id,
         winner: matchStatus.winner,
@@ -140,23 +161,31 @@ export async function POST(
       ? team_side
       : getTeamSide(startingSide, newRoundNumber);
 
-    const { data: newRound, error: insertError } = await supabase
-      .from("rounds")
-      .insert({
-        lobby_id: id,
-        round_number: newRoundNumber,
-        status: "active",
-        team_side: teamSide,
-      })
-      .select("id, round_number, team_side")
-      .single();
+    const { data: newRound, error: insertError } = await withTimeout(
+      supabase
+        .from("rounds")
+        .insert({
+          lobby_id: id,
+          round_number: newRoundNumber,
+          status: "active",
+          team_side: teamSide,
+        })
+        .select("id, round_number, team_side")
+        .single(),
+      15000,
+      "create new round"
+    );
 
     if (insertError || !newRound) {
       // Rollback: restore previous round to active
-      await supabase
-        .from("rounds")
-        .update({ status: "active", winner_side: null })
-        .eq("id", currentRound.id);
+      await withTimeout(
+        supabase
+          .from("rounds")
+          .update({ status: "active", winner_side: null })
+          .eq("id", currentRound.id),
+        15000,
+        "rollback restore round"
+      );
 
       logger.error("API", "Failed to create new round", insertError);
       return NextResponse.json(
@@ -166,11 +195,15 @@ export async function POST(
     }
 
     // -- Copy bans from previous round to new round -----------------------
-    const { data: previousBans } = await supabase
-      .from("lobby_bans")
-      .select("operator_id, side")
-      .eq("lobby_id", id)
-      .eq("round_id", currentRound.id);
+    const { data: previousBans } = await withTimeout(
+      supabase
+        .from("lobby_bans")
+        .select("operator_id, side")
+        .eq("lobby_id", id)
+        .eq("round_id", currentRound.id),
+      10000,
+      "fetch previous bans"
+    );
 
     if (previousBans && previousBans.length > 0) {
       const newBanRows = previousBans.map((ban) => ({
@@ -180,9 +213,13 @@ export async function POST(
         round_id: newRound.id,
       }));
 
-      const { error: copyError } = await supabase
-        .from("lobby_bans")
-        .insert(newBanRows);
+      const { error: copyError } = await withTimeout(
+        supabase
+          .from("lobby_bans")
+          .insert(newBanRows),
+        15000,
+        "copy bans to new round"
+      );
 
       if (copyError) {
         // Non-fatal: log but don't fail the request

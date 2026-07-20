@@ -1,4 +1,5 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -55,20 +56,24 @@ export async function POST(request: Request) {
 
     // -- Insert strategy template (use admin client to bypass RLS) ------
     const adminClient = createAdminClient();
-    const { data: strategy, error: insertError } = await adminClient
-      .from("strategy_templates")
-      .insert({
-        title,
-        map_id,
-        site_id,
-        operator_id,
-        description: description || null,
-        image_url: imageUrl,
-        status: "pending",
-        created_by: user.id,
-      })
-      .select("id, status")
-      .single();
+    const { data: strategy, error: insertError } = await withTimeout(
+      adminClient
+        .from("strategy_templates")
+        .insert({
+          title,
+          map_id,
+          site_id,
+          operator_id,
+          description: description || null,
+          image_url: imageUrl,
+          status: "pending",
+          created_by: user.id,
+        })
+        .select("id, status")
+        .single(),
+      15000,
+      "insert strategy"
+    );
 
     if (insertError || !strategy) {
       logger.error("API", "Insert error:", insertError);
@@ -85,9 +90,13 @@ export async function POST(request: Request) {
         .map((tag) => ({ strategy_id: strategy.id, tag }));
 
       if (tagRows.length > 0) {
-        const { error: tagError } = await adminClient
-          .from("strategy_tags")
-          .insert(tagRows);
+        const { error: tagError } = await withTimeout(
+          adminClient
+            .from("strategy_tags")
+            .insert(tagRows),
+          15000,
+          "insert strategy tags"
+        );
 
         if (tagError) {
           logger.error("API", "Failed to insert tags", tagError);
@@ -122,9 +131,13 @@ export async function POST(request: Request) {
         }));
 
       if (hotspotRows.length > 0) {
-        const { error: hotspotError } = await adminClient
-          .from("strategy_hotspots")
-          .insert(hotspotRows);
+        const { error: hotspotError } = await withTimeout(
+          adminClient
+            .from("strategy_hotspots")
+            .insert(hotspotRows),
+          15000,
+          "insert strategy hotspots"
+        );
 
         if (hotspotError) {
           logger.error("API", "Failed to insert hotspots", hotspotError);
@@ -142,9 +155,13 @@ export async function POST(request: Request) {
         sort_order: index,
       }));
 
-      const { error: imageError } = await adminClient
-        .from("strategy_images")
-        .insert(imageRows);
+      const { error: imageError } = await withTimeout(
+        adminClient
+          .from("strategy_images")
+          .insert(imageRows),
+        15000,
+        "insert strategy images"
+      );
 
       if (imageError) {
         logger.error("API", "Failed to insert images", imageError);
@@ -171,15 +188,19 @@ export async function POST(request: Request) {
           Date.now() + 7 * 24 * 60 * 60 * 1000,
         ).toISOString();
 
-        const { error: queueError } = await adminClient
-          .from("validation_queue")
-          .insert({
-            strategy_id: strategy.id,
-            token_hash: token,
-            action,
-            expires_at: expiresAt,
-            created_at: timestamp,
-          });
+        const { error: queueError } = await withTimeout(
+          adminClient
+            .from("validation_queue")
+            .insert({
+              strategy_id: strategy.id,
+              token_hash: token,
+              action,
+              expires_at: expiresAt,
+              created_at: timestamp,
+            }),
+          15000,
+          "insert validation queue entry"
+        );
 
         if (queueError) {
           logger.error(
@@ -289,11 +310,15 @@ export async function GET(request: Request) {
 
     if (map_id) query = query.eq("map_id", map_id);
     if (site_id) query = query.eq("site_id", site_id);
-    query = query.eq("status", status);
-
-    const { data: strategies, error } = await query.order("created_at", {
+    query = query.eq("status", status).order("created_at", {
       ascending: false,
     });
+
+    const { data: strategies, error } = await withTimeout(
+      query,
+      10000,
+      "fetch strategies"
+    );
 
     if (error) {
       logger.error("API", "Failed to fetch strategies", error);

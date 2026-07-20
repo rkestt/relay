@@ -50,7 +50,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -84,7 +84,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -118,7 +118,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -154,7 +154,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -207,7 +207,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -260,7 +260,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -315,7 +315,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -368,7 +368,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -421,7 +421,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST
@@ -484,7 +484,7 @@ services:
         config:
           origins:
             - "https://r6hub.yourdomain.com"
-            - "http://localhost:3000"
+
           methods:
             - GET
             - POST

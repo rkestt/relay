@@ -28,7 +28,10 @@ export function useHeartbeat(lobbyId: string | null) {
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lobbyIdRef = useRef(lobbyId);
-  lobbyIdRef.current = lobbyId;
+
+  useEffect(() => {
+    lobbyIdRef.current = lobbyId;
+  }, [lobbyId]);
   const pausedRef = useRef(false);
 
   // ── Stable store action references ──
@@ -39,6 +42,7 @@ export function useHeartbeat(lobbyId: string | null) {
   const setCurrentRound = useLobbyStore((s) => s.setCurrentRound);
   const setSelections = useLobbyStore((s) => s.setSelections);
   const setBans = useLobbyStore((s) => s.setBans);
+  const setConnectionStatus = useLobbyStore((s) => s.setConnectionStatus);
 
   // ── fetch & store replace ──────────────────────────────────
 
@@ -63,32 +67,47 @@ export function useHeartbeat(lobbyId: string | null) {
         roundNumber: data.currentRound?.round_number ?? null,
       });
 
-      // Server is authoritative – replace store state
-      setLobbyId(data.lobby.id);
-      setLobbyCode(data.lobby.room_code);
+      // Check if realtime is already keeping the store fresh
+      const currentStatus = useLobbyStore.getState().connectionStatus;
+      const isRealtimeActive = currentStatus === "connected";
 
-      // Flatten members + profiles
-      setMembers(
-        data.members.map((m) => ({
-          id: m.id,
-          lobby_id: m.lobby_id,
-          user_id: m.user_id,
-          joined_at: m.joined_at,
-        })),
-      );
+      if (isRealtimeActive) {
+        // Realtime active → heartbeat only updates lobby metadata
+        setLobbyId(data.lobby.id);
+        setLobbyCode(data.lobby.room_code);
+        setCurrentRound(data.currentRound);
+        logger.info("useHeartbeat", "sync skipped (realtime active)");
+      } else {
+        // Realtime not active → heartbeat does full replace (fallback)
+        setLobbyId(data.lobby.id);
+        setLobbyCode(data.lobby.room_code);
 
-      for (const m of data.members) {
-        if (m.profiles) {
-          setMemberProfile(m.user_id, {
-            username: m.profiles.username,
-            avatar_url: m.profiles.avatar_url,
-          });
+        // Flatten members + profiles
+        setMembers(
+          data.members.map((m) => ({
+            id: m.id,
+            lobby_id: m.lobby_id,
+            user_id: m.user_id,
+            joined_at: m.joined_at,
+          })),
+        );
+
+        for (const m of data.members) {
+          if (m.profiles) {
+            setMemberProfile(m.user_id, {
+              username: m.profiles.username,
+              avatar_url: m.profiles.avatar_url,
+            });
+          }
         }
+
+        setCurrentRound(data.currentRound);
+        setSelections(data.selections);
+        setBans(data.bans);
+        setConnectionStatus("connected");
+        logger.info("useHeartbeat", "sync full (realtime inactive)");
       }
 
-      setCurrentRound(data.currentRound);
-      setSelections(data.selections);
-      setBans(data.bans);
       setLastSync(Date.now());
 
       logger.info("useHeartbeat", "sync ok");

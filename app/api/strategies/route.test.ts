@@ -18,6 +18,11 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+  revalidateTag: vi.fn(),
+}));
+
 vi.mock("crypto", () => ({
   default: {
     createHmac: vi.fn(() => ({
@@ -62,7 +67,7 @@ describe("GET /api/strategies", () => {
   });
 
   it("filters by map_id and site_id", async () => {
-    let usedFilters: string[] = [];
+    const usedFilters: string[] = [];
     const strategiesQuery = {
       select: vi.fn(() => strategiesQuery),
       eq: vi.fn((field: string, _val: unknown) => {

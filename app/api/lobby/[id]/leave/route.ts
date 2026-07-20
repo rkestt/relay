@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
@@ -21,11 +22,15 @@ export async function POST(
     const { id } = await params;
 
     // -- Delete current user from lobby_members --------------------------
-    const { error: deleteError, count } = await supabase
-      .from("lobby_members")
-      .delete()
-      .eq("lobby_id", id)
-      .eq("user_id", user.id);
+    const { error: deleteError, count } = await withTimeout(
+      supabase
+        .from("lobby_members")
+        .delete()
+        .eq("lobby_id", id)
+        .eq("user_id", user.id),
+      15000,
+      "leave lobby",
+    );
 
     if (deleteError) {
       logger.error("API", "Failed to leave lobby:", deleteError);

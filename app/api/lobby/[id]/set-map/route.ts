@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { setMapSchema, validateRequest } from "@/lib/validations";
@@ -21,11 +22,15 @@ export async function POST(
     const { id } = await params;
     logger.info("API", "POST /api/lobby/[id]/set-map start", { lobbyId: id });
 
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("id, leader_id, phase")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("id, leader_id, phase")
+        .eq("id", id)
+        .single(),
+      10000,
+      "verify lobby leader"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -48,20 +53,28 @@ export async function POST(
     const { map_id } = validation.data;
 
     // Verify the map exists
-    const { data: map, error: mapError } = await supabase
-      .from("maps")
-      .select("id")
-      .eq("id", map_id)
-      .single();
+    const { data: map, error: mapError } = await withTimeout(
+      supabase
+        .from("maps")
+        .select("id")
+        .eq("id", map_id)
+        .single(),
+      10000,
+      "verify map exists"
+    );
 
     if (mapError || !map) {
       return NextResponse.json({ error: "Map not found" }, { status: 404 });
     }
 
-    const { error: updateError } = await supabase
-      .from("lobbies")
-      .update({ map_id, updated_at: new Date().toISOString() })
-      .eq("id", id);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .update({ map_id, updated_at: new Date().toISOString() })
+        .eq("id", id),
+      15000,
+      "set lobby map"
+    );
 
     if (updateError) {
       logger.error("API", "Failed to set map for lobby", updateError);

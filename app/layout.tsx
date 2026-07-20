@@ -5,7 +5,6 @@ import UserMenu from "@/components/auth/UserMenu";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import { LogPanel } from "@/components/debug/LogPanel";
 import { generateMetadata } from "@/lib/seo/metadata";
 
 const geistSans = Geist({
@@ -70,7 +69,6 @@ export default function RootLayout({
           <PageTransition>{children}</PageTransition>
         </AnalyticsProvider>
         <CookieBanner />
-        <LogPanel />
       </body>
     </html>
   );

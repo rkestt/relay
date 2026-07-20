@@ -128,7 +128,7 @@ describe("useLobbyRealtime", () => {
     renderHook(() => useLobbyRealtime("lobby-xyz"));
 
     expect(mockSupabaseClient.channel).toHaveBeenCalledWith(
-      "lobby:lobby-xyz",
+      "lobby:lobby-xyz:1",
       expect.objectContaining({
         config: { broadcast: { self: true }, presence: { key: "" } },
       }),
@@ -309,7 +309,7 @@ describe("useLobbyRealtime", () => {
     // Sanity – first subscription was created
     expect(mockSupabaseClient.channel).toHaveBeenCalledTimes(1);
     expect(mockSupabaseClient.channel).toHaveBeenCalledWith(
-      "lobby:lobby-1",
+      "lobby:lobby-1:1",
       expect.any(Object),
     );
 
@@ -320,7 +320,7 @@ describe("useLobbyRealtime", () => {
     expect(mockSupabaseClient.removeChannel).toHaveBeenCalledWith(mockChannel);
     expect(mockSupabaseClient.channel).toHaveBeenCalledTimes(2);
     expect(mockSupabaseClient.channel).toHaveBeenLastCalledWith(
-      "lobby:lobby-2",
+      "lobby:lobby-2:2",
       expect.any(Object),
     );
   });

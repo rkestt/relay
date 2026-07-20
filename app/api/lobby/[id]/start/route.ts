@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 
@@ -20,11 +21,15 @@ export async function POST(
     const { id } = await params;
     logger.info("API", "POST /api/lobby/[id]/start start", { lobbyId: id });
 
-    const { data: lobby, error: lobbyError } = await supabase
-      .from("lobbies")
-      .select("id, leader_id, phase")
-      .eq("id", id)
-      .single();
+    const { data: lobby, error: lobbyError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .select("id, leader_id, phase")
+        .eq("id", id)
+        .single(),
+      10000,
+      "fetch lobby for start"
+    );
 
     if (lobbyError || !lobby) {
       return NextResponse.json({ error: "Lobby not found" }, { status: 404 });
@@ -38,10 +43,14 @@ export async function POST(
       return NextResponse.json({ error: "Lobby is not in waiting phase" }, { status: 400 });
     }
 
-    const { error: updateError } = await supabase
-      .from("lobbies")
-      .update({ phase: 'playing', updated_at: new Date().toISOString() })
-      .eq("id", id);
+    const { error: updateError } = await withTimeout(
+      supabase
+        .from("lobbies")
+        .update({ phase: 'playing', updated_at: new Date().toISOString() })
+        .eq("id", id),
+      15000,
+      "start lobby"
+    );
 
     if (updateError) {
       logger.error("API", "Failed to start lobby", updateError);
