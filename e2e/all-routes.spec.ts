@@ -42,7 +42,7 @@ async function checkPage(
   const consoleCapture = captureConsole(page);
   captureNetwork(page);
 
-  const resp = await page.goto(url, { waitUntil: "networkidle" });
+  const resp = await page.goto(url, { waitUntil: "domcontentloaded" });
   expect(resp?.ok(), `${url} → ${resp?.status()}`).toBeTruthy();
   await page.waitForTimeout(800);
 
