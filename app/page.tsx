@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { handleApiError } from "@/lib/api-error";
@@ -109,14 +110,14 @@ export default function HomePage() {
   }, [router, rejoinCode]);
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
 
       {/* ── Hero ──────────────────────────────────────── */}
       <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 sm:py-32 gap-12 sm:gap-20">
 
         {/* Logomark + Title */}
         <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="flex items-center justify-center w-16 h-16 rounded-2xl border border-border bg-card">
+          <div className="flex items-center justify-center w-16 h-16 rounded-2xl border border-outline bg-surface-container">
             <svg
               aria-hidden="true"
               className="size-8 text-primary"
@@ -134,10 +135,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-on-surface">
               r6hub
             </h1>
-            <p className="text-base text-muted-foreground font-medium">
+            <p className="text-base text-on-surface-variant font-medium">
               Tactical sync for Rainbow Six Siege
             </p>
           </div>
@@ -148,13 +149,13 @@ export default function HomePage() {
 
           {/* Starting side selector */}
           <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase text-center">
+            <span className="text-xs font-semibold tracking-wider text-on-surface-variant uppercase text-center">
               Your team starts as
             </span>
-            <div className="flex rounded-xl bg-card border border-border p-1">
+            <div className="flex rounded-xl bg-surface-container border border-outline p-1">
               <Button
                 type="button"
-                variant={startingSide === "attacker" ? "default" : "ghost"}
+                variant={startingSide === "attacker" ? "filled" : "text"}
                 size="default"
                 onClick={() => setStartingSide("attacker")}
                 className={cn(
@@ -166,7 +167,7 @@ export default function HomePage() {
               </Button>
               <Button
                 type="button"
-                variant={startingSide === "defender" ? "default" : "ghost"}
+                variant={startingSide === "defender" ? "filled" : "text"}
                 size="default"
                 onClick={() => setStartingSide("defender")}
                 className={cn(
@@ -182,15 +183,9 @@ export default function HomePage() {
           {/* Create lobby — primary red-orange action */}
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
             <Button
-              size="lg"
-              className={cn(
-                "w-full h-14 rounded-lg text-base font-bold tracking-wide",
-                "bg-primary text-primary-foreground",
-                "hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "transition-all duration-150",
-                "shadow-[0_0_24px_-4px_var(--primary)]"
-              )}
+              variant="filled"
+              size="xl"
+              className="w-full h-14 text-base font-bold tracking-wide shadow-2"
               onClick={handleCreate}
               disabled={loading}
             >
@@ -212,13 +207,8 @@ export default function HomePage() {
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
             <Button
               variant="outlined"
-              size="lg"
-              className={cn(
-                "w-full h-14 rounded-lg text-base font-semibold tracking-wide",
-                "border-border text-foreground",
-                "hover:bg-muted hover:border-border",
-                "active:scale-[0.98] transition-all duration-150"
-              )}
+              size="xl"
+              className="w-full h-14 text-base font-semibold tracking-wide"
               onClick={() => {
                 logger.info("Landing", "Join modal opened");
                 setShowJoinModal(true);
@@ -249,13 +239,9 @@ export default function HomePage() {
           {rejoinCode && (
             <div className="animate-in fade-in duration-300">
               <Button
-                variant="ghost"
+                variant="text"
                 size="lg"
-                className={cn(
-                  "w-full h-12 rounded-lg text-sm font-medium text-muted-foreground",
-                  "hover:bg-muted hover:text-foreground",
-                  "active:scale-[0.98] transition-all duration-150"
-                )}
+                className="w-full h-12 text-sm font-medium text-on-surface-variant"
                 onClick={handleRejoin}
                 disabled={loading}
               >
@@ -268,16 +254,11 @@ export default function HomePage() {
 
         {/* ── Submit Strategy (standalone) ─────────────── */}
         <div className="flex flex-col items-center w-full max-w-sm animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
-          <div className="w-full border-t border-border/20 mb-5" />
+          <div className="w-full border-t border-outline-variant mb-5" />
           <Button
-            variant="outlined"
+            variant="text"
             size="lg"
-            className={cn(
-              "w-full h-14 rounded-lg text-base font-semibold tracking-wide",
-              "border-border text-foreground/80",
-              "hover:bg-card hover:border-border hover:text-foreground",
-              "active:scale-[0.98] transition-all duration-150"
-            )}
+            className="w-full h-14 text-base font-semibold tracking-wide"
             onClick={() => router.push("/submit")}
           >
             <svg
@@ -297,7 +278,7 @@ export default function HomePage() {
             </svg>
             Submit Strategy
           </Button>
-          <p className="text-xs text-muted-foreground/40 mt-2">
+          <p className="text-xs text-on-surface-variant/40 mt-2">
             Share your tactics with the community
           </p>
         </div>
@@ -305,105 +286,82 @@ export default function HomePage() {
         {/* Error */}
         {error && (
           <div
-            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-bottom-1 duration-200"
+            className="flex items-center gap-2 px-4 py-3 rounded-xl bg-error/10 text-on-error border border-error/20 animate-in fade-in slide-in-from-bottom-1 duration-200"
             role="alert"
             aria-live="polite"
           >
-             <AlertIcon className="size-4 text-destructive flex-shrink-0" />
-            <p className="text-sm text-destructive text-center">{error}</p>
+             <AlertIcon className="size-4 text-error flex-shrink-0" />
+            <p className="text-sm text-error text-center">{error}</p>
           </div>
         )}
       </main>
 
       {/* ── Join Modal ──────────────────────────────────── */}
-      {showJoinModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowJoinModal(false);
-          }}
-        >
-          <div
+      <Dialog open={showJoinModal} onOpenChange={setShowJoinModal}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogTitle>Join Lobby</DialogTitle>
+          <DialogDescription className="mt-1 mb-5">
+            Enter the 6-character room code shared by your squad leader.
+          </DialogDescription>
+
+          {/* Code input */}
+          <Input
+            type="text"
+            value={roomCode}
+            onChange={(e) =>
+              setRoomCode(e.target.value.toUpperCase().slice(0, 6))
+            }
+            placeholder="XXXXXX"
+            maxLength={6}
             className={cn(
-              "w-full max-w-sm bg-popover border border-border rounded-xl p-6 shadow-lg",
-              "animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+              "h-14 text-center text-2xl font-mono font-bold tracking-[0.3em] uppercase rounded-xl",
+              "bg-surface-container-high border-2 transition-all duration-fast mb-5",
+              "placeholder:text-on-surface-variant/30 placeholder:tracking-normal",
+              error
+                ? "border-error focus:border-error focus:ring-error/20"
+                : "border-outline focus:border-primary focus:ring-primary/20",
+              "hover:border-on-surface/20"
             )}
-          >
-            <h2 className="text-lg font-bold text-foreground mb-1">
-              Join Lobby
-            </h2>
-            <p className="text-sm text-muted-foreground mb-5">
-              Enter the 6-character room code shared by your squad leader.
+            autoFocus
+            aria-label="Room code"
+          />
+
+          {/* Inline error inside modal */}
+          {error && (
+            <p className="text-sm text-error mb-4 text-center animate-in fade-in slide-in-from-top-1 duration-200">
+              {error}
             </p>
+          )}
 
-            {/* Code input */}
-            <Input
-              type="text"
-              value={roomCode}
-              onChange={(e) =>
-                setRoomCode(e.target.value.toUpperCase().slice(0, 6))
-              }
-              placeholder="XXXXXX"
-              maxLength={6}
-              className={cn(
-                "h-14 text-center text-2xl font-mono font-bold tracking-[0.3em] uppercase rounded-xl",
-                "bg-muted border-2 transition-all duration-150 mb-5",
-                "placeholder:text-muted-foreground/30 placeholder:tracking-normal",
-                error
-                  ? "border-destructive focus:border-destructive focus:ring-destructive/20"
-                  : "border-border focus:border-primary focus:ring-primary/20",
-                "hover:border-foreground/20"
+          {/* Modal actions */}
+          <div className="flex gap-3 mt-2">
+            <Button
+              variant="text"
+              size="lg"
+              className="flex-1 h-12 text-sm font-medium text-on-surface-variant"
+              onClick={() => setShowJoinModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="filled"
+              size="lg"
+              className="flex-1 h-12 text-sm font-bold"
+              onClick={handleJoin}
+              disabled={roomCode.length !== 6 || loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                  Joining…
+                </span>
+              ) : (
+                "Join"
               )}
-              autoFocus
-              aria-label="Room code"
-            />
-
-            {/* Inline error inside modal */}
-            {error && (
-              <p className="text-sm text-destructive mb-4 text-center animate-in fade-in slide-in-from-top-1 duration-200">
-                {error}
-              </p>
-            )}
-
-            {/* Modal actions */}
-            <div className="flex gap-3">
-              <Button
-                variant="ghost"
-                size="lg"
-                className={cn(
-                  "flex-1 h-12 rounded-lg text-sm font-medium text-muted-foreground",
-                  "hover:bg-muted hover:text-foreground",
-                  "active:scale-[0.98] transition-all duration-150"
-                )}
-                onClick={() => setShowJoinModal(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="lg"
-                className={cn(
-                  "flex-1 h-12 rounded-lg text-sm font-bold",
-                  "bg-primary text-primary-foreground",
-                  "hover:bg-primary-hover active:bg-primary-active active:scale-[0.98]",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
-                  "transition-all duration-150"
-                )}
-                onClick={handleJoin}
-                disabled={roomCode.length !== 6 || loading}
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <div className="size-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    Joining…
-                  </span>
-                ) : (
-                  "Join"
-                )}
-              </Button>
-            </div>
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

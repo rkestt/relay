@@ -18,7 +18,7 @@ interface DialogProps {
 }
 
 function Dialog({ children, open, defaultOpen, onOpenChange }: DialogProps) {
-  const handleOpenChange = (isOpen: boolean, event: Event, reason: string) => {
+  const handleOpenChange = (isOpen: boolean) => {
     onOpenChange?.(isOpen);
   };
 
