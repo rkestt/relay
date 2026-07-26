@@ -14,7 +14,7 @@ export default function NotFound() {
           <Button render={<Link href="/" />} variant="default">
             Torna alla Home
           </Button>
-          <Button render={<Link href="/lobby" />} variant="outline">
+          <Button render={<Link href="/lobby" />} variant="outlined">
             Crea Lobby
           </Button>
         </div>

@@ -365,7 +365,7 @@ export default function TaskDetailPage({
           description="Could not load this task assignment."
           action={
             <Button
-              variant="outline"
+              variant="outlined"
               size="sm"
               className="h-11 min-w-[120px] rounded-xl border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => router.push(`/lobby/${code}/tasks`)}

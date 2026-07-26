@@ -63,7 +63,7 @@ export function DeleteAccount() {
                 {loading ? "Eliminazione..." : "Conferma eliminazione"}
               </Button>
               <Button
-                variant="outline"
+                variant="outlined"
                 onClick={() => setShowConfirm(false)}
               >
                 Annulla

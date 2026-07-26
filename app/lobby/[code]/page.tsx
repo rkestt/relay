@@ -432,7 +432,7 @@ export default function LobbyPage({
           action={
             <div className="flex gap-3">
               <Button
-                variant="outline"
+                variant="outlined"
                 size="sm"
                 className="h-11 min-w-[120px] rounded-xl"
                 onClick={() => router.push("/")}
@@ -727,7 +727,7 @@ export default function LobbyPage({
               </div>
             )}
             <Button
-              variant="outline"
+              variant="outlined"
               size="lg"
               className="h-12 rounded-xl text-sm font-semibold"
               onClick={() => router.push("/")}
@@ -935,7 +935,7 @@ export default function LobbyPage({
                 </p>
                 <div className="flex gap-3">
                   <Button
-                    variant="outline"
+                    variant="outlined"
                     size="lg"
                     className={cn(
                       "flex-1 h-12 rounded-xl text-sm font-semibold",
@@ -960,7 +960,7 @@ export default function LobbyPage({
                     Set Bans
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="outlined"
                     size="lg"
                     className={cn(
                       "flex-1 h-12 rounded-xl text-sm font-semibold",

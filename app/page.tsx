@@ -111,16 +111,6 @@ export default function HomePage() {
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
 
-      {/* ═══ WIP OVERLAY ═══ — fixed, sopra tutto, solo root page */}
-      <div className="fixed top-0 left-0 right-0 z-[9999] bg-[oklch(0.75_0.16_85)] text-[oklch(0.12_0_0)] text-center font-extrabold tracking-[0.15em] uppercase shadow-[0_0_30px_rgba(0,0,0,0.6)] border-b-4 border-[oklch(0.65_0.20_25)] pointer-events-none"
-           style={{
-             fontSize: "clamp(0.7rem, 2.5vw, 1.4rem)",
-             paddingBlock: "clamp(4px, 1vh, 12px)",
-             animation: "pulse-subtle 2s ease-in-out infinite",
-           }}>
-        WORK IN PROGRESS — features incomplete, data may reset anytime
-      </div>
-
       {/* ── Hero ──────────────────────────────────────── */}
       <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 sm:py-32 gap-12 sm:gap-20">
 
@@ -221,7 +211,7 @@ export default function HomePage() {
           {/* Join lobby */}
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 delay-200">
             <Button
-              variant="outline"
+              variant="outlined"
               size="lg"
               className={cn(
                 "w-full h-14 rounded-lg text-base font-semibold tracking-wide",
@@ -280,7 +270,7 @@ export default function HomePage() {
         <div className="flex flex-col items-center w-full max-w-sm animate-in fade-in slide-in-from-bottom-2 duration-500 delay-300">
           <div className="w-full border-t border-border/20 mb-5" />
           <Button
-            variant="outline"
+            variant="outlined"
             size="lg"
             className={cn(
               "w-full h-14 rounded-lg text-base font-semibold tracking-wide",

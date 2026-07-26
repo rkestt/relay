@@ -153,7 +153,7 @@ function ValidateContent() {
               </p>
             </div>
             <Button
-              variant="outline"
+              variant="outlined"
               size="lg"
               className="w-full h-11"
               onClick={() => router.push("/")}
@@ -191,7 +191,7 @@ function ValidateContent() {
               )}
             </div>
             <Button
-              variant="outline"
+              variant="outlined"
               size="lg"
               className="w-full h-11"
               onClick={() => router.push("/")}

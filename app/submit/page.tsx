@@ -349,7 +349,7 @@ export default function SubmitStrategyPage() {
           </p>
         </div>
         <Button
-          variant="outline"
+          variant="outlined"
           size="lg"
           className="h-12 rounded-xl mt-2"
           onClick={() => router.push("/")}

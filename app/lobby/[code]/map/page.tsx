@@ -213,7 +213,7 @@ export default function LobbyMapPage({
           description={error}
           action={
             <Button
-              variant="outline"
+              variant="outlined"
               size="sm"
               className="h-11 min-w-[120px] rounded-xl"
               onClick={() => router.push(`/lobby/${code}`)}

@@ -44,7 +44,7 @@ export function ExportData() {
         <p className="text-sm text-muted-foreground mb-4">
           Scarica una copia di tutti i tuoi dati personali in formato JSON.
         </p>
-        <Button onClick={handleExport} disabled={loading} variant="outline">
+        <Button onClick={handleExport} disabled={loading} variant="outlined">
           <DownloadIcon className="mr-2 h-4 w-4" />
           {loading ? "Esportazione..." : "Esporta dati"}
         </Button>

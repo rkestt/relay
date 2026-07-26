@@ -131,7 +131,7 @@ export function CookieBanner() {
                     Rifiuta tutti
                   </Button>
                   <Button
-                    variant="outline"
+                    variant="outlined"
                     size="sm"
                     onClick={() => setShowModal(true)}
                     aria-label="Personalizza preferenze cookie"

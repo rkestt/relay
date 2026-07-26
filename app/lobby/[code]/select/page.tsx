@@ -276,7 +276,7 @@ export default function SelectPage({
           description={error}
           action={
             <Button
-              variant="outline"
+              variant="outlined"
               size="sm"
               className="h-11 min-w-[120px] rounded-xl border-primary/30 text-primary hover:bg-primary/10"
               onClick={() => router.push(`/lobby/${code}`)}
@@ -815,7 +815,7 @@ export default function SelectPage({
             </div>
             <div className="flex gap-3 justify-end pt-2">
               <Button
-                variant="outline"
+                variant="outlined"
                 size="sm"
                 className="h-11 min-w-[100px] rounded-xl"
                 onClick={() => setShowConfirm(false)}

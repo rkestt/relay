@@ -209,7 +209,7 @@ export default function LoginPage() {
         {/* Discord OAuth */}
         <Button
           type="button"
-          variant="outline"
+          variant="outlined"
           size="lg"
           onClick={handleDiscordLogin}
           disabled={discordLoading}

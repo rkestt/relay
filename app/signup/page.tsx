@@ -370,7 +370,7 @@ export default function SignupPage() {
         {/* Discord OAuth */}
         <Button
           type="button"
-          variant="outline"
+          variant="outlined"
           size="lg"
           onClick={handleDiscordSignup}
           disabled={discordLoading}
