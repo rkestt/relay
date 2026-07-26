@@ -15,8 +15,11 @@ import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import type { LobbyMember, Operator, Profile } from "@/types";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { AlertIcon, CheckIcon, CopyIcon, CrownIcon, MapIcon, UsersIcon } from "@/components/icons";
-import Image from "next/image";
+import { AlertIcon, CheckIcon, CrownIcon, MapIcon, UsersIcon } from "@/components/icons";
+import { WaitingRoom } from "@/components/lobby/WaitingRoom";
+import { PlayingPhase } from "@/components/lobby/PlayingPhase";
+import { MatchComplete } from "@/components/lobby/MatchComplete";
+import { LeaderControls } from "@/components/lobby/LeaderControls";
 
 const ROOM_CODE_KEY = "r6hub_room_code";
 
@@ -234,12 +237,6 @@ export default function LobbyPage({
     }
   }, [lobbyId, router]);
 
-  // ── Derived data (must be before conditional returns) ──
-  const operatorMap = useMemo(() =>
-    new Map(operators.map(op => [op.id, op.name])),
-    [operators]
-  );
-
   const handleNewRound = useCallback(() => {
     setShowRoundWinnerModal(true);
   }, []);
@@ -378,11 +375,11 @@ export default function LobbyPage({
   const phaseLabel = (() => {
     if (!state?.lobby) return null;
     switch (state.lobby.phase) {
-      case "waiting": return { label: "Waiting Room", color: "text-muted-foreground" };
+      case "waiting": return { label: "Waiting Room", color: "text-on-surface-variant" };
       case "playing": return state.lobby.map_id
         ? { label: "In Game", color: "text-success" }
         : { label: "Map Selection", color: "text-primary" };
-      case "closed": return { label: "Closed", color: "text-destructive" };
+      case "closed": return { label: "Closed", color: "text-error" };
       default: return null;
     }
   })();
@@ -390,23 +387,23 @@ export default function LobbyPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
           <div className="flex flex-col gap-1.5">
-            <div className="h-3 w-16 rounded bg-muted animate-pulse" />
-            <div className="h-2.5 w-12 rounded bg-muted/60 animate-pulse" />
+            <div className="h-3 w-16 rounded bg-surface-variant animate-pulse" />
+            <div className="h-2.5 w-12 rounded bg-surface-variant/60 animate-pulse" />
           </div>
-          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-surface-variant animate-pulse" />
         </header>
         <div className="flex flex-col gap-6 p-5">
-          <div className="h-4 w-28 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-28 rounded bg-surface-variant animate-pulse" />
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="h-8 w-24 rounded-lg bg-muted animate-pulse" />
+              <div key={i} className="h-8 w-24 rounded-lg bg-surface-variant animate-pulse" />
             ))}
           </div>
-          <div className="h-4 w-20 rounded bg-muted animate-pulse" />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <div className="h-4 w-20 rounded bg-surface-variant animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonCard key={i} className="p-4" lines={2} />
             ))}
@@ -419,13 +416,13 @@ export default function LobbyPage({
   // ── Error state ──────────────────────────────────────
   if (error || !state) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-24 rounded bg-surface-variant animate-pulse" />
         </header>
         <EmptyState
           icon={
-            <AlertIcon className="size-7 text-destructive" />
+            <AlertIcon className="size-7 text-error" />
           }
           title={error ?? "Failed to load lobby"}
           description={error ? "Check your connection and try again." : "Lobby data unavailable."}
@@ -441,7 +438,7 @@ export default function LobbyPage({
               </Button>
               {error && (
                 <Button
-                  variant="default"
+                  variant="filled"
                   size="sm"
                   className="h-11 min-w-[120px] rounded-xl"
                   onClick={() => { setError(null); setLoading(true); if (code) loadLobby(code); }}
@@ -458,23 +455,23 @@ export default function LobbyPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold tracking-widest text-muted-foreground uppercase">
+              <span className="text-xs font-mono font-bold tracking-widest text-on-surface-variant uppercase">
                 Room
               </span>
-              <span className="text-xs font-mono font-bold tracking-widest text-foreground">
+              <span className="text-xs font-mono font-bold tracking-widest text-on-surface">
                 {code}
               </span>
             </div>
             {/* Phase indicator */}
             {phaseLabel && (
               <span className={cn(
-                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-card border border-border",
+                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-surface-container border border-outline",
                 phaseLabel.color
               )}>
                 {phaseLabel.label}
@@ -483,11 +480,11 @@ export default function LobbyPage({
           </div>
           {state.currentRound ? (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-on-surface-variant">
                 Round {state.currentRound.round_number}
               </span>
               {state.score && (
-                <span className="text-xs font-bold text-muted-foreground">
+                <span className="text-xs font-bold text-on-surface-variant">
                   ({state.score.attacker} - {state.score.defender})
                 </span>
               )}
@@ -503,14 +500,14 @@ export default function LobbyPage({
               )}
             </div>
           ) : state.lobby.phase === "waiting" ? (
-            <span className="text-xs text-muted-foreground">Waiting for players…</span>
+            <span className="text-xs text-on-surface-variant">Waiting for players…</span>
           ) : null}
         </div>
 
         <Button
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 active:scale-95"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-on-surface-variant hover:bg-error/10 hover:text-error transition-all duration-200 active:scale-95"
           onClick={handleLeave}
         >
           Leave
@@ -521,149 +518,15 @@ export default function LobbyPage({
 
         {state.lobby.phase === "waiting" ? (
           /* ── WAITING ROOM ──────────────────────────────── */
-          <>
-            {/* ── Room Code Display ──────────────────────── */}
-            <section className="flex flex-col items-center justify-center gap-3 py-8 animate-in fade-in duration-300">
-              <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                Share this code with your squad
-              </p>
-              <div className="flex items-center gap-3">
-                <span className="text-5xl sm:text-6xl font-mono font-black tracking-[0.15em] text-primary select-all">
-                  {code}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleCopyCode}
-                  className="w-12 h-12 rounded-xl"
-                  aria-label={copied ? "Code copied" : "Copy room code"}
-                >
-                  {copied ? (
-                    <CheckIcon className="size-5 text-success" />
-                  ) : (
-                    <CopyIcon className="size-5 text-muted-foreground" />
-                  )}
-                </Button>
-              </div>
-              {copied && (
-                <span className="text-xs text-success font-medium animate-in fade-in" role="status" aria-live="polite">
-                  Copied!
-                </span>
-              )}
-            </section>
-
-            {/* ── Squad Members ────────────────────────── */}
-            <section className="animate-in fade-in slide-in-from-bottom-3 duration-400">
-              <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
-                <UsersIcon className="size-3.5" />
-                Squad
-                <span className="ml-auto text-muted-foreground font-normal tracking-normal">
-                  {state.members.length} member{state.members.length !== 1 ? "s" : ""}
-                </span>
-              </h2>
-
-              {state.members.length === 0 ? (
-                <EmptyState
-                  title="No members yet"
-                  description="Share the room code to invite your squad."
-                  className="py-10"
-                />
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {state.members.map((member, index) => {
-                    const isMemberLeader = state.lobby.leader_id === member.user_id;
-                    return (
-                      <div
-                        key={member.id}
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl bg-card border border-border transition-all duration-200 hover:border-border/80 animate-in fade-in slide-in-from-bottom-2"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        {/* Avatar */}
-                        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center relative">
-                          {member.profiles?.avatar_url ? (
-                            <Image
-                              src={member.profiles.avatar_url}
-                              alt={member.profiles.username ?? "User"}
-                              fill
-                              sizes="44px"
-                              className="object-cover"
-                              unoptimized={member.profiles.avatar_url.startsWith('blob:') || member.profiles.avatar_url.startsWith('data:')}
-                            />
-                          ) : (
-                            <span className="text-sm font-bold text-muted-foreground">
-                              {(member.profiles?.username ?? "?")[0].toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        {/* Name + badge */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-semibold text-foreground truncate">
-                            {member.profiles?.username ?? "Unknown"}
-                          </span>
-                          {isMemberLeader && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-warning uppercase">
-                              <CrownIcon className="size-3" />
-                              Leader
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-
-            {/* ── Start Game (leader) / Waiting (non-leader) ── */}
-            {isLeader ? (
-              <section className="flex flex-col gap-3 mt-auto pt-4 border-t border-border animate-in fade-in duration-300">
-                <p className="text-xs text-muted-foreground font-medium">
-                  Squad Leader Actions
-                </p>
-                <Button
-                  size="lg"
-                  className={cn(
-                    "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-                    "bg-primary text-primary-foreground",
-                    "hover:bg-primary-hover active:scale-[0.99]",
-                    "transition-all duration-200",
-                    "shadow-[0_0_24px_-4px_oklch(0.65_0.22_25_/_0.35)]"
-                  )}
-                  onClick={handleStartGame}
-                >
-                  <svg
-                    className="size-5 mr-2"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <polygon points="5 3 19 12 5 21 5 3" />
-                  </svg>
-                  Start Game
-                </Button>
-              </section>
-            ) : (
-              <section className="flex flex-col items-center justify-center gap-2 mt-auto pt-4 border-t border-border animate-in fade-in duration-300">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <svg
-                    className="size-4 animate-pulse"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  <span className="text-sm font-medium">
-                    Waiting for squad leader to start the game…
-                  </span>
-                </div>
-              </section>
-            )}
-          </>
+          <WaitingRoom
+            code={code}
+            members={state.members}
+            leaderId={state.lobby.leader_id}
+            isLeader={isLeader}
+            copied={copied}
+            onCopyCode={handleCopyCode}
+            onStartGame={handleStartGame}
+          />
         ) : state.lobby.phase === 'playing' && !state.lobby.map_id ? (
           /* ── MAP SELECTION PENDING ─────────────────────── */
           <section className="flex flex-col items-center justify-center flex-1 gap-4 animate-in fade-in duration-300">
@@ -676,22 +539,22 @@ export default function LobbyPage({
                 size="lg"
                 className={cn(
                   "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-                  "bg-primary text-primary-foreground",
+                  "bg-primary text-on-primary",
                   "hover:bg-primary-hover active:scale-[0.99]",
                   "transition-all duration-200",
-                  "shadow-[0_0_24px_-4px_oklch(0.65_0.22_25_/_0.35)]"
+                  "shadow-1 hover:shadow-2"
                 )}
                 onClick={() => router.push(`/lobby/${code}/map`)}
               >
                 Choose Map
               </Button>
             ) : (
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-on-surface-variant">
                 <svg className="size-4 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-on-surface-variant">
                   Waiting for squad leader to choose the map…
                 </p>
               </div>
@@ -699,292 +562,30 @@ export default function LobbyPage({
           </section>
         ) : state.lobby.phase === "closed" ? (
           /* ── MATCH COMPLETE ─────────────────────────────── */
-          <section className="flex flex-col items-center justify-center flex-1 gap-6 animate-in fade-in duration-300">
-            <div className="flex flex-col items-center gap-2">
-              <span className="text-xs font-bold tracking-widest uppercase text-muted-foreground">
-                Match Complete
-              </span>
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col items-center">
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-attacker">Attackers</span>
-                  <span className="text-4xl font-black text-attacker">{state.score?.attacker ?? 0}</span>
-                </div>
-                <span className="text-2xl font-bold text-muted-foreground">—</span>
-                <div className="flex flex-col items-center">
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-defender">Defenders</span>
-                  <span className="text-4xl font-black text-defender">{state.score?.defender ?? 0}</span>
-                </div>
-              </div>
-            </div>
-            {matchResult?.winner && (
-              <div className={cn(
-                "px-6 py-3 rounded-xl border font-bold text-lg tracking-wide",
-                matchResult.winner === "attacker"
-                  ? "bg-attacker/10 border-attacker/30 text-attacker"
-                  : "bg-defender/10 border-defender/30 text-defender"
-              )}>
-                {matchResult.winner === "attacker" ? "Attackers" : "Defenders"} Win!
-              </div>
-            )}
-            <Button
-              variant="outlined"
-              size="lg"
-              className="h-12 rounded-xl text-sm font-semibold"
-              onClick={() => router.push("/")}
-            >
-              Back to Home
-            </Button>
-          </section>
+          <MatchComplete
+            score={state.score}
+            winner={matchResult?.winner ?? null}
+            onBackToHome={() => router.push("/")}
+          />
         ) : (
           /* ── PLAYING PHASE ─────────────────────────────── */
           <>
-            {/* ── Score Display ────────────────────────────── */}
-            {state.score && (
-              <section className="animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-center justify-center gap-4 p-4 rounded-2xl bg-card border border-border">
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-attacker">Attackers</span>
-                    <span className="text-3xl font-black text-attacker">{state.score.attacker}</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-xs font-bold text-muted-foreground">—</span>
-                    <span className="text-[10px] font-medium text-muted-foreground">
-                      {state.currentRound
-                        ? (state.currentRound.round_number <= 6 ? "Regulation" : "Overtime")
-                        : ""}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-defender">Defenders</span>
-                    <span className="text-3xl font-black text-defender">{state.score.defender}</span>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ── Banned Operators ──────────────────────────── */}
-            {state.bans.length > 0 && (
-              <section className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-destructive uppercase mb-3">
-                  <svg
-                    className="size-3.5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                  </svg>
-                  Banned Operators
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {state.bans.map((ban) =>
-                    ban.operators ? (
-                      <div
-                        key={ban.id}
-                        className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-card border border-destructive/20"
-                      >
-                        {ban.operators.icon_url && (
-                          <div className="w-6 h-6 rounded relative overflow-hidden flex-shrink-0">
-                            <Image
-                              src={ban.operators.icon_url}
-                              alt={ban.operators.name}
-                              fill
-                              sizes="44px"
-                              className="object-contain"
-                            />
-                          </div>
-                        )}
-                        <span className="text-xs font-medium text-foreground">
-                          {ban.operators.name}
-                        </span>
-                        <span className="text-[10px] font-bold tracking-wider text-destructive uppercase">
-                          Banned
-                        </span>
-                      </div>
-                    ) : null
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* ── Squad Members ─────────────────────────────── */}
-            <section className="animate-in fade-in slide-in-from-bottom-3 duration-400">
-              <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
-                <UsersIcon className="size-3.5" />
-                Squad
-                <span className="ml-auto text-muted-foreground font-normal tracking-normal">
-                  {state.members.length} member{state.members.length !== 1 ? "s" : ""}
-                </span>
-              </h2>
-
-              {state.members.length === 0 ? (
-                <EmptyState
-                  title="No members yet"
-                  description="Share the room code to invite your squad."
-                  className="py-10"
-                />
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {state.members.map((member, index) => {
-                    const isMemberLeader = state.lobby.leader_id === member.user_id;
-                    return (
-                      <div
-                        key={member.id}
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl bg-card border border-border transition-all duration-200 hover:border-border/80 animate-in fade-in slide-in-from-bottom-2"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        {/* Avatar */}
-                        <div className="flex-shrink-0 w-11 h-11 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center relative">
-                          {member.profiles?.avatar_url ? (
-                            <Image
-                              src={member.profiles.avatar_url}
-                              alt={member.profiles.username ?? "User"}
-                              fill
-                              sizes="44px"
-                              className="object-cover"
-                              unoptimized={member.profiles.avatar_url.startsWith('blob:') || member.profiles.avatar_url.startsWith('data:')}
-                            />
-                          ) : (
-                            <span className="text-sm font-bold text-muted-foreground">
-                              {(member.profiles?.username ?? "?")[0].toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                        {/* Name + badge */}
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-semibold text-foreground truncate">
-                            {member.profiles?.username ?? "Unknown"}
-                          </span>
-                          {isMemberLeader && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-warning uppercase">
-                              <CrownIcon className="size-3" />
-                              Leader
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-
-            {/* ── Selections ───────────────────────────────── */}
-            {state.selections.length > 0 && (
-              <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
-                  <CheckIcon className="size-3.5" />
-                  Selections
-                </h2>
-                <div className="flex flex-col gap-2">
-                  {state.selections
-                    .filter((s) => s && typeof s === "object")
-                    .map((sel: unknown) => {
-                      const selection = sel as {
-                        user_id: string;
-                        map_id: string | null;
-                        operator_id: string | null;
-                        locked_at: string | null;
-                      };
-                      const member = state.members.find(
-                        (m) => m.user_id === selection.user_id
-                      );
-                      const isLocked = Boolean(selection.locked_at);
-                      return (
-                        <div
-                          key={selection.user_id}
-                          className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200",
-                            isLocked
-                              ? "bg-success/5 border-success/20"
-                              : "bg-card border-border"
-                          )}
-                        >
-                          <span className="text-sm font-medium text-foreground min-w-0 truncate">
-                            {member?.profiles?.username ?? "Unknown"}
-                          </span>
-                          <span className="ml-auto text-xs text-muted-foreground">
-                            {selection.operator_id
-                              ? `Op: ${operatorMap.get(selection.operator_id) || selection.operator_id}`
-                              : selection.map_id
-                              ? `Map: ${selection.map_id}`
-                              : "Choosing…"}
-                          </span>
-                          {isLocked && (
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-success tracking-wider uppercase">
-                              <CheckIcon className="size-3" strokeWidth={2.5} />
-                              Locked
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              </section>
-            )}
+            <PlayingPhase
+              members={state.members}
+              leaderId={state.lobby.leader_id}
+              operators={operators}
+              selections={state.selections}
+              bans={state.bans}
+              score={state.score}
+              currentRound={state.currentRound}
+            />
 
             {/* ── Leader Controls ──────────────────────────── */}
             {isLeader && (
-              <section className="flex flex-col gap-3 mt-auto pt-4 border-t border-border animate-in fade-in duration-300">
-                <p className="text-xs text-muted-foreground font-medium">
-                  Squad Leader Actions
-                </p>
-                <div className="flex gap-3">
-                  <Button
-                    variant="outlined"
-                    size="lg"
-                    className={cn(
-                      "flex-1 h-12 rounded-xl text-sm font-semibold",
-                      "border-primary/30 text-primary",
-                      "hover:bg-primary/10 hover:text-primary-hover",
-                      "active:scale-[0.98] transition-all duration-200"
-                    )}
-                    onClick={handleSetBans}
-                  >
-                    <svg
-                      className="size-4 mr-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-                    </svg>
-                    Set Bans
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="lg"
-                    className={cn(
-                      "flex-1 h-12 rounded-xl text-sm font-semibold",
-                      "border-primary/30 text-primary",
-                      "hover:bg-primary/10 hover:text-primary-hover",
-                      "active:scale-[0.98] transition-all duration-200"
-                    )}
-                    onClick={handleNewRound}
-                  >
-                    <svg
-                      className="size-4 mr-2"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                    New Round
-                  </Button>
-                </div>
-              </section>
+              <LeaderControls
+                onSetBans={handleSetBans}
+                onNewRound={handleNewRound}
+              />
             )}
 
             {/* ── Round Actions ──────────────────────────── */}
@@ -993,10 +594,10 @@ export default function LobbyPage({
                 size="lg"
                 className={cn(
                   "w-full h-14 rounded-2xl text-base font-bold tracking-wide",
-                  "bg-foreground text-background",
-                  "hover:bg-muted-foreground active:scale-[0.99]",
+                  "bg-on-surface text-surface",
+                  "hover:bg-on-surface-variant active:scale-[0.99]",
                   "transition-all duration-200",
-                  "shadow-[0_0_24px_-4px_oklch(0.96_0_0_/_0.12)]"
+                  "shadow-1 hover:shadow-2"
                 )}
                 onClick={() => {
                   logger.info("LobbyPage", "Select operator click", { code });
@@ -1005,8 +606,6 @@ export default function LobbyPage({
               >
                 Select Operator
               </Button>
-
-
             </section>
           </>
         )}
@@ -1020,7 +619,7 @@ export default function LobbyPage({
             Are you sure you want to leave this lobby? You can rejoin with the room code.
           </DialogDescription>
           <div className="flex gap-3 mt-4 justify-end">
-            <Button variant="ghost" onClick={() => setShowLeaveConfirm(false)}>
+            <Button variant="text" onClick={() => setShowLeaveConfirm(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmLeave}>
@@ -1086,10 +685,10 @@ export default function LobbyPage({
             You are the only player in the lobby. Do you want to start anyway?
           </DialogDescription>
           <div className="flex gap-3 mt-4 justify-end">
-            <Button variant="ghost" onClick={() => setShowStartConfirm(false)}>
+            <Button variant="text" onClick={() => setShowStartConfirm(false)}>
               Cancel
             </Button>
-            <Button variant="default" onClick={confirmStartGame}>
+            <Button variant="filled" onClick={confirmStartGame}>
               Start Anyway
             </Button>
           </div>
