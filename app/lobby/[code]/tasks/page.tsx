@@ -374,13 +374,13 @@ export default function TasksPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
           <div className="flex flex-col gap-1">
-            <div className="h-4 w-32 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-28 rounded bg-muted/60 animate-pulse" />
+            <div className="h-4 w-32 rounded bg-surface-variant animate-pulse" />
+            <div className="h-3 w-28 rounded bg-surface-variant/60 animate-pulse" />
           </div>
-          <div className="h-9 w-24 rounded-lg bg-muted animate-pulse" />
+          <div className="h-9 w-24 rounded-lg bg-surface-variant animate-pulse" />
         </header>
         <div className="p-5">
           <SkeletonGrid count={6} />
@@ -392,9 +392,9 @@ export default function TasksPage({
   // ── Error state ──────────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-20 rounded bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-20 rounded bg-surface-variant animate-pulse" />
         </header>
         <EmptyState
           icon={<AlertIcon className="size-7 text-destructive" />}
@@ -420,20 +420,20 @@ export default function TasksPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
         <div>
-          <h1 className="text-base font-bold text-foreground">
+          <h1 className="text-base font-bold text-on-surface">
             Strategies Feed
           </h1>
-          <p className="text-xs text-muted-foreground">Room {code}</p>
+          <p className="text-xs text-on-surface-variant">Room {code}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Sort toggle */}
           <button
             onClick={() => setSortMode(sortMode === "score" ? "newest" : "score")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all duration-200"
           >
             <svg
               className="size-3.5"
@@ -451,9 +451,9 @@ export default function TasksPage({
             {sortMode === "score" ? "By Score" : "Newest"}
           </button>
           <Button
-            variant="ghost"
+            variant="text"
             size="sm"
-            className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+            className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all duration-200 active:scale-95"
             onClick={() => {
               if (!code) return;
               router.push(`/lobby/${code}`);
@@ -472,7 +472,7 @@ export default function TasksPage({
             <EmptyState
               icon={
                 <svg
-                  className="size-7 text-muted-foreground"
+                  className="size-7 text-on-surface-variant"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"

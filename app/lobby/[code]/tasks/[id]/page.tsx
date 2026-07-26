@@ -15,8 +15,8 @@ import Image from "next/image";
 const MapViewer = dynamic(() => import("@/components/maps/MapViewer").then(mod => mod.MapViewer), {
   ssr: false,
   loading: () => (
-    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
-      <span className="text-xs text-muted-foreground">Loading map…</span>
+    <div className="w-full aspect-video rounded-xl bg-surface-variant animate-pulse flex items-center justify-center">
+      <span className="text-xs text-on-surface-variant">Loading map…</span>
     </div>
   ),
 });
@@ -322,23 +322,23 @@ export default function TaskDetailPage({
   // ── Loading ──────────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-lg bg-muted animate-pulse" />
-            <div className="h-5 w-48 rounded bg-muted animate-pulse" />
+            <div className="size-9 rounded-lg bg-surface-variant animate-pulse" />
+            <div className="h-5 w-48 rounded bg-surface-variant animate-pulse" />
           </div>
           <div className="flex items-center gap-2">
-            <div className="size-8 rounded bg-muted animate-pulse" />
-            <div className="h-6 w-8 rounded bg-muted animate-pulse" />
-            <div className="size-8 rounded bg-muted animate-pulse" />
+            <div className="size-8 rounded bg-surface-variant animate-pulse" />
+            <div className="h-6 w-8 rounded bg-surface-variant animate-pulse" />
+            <div className="size-8 rounded bg-surface-variant animate-pulse" />
           </div>
         </header>
         <div className="p-5">
-          <div className="aspect-video rounded-xl bg-muted animate-pulse" />
-          <div className="h-4 w-3/4 rounded bg-muted animate-pulse mt-5" />
-          <div className="h-3 w-full rounded bg-muted/60 animate-pulse mt-3" />
-          <div className="h-3 w-5/6 rounded bg-muted/60 animate-pulse mt-2" />
+          <div className="aspect-video rounded-xl bg-surface-variant animate-pulse" />
+          <div className="h-4 w-3/4 rounded bg-surface-variant animate-pulse mt-5" />
+          <div className="h-3 w-full rounded bg-surface-variant/60 animate-pulse mt-3" />
+          <div className="h-3 w-5/6 rounded bg-surface-variant/60 animate-pulse mt-2" />
         </div>
       </div>
     );
@@ -347,12 +347,12 @@ export default function TaskDetailPage({
   // ── Error ────────────────────────────────────────────
   if (error || !data) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
           <Button
-            variant="ghost"
+            variant="text"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+            className="h-9 min-w-[80px] rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
             <BackArrowIcon className="size-4 mr-1" />
@@ -386,12 +386,12 @@ export default function TaskDetailPage({
   // ── Strategy removed ────────────────────────────────────
   if (!strategy) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
           <Button
-            variant="ghost"
+            variant="text"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+            className="h-9 min-w-[80px] rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
             <BackArrowIcon className="size-4 mr-1" />
@@ -400,10 +400,10 @@ export default function TaskDetailPage({
         </header>
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-lg font-bold text-muted-foreground">
+            <h1 className="text-lg font-bold text-on-surface-variant">
               Strategy removed
             </h1>
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-on-surface-variant mt-2">
               This strategy is no longer available.
             </p>
           </div>
@@ -417,13 +417,13 @@ export default function TaskDetailPage({
   const currentImage = images[safeIdx];
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
         <Button
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          className="h-9 min-w-[80px] rounded-lg text-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all duration-200 active:scale-95"
           onClick={() => router.push(`/lobby/${code}/tasks`)}
         >
             <BackArrowIcon className="size-4 mr-1" />
@@ -465,7 +465,7 @@ export default function TaskDetailPage({
           {images.length > 0 && (
             <div className="space-y-3" ref={galleryRef} aria-label="Strategy image gallery">
               {images.length === 1 ? (
-                <div className="aspect-video rounded-xl overflow-hidden bg-muted relative">
+                <div className="aspect-video rounded-xl overflow-hidden bg-surface-variant relative">
                   <Image
                     src={currentImage.image_url}
                     alt={currentImage.caption ?? strategy.title}
@@ -475,7 +475,7 @@ export default function TaskDetailPage({
                   />
                 </div>
               ) : (
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
+                <div className="relative aspect-video rounded-xl overflow-hidden bg-surface-variant">
                   <Image
                     src={currentImage.image_url}
                     alt={currentImage.caption ?? strategy.title}
@@ -491,7 +491,7 @@ export default function TaskDetailPage({
                         prev > 0 ? prev - 1 : images.length - 1,
                       )
                     }
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-muted-foreground hover:bg-black/70 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-on-surface-variant hover:bg-black/70 hover:text-on-surface transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     aria-label="Previous image"
                   >
                     <svg
@@ -514,14 +514,14 @@ export default function TaskDetailPage({
                         prev < images.length - 1 ? prev + 1 : 0,
                       )
                     }
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-muted-foreground hover:bg-black/70 hover:text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-black/50 flex items-center justify-center text-on-surface-variant hover:bg-black/70 hover:text-on-surface transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                     aria-label="Next image"
                   >
                     <ArrowRightIcon className="size-4" />
                   </button>
 
                   {/* Image counter */}
-                  <div className="absolute bottom-2 right-2 z-10 px-2 py-1 rounded-md bg-black/60 text-xs text-foreground font-medium">
+                  <div className="absolute bottom-2 right-2 z-10 px-2 py-1 rounded-md bg-black/60 text-xs text-on-surface font-medium">
                     {safeIdx + 1} / {images.length}
                   </div>
                 </div>
@@ -529,7 +529,7 @@ export default function TaskDetailPage({
 
               {/* Caption */}
               {currentImage.caption && (
-                <p className="text-xs text-muted-foreground text-center">
+                <p className="text-xs text-on-surface-variant text-center">
                   {currentImage.caption}
                 </p>
               )}
@@ -545,7 +545,7 @@ export default function TaskDetailPage({
                         "size-2 rounded-full transition-all duration-200",
                         i === safeIdx
                           ? "bg-primary w-4"
-                          : "bg-muted-foreground hover:bg-foreground",
+                          : "bg-surface-variant-foreground hover:bg-foreground",
                       )}
                       aria-label={`Go to image ${i + 1}`}
                     />
@@ -557,17 +557,17 @@ export default function TaskDetailPage({
 
           {/* ── Strategy Info ──────────────────────────────── */}
           <div className="mt-6">
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-bold text-on-surface">
               {strategy.title}
             </h1>
 
             {/* Author + timestamp */}
-            <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-3 mt-3 text-sm text-on-surface-variant">
               <span className="flex items-center gap-1.5">
                 <UserIcon className="size-4" />
                 {assignment.user?.username ?? "Unknown"}
               </span>
-              <span className="text-muted-foreground">·</span>
+              <span className="text-on-surface-variant">·</span>
               <span>
                 {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
                   month: "short",
@@ -581,7 +581,7 @@ export default function TaskDetailPage({
             {/* Map / Site / Operator badges */}
             {data.map && (
               <div className="flex flex-wrap gap-2 mt-3">
-                <span className="px-2.5 py-1 rounded-lg bg-card border border-border text-xs font-medium text-muted-foreground">
+                <span className="px-2.5 py-1 rounded-lg bg-surface-container border border-outline text-xs font-medium text-on-surface-variant">
                   {data.map.name}
                 </span>
               </div>
@@ -589,16 +589,16 @@ export default function TaskDetailPage({
           </div>
 
           {/* ── Description ──────────────────────────────── */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          <div className="mt-8 pt-6 border-t border-outline">
+            <h2 className="text-sm font-semibold text-on-surface-variant uppercase tracking-wider mb-3">
               Description
             </h2>
             {strategy.description ? (
-              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-on-surface leading-relaxed whitespace-pre-line">
                 {strategy.description}
               </p>
             ) : (
-              <p className="text-sm text-muted-foreground italic">
+              <p className="text-sm text-on-surface-variant italic">
                 No description provided.
               </p>
             )}
@@ -620,9 +620,9 @@ export default function TaskDetailPage({
                   }))}
                 />
               ) : (
-                <div className="aspect-video rounded-xl bg-muted border border-border flex flex-col items-center justify-center gap-2">
+                <div className="aspect-video rounded-xl bg-surface-variant border border-outline flex flex-col items-center justify-center gap-2">
                   <svg
-                    className="size-6 text-muted-foreground"
+                    className="size-6 text-on-surface-variant"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -634,7 +634,7 @@ export default function TaskDetailPage({
                     <circle cx="8.5" cy="8.5" r="1.5" />
                     <path d="M21 15l-5-5L5 21" />
                   </svg>
-                  <span className="text-muted-foreground text-sm">
+                  <span className="text-on-surface-variant text-sm">
                     Map image not available for {data.map.name}
                   </span>
                 </div>
@@ -645,7 +645,7 @@ export default function TaskDetailPage({
       </div>
 
       {/* ── Sticky Vote Bar (mobile) ────────────────────── */}
-      <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur-sm p-3 md:hidden">
+      <div className="sticky bottom-0 border-t border-outline bg-surface/95 backdrop-blur-sm p-3 md:hidden">
         <div className="flex items-center justify-between gap-2">
           <VoteButtons
             score={score}

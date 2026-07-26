@@ -175,18 +175,18 @@ export default function BansPage({
 
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
-          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-24 rounded bg-surface-variant animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-surface-variant animate-pulse" />
         </header>
         <div className="flex flex-col gap-4 p-5">
-          <div className="h-4 w-28 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-28 rounded bg-surface-variant animate-pulse" />
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="flex flex-col items-center gap-2 p-2">
-                <div className="w-12 h-12 rounded-lg bg-muted animate-pulse" />
-                <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+                <div className="w-12 h-12 rounded-lg bg-surface-variant animate-pulse" />
+                <div className="h-3 w-16 rounded bg-surface-variant animate-pulse" />
               </div>
             ))}
           </div>
@@ -196,16 +196,16 @@ export default function BansPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
         <div>
-          <h1 className="text-base font-semibold text-foreground">Set Bans</h1>
+          <h1 className="text-base font-semibold text-on-surface">Set Bans</h1>
           <div className="flex items-center gap-2">
-            <p className="text-xs text-muted-foreground">Room {code}</p>
+            <p className="text-xs text-on-surface-variant">Room {code}</p>
             {currentRound && (
               <span className={cn(
-                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-card border border-border",
+                "text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded bg-surface-container border border-outline",
                 currentRound.team_side === "attacker"
                   ? "text-attacker"
                   : "text-defender"
@@ -216,9 +216,9 @@ export default function BansPage({
           </div>
         </div>
         <Button
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="h-11 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
           onClick={() => router.push(`/lobby/${code}`)}
         >
           Back
@@ -229,7 +229,7 @@ export default function BansPage({
         {/* ── Active bans summary ─────────────────────────── */}
         {hasBans && (
           <section>
-            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase mb-3">
+            <h2 className="text-xs font-semibold tracking-widest text-on-surface-variant uppercase mb-3">
               Active Bans
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -238,7 +238,7 @@ export default function BansPage({
                   <div
                     key={ban.id}
                     className={cn(
-                      "flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-card border border-destructive/20",
+                      "flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-surface-container border border-destructive/20",
                       lastBannedId === ban.operator_id && "animate-pop-in"
                     )}
                   >
@@ -252,7 +252,7 @@ export default function BansPage({
                         />
                       </div>
                     )}
-                    <span className="text-xs font-medium text-foreground">
+                    <span className="text-xs font-medium text-on-surface">
                       {ban.operators.name}
                     </span>
                     <span className="text-[10px] font-bold tracking-wider text-destructive uppercase">
@@ -267,7 +267,7 @@ export default function BansPage({
 
         {/* ── Banned count summary ──────────────────────────── */}
         {hasBans && (
-          <div className="text-center text-xs text-muted-foreground">
+          <div className="text-center text-xs text-on-surface-variant">
             {attackerBans > 0 && <span className="inline-flex items-center gap-1 mr-3"><span className="w-2 h-2 rounded-full bg-attacker" /> {attackerBans} attacker{attackerBans !== 1 ? "s" : ""} banned</span>}
             {defenderBans > 0 && <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-defender" /> {defenderBans} defender{defenderBans !== 1 ? "s" : ""} banned</span>}
             {attackerBans === 0 && defenderBans === 0 && "No operators banned yet"}
@@ -275,8 +275,8 @@ export default function BansPage({
         )}
 
         {!isLeader && (
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-card border border-border text-sm text-muted-foreground">
-            <svg className="size-4 text-muted-foreground flex-shrink-0 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container border border-outline text-sm text-on-surface-variant">
+            <svg className="size-4 text-on-surface-variant flex-shrink-0 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
@@ -322,13 +322,13 @@ export default function BansPage({
                           "active:scale-[0.97]",
                           banned
                             ? "border-destructive/20 bg-destructive/10 opacity-40 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
-                            : "border-border bg-card hover:border-border/80 hover:bg-card/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
+                            : "border-outline bg-surface-container hover:border-outline/80 hover:bg-surface-container/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
                           lastBannedId === op.id && banned && "animate-pop-in"
                         )}
                         aria-label={banned ? `Banned: ${op.name}. Click to unban.` : op.name}
                         aria-pressed={banned}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                        <div className="w-12 h-12 rounded-lg bg-surface-variant overflow-hidden relative">
                           {op.icon_url ? (
                             <Image
                               src={op.icon_url}
@@ -337,14 +337,14 @@ export default function BansPage({
                               className="object-contain transition-all duration-200"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-xs">
                               {op.name[0]}
                             </div>
                           )}
                         </div>
                         <span className={cn(
                           "text-[11px] font-medium leading-tight transition-all duration-200",
-                          banned ? "text-muted-foreground line-through" : "text-foreground"
+                          banned ? "text-on-surface-variant line-through" : "text-on-surface"
                         )}>
                           {op.name}
                         </span>
@@ -388,13 +388,13 @@ export default function BansPage({
                           "active:scale-[0.97]",
                           banned
                             ? "border-destructive/20 bg-destructive/10 opacity-40 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
-                            : "border-border bg-card hover:border-border/80 hover:bg-card/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
+                            : "border-outline bg-surface-container hover:border-outline/80 hover:bg-surface-container/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
                           lastBannedId === op.id && banned && "animate-pop-in"
                         )}
                         aria-label={banned ? `Banned: ${op.name}. Click to unban.` : op.name}
                         aria-pressed={banned}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                        <div className="w-12 h-12 rounded-lg bg-surface-variant overflow-hidden relative">
                           {op.icon_url ? (
                             <Image
                               src={op.icon_url}
@@ -403,14 +403,14 @@ export default function BansPage({
                               className="object-contain transition-all duration-200"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                            <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-xs">
                               {op.name[0]}
                             </div>
                           )}
                         </div>
                         <span className={cn(
                           "text-[11px] font-medium leading-tight transition-all duration-200",
-                          banned ? "text-muted-foreground line-through" : "text-foreground"
+                          banned ? "text-on-surface-variant line-through" : "text-on-surface"
                         )}>
                           {op.name}
                         </span>
@@ -429,7 +429,7 @@ export default function BansPage({
 
         {/* ── Done Banning Button (leader only) ──────────── */}
         {isLeader && (
-          <div className="mt-auto pt-4 border-t border-border">
+          <div className="mt-auto pt-4 border-t border-outline">
             <Button
               size="lg"
               className={cn(
@@ -437,7 +437,7 @@ export default function BansPage({
                 "bg-primary text-primary-foreground",
                 "hover:bg-primary-hover active:scale-[0.99]",
                 "transition-all duration-200",
-                "shadow-[0_0_24px_-4px_oklch(0.65_0.22_25_/_0.35)]"
+                "shadow-2"
               )}
               onClick={() => {
                 logger.info("BansPage", "Done banning, returning to lobby", { code });

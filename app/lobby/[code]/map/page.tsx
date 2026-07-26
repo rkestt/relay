@@ -146,13 +146,13 @@ export default function LobbyMapPage({
   // ── Loading skeleton ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground" aria-busy="true">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-32 rounded bg-muted animate-pulse" />
-          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface" aria-busy="true">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-32 rounded bg-surface-variant animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-surface-variant animate-pulse" />
         </header>
         <div className="flex flex-col gap-4 p-5">
-          <div className="h-4 w-24 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-24 rounded bg-surface-variant animate-pulse" />
           <SkeletonGrid count={6} />
         </div>
       </div>
@@ -162,22 +162,22 @@ export default function LobbyMapPage({
   // ── Non-leader waiting state ─────────────────────────
   if (!isLeader && lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <h1 className="text-base font-semibold text-on-surface">Choose Map</h1>
           <Button
-            variant="ghost"
+            variant="text"
             size="sm"
-            className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="h-9 rounded-lg text-sm font-medium text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
             onClick={() => router.push(`/lobby/${code}`)}
           >
             Back
           </Button>
         </header>
         <div className="flex flex-col items-center justify-center flex-1 gap-4 px-5">
-          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card border border-border">
+          <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-surface-container border border-outline">
             <svg
-              className="size-5 text-muted-foreground animate-pulse"
+              className="size-5 text-on-surface-variant animate-pulse"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -189,7 +189,7 @@ export default function LobbyMapPage({
               <circle cx="12" cy="12" r="10" />
               <polyline points="12 6 12 12 16 14" />
             </svg>
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-sm font-medium text-on-surface-variant">
               Waiting for leader to choose the map…
             </p>
           </div>
@@ -201,9 +201,9 @@ export default function LobbyMapPage({
   // ── Error state ──────────────────────────────────────
   if (error && !lobbyId) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-24 rounded bg-surface-variant animate-pulse" />
         </header>
         <EmptyState
           icon={
@@ -228,17 +228,17 @@ export default function LobbyMapPage({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
         <div>
-          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
-          <p className="text-xs text-muted-foreground">Room {code}</p>
+          <h1 className="text-base font-semibold text-on-surface">Choose Map</h1>
+          <p className="text-xs text-on-surface-variant">Room {code}</p>
         </div>
         <Button
-          variant="ghost"
+          variant="text"
           size="sm"
-          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="h-11 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"
           onClick={() => router.push(`/lobby/${code}`)}
         >
           Back
@@ -280,14 +280,14 @@ export default function LobbyMapPage({
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     "active:scale-[0.98]",
                     isSelected
-                      ? "ring-2 ring-primary bg-card shadow-[0_0_16px_-4px_oklch(0.65_0.22_25_/_0.3)]"
-                      : "border-border bg-card hover:border-border/80 hover:bg-card/80"
+                      ? "ring-2 ring-primary bg-surface-container shadow-2"
+                      : "border-outline bg-surface-container hover:border-outline/80 hover:bg-surface-container/80"
                   )}
                   style={{ animationDelay: `${i * 30}ms` }}
                   aria-pressed={isSelected}
                   aria-label={isSelected ? `${map.name} (selected)` : map.name}
                 >
-                  <div className="aspect-video bg-muted overflow-hidden relative">
+                  <div className="aspect-video bg-surface-variant overflow-hidden relative">
                     {map.image_url ? (
                       <Image
                         src={map.image_url}
@@ -296,7 +296,7 @@ export default function LobbyMapPage({
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                      <div className="w-full h-full flex items-center justify-center text-on-surface-variant text-xs">
                         No image
                       </div>
                     )}
@@ -308,7 +308,7 @@ export default function LobbyMapPage({
                     )}
                   </div>
                   <div className="px-3 py-2.5">
-                    <span className="text-sm font-semibold text-foreground">{map.name}</span>
+                    <span className="text-sm font-semibold text-on-surface">{map.name}</span>
                   </div>
                 </button>
               );
@@ -332,7 +332,7 @@ export default function LobbyMapPage({
                 "hover:bg-primary-hover active:scale-[0.99]",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "transition-all duration-200",
-                "shadow-[0_0_20px_-4px_oklch(0.65_0.22_25_/_0.35)]"
+                "shadow-2"
               )}
               onClick={handleConfirmMap}
               disabled={submitting || !selectedMapId || confirmed}
