@@ -121,7 +121,7 @@
 
   /* ── Primary (Red-Orange Fire Brand) ── */
   --primary: oklch(0.65 0.22 25);
-  --primary-foreground: oklch(0.98 0 0);
+  --primary-foreground: oklch(0.20 0.02 25);
   --on-primary: oklch(0.98 0 0);
   --primary-hover: oklch(0.70 0.24 25);
   --primary-active: oklch(0.60 0.20 25);
@@ -368,7 +368,7 @@
 /* Dark-mode class compat — mirrors :root */
 .dark {
   --primary: oklch(0.65 0.22 25);
-  --primary-foreground: oklch(0.98 0 0);
+  --primary-foreground: oklch(0.20 0.02 25);
   --primary-hover: oklch(0.70 0.24 25);
   --primary-active: oklch(0.60 0.20 25);
   --primary-muted: oklch(0.65 0.22 25 / 0.15);
