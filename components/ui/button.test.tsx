@@ -16,7 +16,7 @@ describe("Button", () => {
   });
 
   it("applies variant class via className override", () => {
-    render(<Button variant="outline">Outline</Button>);
+    render(<Button variant="outlined">Outline</Button>);
     expect(screen.getByRole("button", { name: /outline/i })).toBeInTheDocument();
   });
 

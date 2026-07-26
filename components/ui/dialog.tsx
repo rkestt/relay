@@ -1,24 +1,14 @@
 import * as React from "react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 
 import { cn } from "@/lib/utils";
 import { XIcon } from "@/components/icons";
 
 // ──────────────────────────────────────────────────────
-// Custom Dialog (using native HTML + portal pattern)
+// MD3 Dialog — built on @base-ui/react/dialog
+// Provides focus trap, scroll lock, escape handling, and
+// aria-modal out of the box.
 // ──────────────────────────────────────────────────────
-
-interface DialogContextValue {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-const DialogContext = React.createContext<DialogContextValue | null>(null);
-
-function useDialogContext() {
-  const ctx = React.useContext(DialogContext);
-  if (!ctx) throw new Error("Dialog parts must be used within Dialog");
-  return ctx;
-}
 
 interface DialogProps {
   children: React.ReactNode;
@@ -27,113 +17,90 @@ interface DialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-function Dialog({ children, open: openProp, defaultOpen = false, onOpenChange }: DialogProps) {
-  const [openState, setOpenState] = React.useState(defaultOpen);
-  const isControlled = openProp !== undefined;
-  const open = isControlled ? openProp : openState;
-
-  const handleOpenChange = React.useCallback(
-    (next: boolean) => {
-      if (!isControlled) setOpenState(next);
-      onOpenChange?.(next);
-    },
-    [isControlled, onOpenChange]
-  );
-
-  return (
-    <DialogContext.Provider value={{ open, onOpenChange: handleOpenChange }}>
-      {children}
-    </DialogContext.Provider>
-  );
-}
-
-function DialogTrigger({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { onOpenChange } = useDialogContext();
-  return (
-    <button
-      type="button"
-      onClick={() => onOpenChange(true)}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function DialogContent({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  const { open, onOpenChange } = useDialogContext();
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [isExiting, setIsExiting] = React.useState(false);
-
-  // Handle open/close with animation
-  React.useEffect(() => {
-    if (open) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setIsVisible(true);
-      setIsExiting(false);
-    } else if (isVisible) {
-      // Trigger exit animation
-      setIsExiting(true);
-      const timer = setTimeout(() => {
-        setIsVisible(false);
-        setIsExiting(false);
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [open, isVisible]);
-
-  // Close on backdrop click
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) onOpenChange(false);
+function Dialog({ children, open, defaultOpen, onOpenChange }: DialogProps) {
+  const handleOpenChange = (isOpen: boolean, event: Event, reason: string) => {
+    onOpenChange?.(isOpen);
   };
 
-  // Close on Escape
-  React.useEffect(() => {
-    if (!isVisible) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [isVisible, onOpenChange]);
-
-  if (!isVisible) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
-      onClick={handleBackdropClick}
-      {...props}
+    <DialogPrimitive.Root
+      open={open}
+      defaultOpen={defaultOpen}
+      onOpenChange={handleOpenChange}
+      modal
     >
-      {/* Backdrop */}
-      <div
-        className={cn(
-          "fixed inset-0 bg-background/80 backdrop-blur-sm",
-          isExiting ? "animate-fade-out" : "animate-fade-in"
-        )}
-      />
-
-      {/* Content */}
-      <div
-        className={cn(
-          "relative z-10 w-full max-w-lg rounded-t-2xl sm:rounded-xl border border-border bg-popover p-6 shadow-3 mx-0 sm:mx-auto",
-          isExiting ? "animate-fade-out" : "animate-in slide-in-from-bottom-4 sm:animate-scale-in duration-300",
-          className
-        )}
-      >
-        {children}
-      </div>
-    </div>
+      {children}
+    </DialogPrimitive.Root>
   );
 }
+
+function DialogTrigger({
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  children: React.ReactNode;
+}) {
+  return (
+    <DialogPrimitive.Trigger
+      className={cn("inline-flex", className)}
+      {...props}
+    >
+      {children}
+    </DialogPrimitive.Trigger>
+  );
+}
+
+interface DialogContentProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  children: React.ReactNode;
+}
+
+const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
+  ({ children, className, ...props }, ref) => {
+    return (
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop
+          className={cn(
+            "fixed inset-0 z-50 bg-scrim backdrop-blur-sm",
+            "data-[ending-style]:opacity-0 data-[starting-style]:opacity-0",
+            "transition-opacity duration-fast"
+          )}
+        />
+        <DialogPrimitive.Popup
+          ref={ref}
+          className={cn(
+            "fixed z-50 w-full max-w-lg",
+            // Mobile bottom sheet; centered on desktop
+            "bottom-0 left-0 right-0 rounded-t-2xl sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl",
+            "bg-surface-container p-6 shadow-5 outline-none",
+            "border border-outline/50",
+            "data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[starting-style]:scale-95",
+            "transition-all duration-medium ease-enter",
+            className
+          )}
+          role="dialog"
+          aria-modal="true"
+          {...props}
+        >
+          {children}
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    );
+  }
+);
+DialogContent.displayName = "DialogContent";
 
 const DialogTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h2
+  <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-h3 font-semibold text-popover-foreground", className)}
+    className={cn(
+      "text-h3 font-semibold text-on-surface",
+      className
+    )}
     {...props}
   />
 ));
@@ -143,34 +110,34 @@ const DialogDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
+  <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-on-surface-variant", className)}
     {...props}
   />
 ));
 DialogDescription.displayName = "DialogDescription";
 
-function DialogClose({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { onOpenChange } = useDialogContext();
+function DialogClose({
+  children,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      type="button"
-      aria-label="Close"
+    <DialogPrimitive.Close
       className={cn(
         "absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-lg",
-        "text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
+        "text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
         "disabled:pointer-events-none disabled:opacity-50",
+        "transition-colors duration-fast",
         className
       )}
-      onClick={() => onOpenChange(false)}
+      aria-label="Close"
       {...props}
     >
-      {children ?? (
-        <XIcon className="size-4" />
-      )}
-    </button>
+      {children ?? <XIcon className="size-4" />}
+    </DialogPrimitive.Close>
   );
 }
 

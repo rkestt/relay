@@ -2,21 +2,36 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { interactive?: boolean }
->(({ className, interactive, onClick, ...props }, ref) => (
-  <div
-    ref={ref}
-    onClick={onClick}
-    className={cn(
-      "rounded-lg border border-border bg-card text-card-foreground shadow-1",
-      (interactive || onClick) && "cursor-pointer transition-all duration-200 hover:shadow-2 hover:-translate-y-0.5 hover:border-border/80 active:translate-y-0 active:shadow-1 active:duration-75",
-      className
-    )}
-    {...props}
-  />
-));
+const cardVariants = {
+  elevated: "bg-surface shadow-2 hover:shadow-3",
+  filled: "bg-surface-container shadow-0",
+  outlined: "bg-surface border border-outline shadow-0",
+};
+
+type CardVariant = keyof typeof cardVariants;
+
+interface CardProps
+  extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: CardVariant;
+  interactive?: boolean;
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, variant = "elevated", interactive, onClick, ...props }, ref) => (
+    <div
+      ref={ref}
+      onClick={onClick}
+      className={cn(
+        "rounded-lg text-on-surface transition-all duration-fast",
+        cardVariants[variant],
+        (interactive || onClick) &&
+          "cursor-pointer relative overflow-hidden before:absolute before:inset-0 before:bg-current before:opacity-0 before:transition-opacity before:duration-fast hover:before:opacity-[--md-sys-state-hover-opacity] active:before:opacity-[--md-sys-state-pressed-opacity]",
+        className
+      )}
+      {...props}
+    />
+  )
+);
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
@@ -37,7 +52,7 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("text-h3 font-semibold text-card-foreground", className)}
+    className={cn("text-h3 font-semibold text-on-surface", className)}
     {...props}
   />
 ));
@@ -49,7 +64,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-on-surface-variant", className)}
     {...props}
   />
 ));
