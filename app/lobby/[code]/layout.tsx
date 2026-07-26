@@ -166,7 +166,7 @@ export default function LobbyLayout({
                   "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
                   state.lobby.phase === "playing" && "bg-success/15 text-success",
                   state.lobby.phase === "waiting" && "bg-tertiary/15 text-tertiary",
-                  state.lobby.phase === "closed" && "bg-muted text-muted-foreground"
+                  state.lobby.phase === "closed" && "bg-surface-variant text-on-surface-variant"
                 )}
               >
                 {phaseLabel(state.lobby.phase)}
