@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import UserMenu from "@/components/auth/UserMenu";
+import { Header } from "@/components/ui/Header";
+import { BottomNav } from "@/components/ui/BottomNav";
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
@@ -35,8 +37,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#0a0a0a",
 };
 
@@ -48,6 +48,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
+      data-theme="dark"
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <head>
@@ -63,11 +65,30 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-        <UserMenu />
-        <AnalyticsProvider>
-          <PageTransition>{children}</PageTransition>
-        </AnalyticsProvider>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+        >
+          Skip to content
+        </a>
+
+        <ThemeProvider>
+          <Header />
+          <AnalyticsProvider>
+            <PageTransition>
+              <main
+                id="main"
+                className="flex-1 pt-[calc(4rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0"
+                tabIndex={-1}
+              >
+                {children}
+              </main>
+            </PageTransition>
+          </AnalyticsProvider>
+          <BottomNav />
+        </ThemeProvider>
+
         <CookieBanner />
       </body>
     </html>

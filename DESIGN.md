@@ -1,153 +1,166 @@
 # r6Hub — Design System
 
-## Color Strategy
-**Committed** — Red-orange fire palette on dark background. Single saturated accent carries 30-40% of interactive surface.
+## Stato
+Refactor in corso verso **Material Design 3** su stack esistente (Next.js + Tailwind v4 + shadcn/ui + @base-ui/react).
 
-### Primary Palette (Red-Orange Fire)
-- **Primary**: `oklch(0.65 0.22 25)` — Vibrant red-orange (CTA buttons, active states, primary actions)
-- **Primary-hover**: `oklch(0.70 0.24 25)` — Lighter red-orange (hover states)
-- **Primary-active**: `oklch(0.60 0.20 25)` — Deeper red-orange (active/pressed states)
-- **Primary-foreground**: `oklch(0.98 0 0)` — Near-white text on primary
+## Stack Decisioni
+- **CSS variables** in `app/globals.css`
+- **OKLCH** color space per gamma dinamica e accessibilità
+- **Theme system** via Zustand + `data-theme` attribute su `<html>`
+- **Dark-first**, con light mode supportata
+- **Font**: Geist Sans + Geist Mono (mantenuti)
 
-### Background & Surface
-- **Background**: `oklch(0.12 0.005 270)` — Deep dark with subtle blue tint (not pure black)
-- **Card**: `oklch(0.16 0.005 270)` — Slightly lighter than background
-- **Elevated**: `oklch(0.20 0.005 270)` — Modals, dropdowns, popovers
-- **Foreground**: `oklch(0.96 0 0)` — Near-white text
+---
 
-### Neutral Scale (Tinted toward blue)
-- **Neutral-50**: `oklch(0.96 0.003 270)` — Primary text
-- **Neutral-100**: `oklch(0.90 0.005 270)` — Secondary text
-- **Neutral-200**: `oklch(0.80 0.008 270)` — Tertiary text, icons
-- **Neutral-300**: `oklch(0.70 0.010 270)` — Disabled text
-- **Neutral-400**: `oklch(0.50 0.012 270)` — Borders, dividers
-- **Neutral-500**: `oklch(0.40 0.010 270)` — Muted backgrounds
-- **Neutral-600**: `oklch(0.30 0.008 270)` — Card borders
-- **Neutral-700**: `oklch(0.24 0.006 270)` — Input backgrounds
-- **Neutral-800**: `oklch(0.20 0.005 270)` — Elevated surfaces
-- **Neutral-900**: `oklch(0.16 0.005 270)` — Cards
-- **Neutral-950**: `oklch(0.12 0.005 270)` — Page background
+## Color System (MD3)
+
+### Primary (Red-Orange Fire — Brand)
+- **Primary**: `oklch(0.65 0.22 25)` — CTA buttons, active states
+- **Primary-hover**: `oklch(0.70 0.24 25)` — Hover states
+- **Primary-active**: `oklch(0.60 0.20 25)` — Active/pressed states
+- **On-primary**: `oklch(0.98 0 0)` — Text on primary
+- **Inverse-primary**: `oklch(0.65 0.22 25)` — Text/link su surface inverse
+
+### Secondary (Defender Blue)
+- **Secondary**: `oklch(0.65 0.18 240)` — Secondary actions
+- **On-secondary**: `oklch(0.12 0.005 270)` — Text on secondary
+
+### Tertiary (Amber)
+- **Tertiary**: `oklch(0.75 0.16 85)` — Accent alternativo, leader badge
+- **On-tertiary**: `oklch(0.12 0 0)` — Text on tertiary
+
+### Error / Destructive (FIXED ≠ primary)
+- **Error**: `oklch(0.60 0.22 15)` — Error states, destructive actions
+- **On-error**: `oklch(0.98 0 0)` — Text on error
+- **Destructive**: `oklch(0.60 0.22 15)` — Mantenuto per compat shadcn
+- **Destructive-hover**: `oklch(0.55 0.20 15)` — Hover destructive
+
+### Surface System (MD3 Tonal Elevation)
+Dark mode:
+- **Surface**: `oklch(0.14 0.005 270)` — Base surface
+- **Surface-variant**: `oklch(0.16 0.005 270)` — Variante surface
+- **Surface-container-lowest**: `oklch(0.10 0.005 270)`
+- **Surface-container-low**: `oklch(0.12 0.005 270)`
+- **Surface-container**: `oklch(0.16 0.005 270)` — Cards, containers
+- **Surface-container-high**: `oklch(0.20 0.005 270)` — Elevated cards
+- **Surface-container-highest**: `oklch(0.24 0.005 270)` — Modals, dialogs
+- **Surface-bright**: `oklch(0.20 0.005 270)`
+- **Surface-dim**: `oklch(0.10 0.005 270)`
+- **Inverse-surface**: `oklch(0.90 0.005 270)`
+- **Inverse-on-surface**: `oklch(0.12 0.005 270)`
+
+Light mode speculare: surfaces chiari, testo scuro.
+
+### Outline
+- **Outline**: `oklch(0.40 0.010 270)` (dark)
+- **Outline-variant**: `oklch(0.30 0.008 270)` (dark)
+- **On-surface-variant**: `oklch(0.70 0.010 270)` (dark)
 
 ### Semantic Colors
-- **Success**: `oklch(0.70 0.18 145)` — Green (completed actions, locked selections)
-- **Warning**: `oklch(0.75 0.16 85)` — Amber (warnings, leader badge)
-- **Destructive**: `oklch(0.65 0.22 25)` — Red-orange (errors, destructive actions, leave)
-- **Info**: `oklch(0.65 0.18 240)` — Blue (defender side, informational)
+- **Success**: `oklch(0.70 0.18 145)`
+- **Warning**: `oklch(0.75 0.16 85)`
+- **Info**: `oklch(0.65 0.18 240)`
 
-### Special
-- **Attacker**: `oklch(0.65 0.22 25)` — Red-orange (attacker side indicator)
-- **Defender**: `oklch(0.65 0.18 240)` — Blue (defender side indicator)
+### Game Roles
+- **Attacker**: `oklch(0.65 0.22 25)` — Red-orange
+- **Defender**: `oklch(0.65 0.18 240)` — Blue
 
-## Typography
+---
 
-### Font Families
-- **Display/Heading**: Geist Sans (already configured) — Clean, modern, technical
-- **Body**: Geist Sans — Consistent with headings
-- **Mono**: Geist Mono (already configured) — Code, room codes, technical data
+## Light Theme
 
-### Type Scale (1.25 ratio)
-- **Display**: 48px / 3rem — Hero titles (font-weight: 700)
-- **H1**: 36px / 2.25rem — Page titles (font-weight: 700)
-- **H2**: 28px / 1.75rem — Section titles (font-weight: 600)
-- **H3**: 22px / 1.375rem — Card titles (font-weight: 600)
-- **Body-lg**: 18px / 1.125rem — Lead text (font-weight: 400)
-- **Body**: 16px / 1rem — Default text (font-weight: 400)
-- **Body-sm**: 14px / 0.875rem — Secondary text (font-weight: 400)
-- **Caption**: 12px / 0.75rem — Labels, metadata (font-weight: 500)
+`[data-theme="light"]` inverte i surface e testo. Palette colorata (primary, secondary, error, success, etc.) rimane la stessa o leggermente adattata per leggibilità.
 
-### Line Heights
-- **Headings**: 1.2 (tight)
-- **Body**: 1.5 (comfortable reading)
-- **Caption**: 1.4 (compact)
+---
 
-### Letter Spacing
-- **Display/H1**: -0.02em (tighter for large text)
-- **Body**: 0 (default)
-- **Caption/Labels**: 0.05em (wider for small caps)
+## Elevation System
 
-## Spacing Scale
-Based on 4px grid:
-- **xs**: 4px (0.25rem)
-- **sm**: 8px (0.5rem)
-- **md**: 12px (0.75rem)
-- **lg**: 16px (1rem)
-- **xl**: 24px (1.5rem)
-- **2xl**: 32px (2rem)
-- **3xl**: 48px (3rem)
-- **4xl**: 64px (4rem)
+| Livello | Token | Uso |
+|---------|-------|-----|
+| 0 | `--md-sys-elevation-0` | Flat, no shadow |
+| 1 | `--md-sys-elevation-1` | Resting cards |
+| 2 | `--md-sys-elevation-2` | Raised cards, buttons |
+| 3 | `--md-sys-elevation-3` | Navigation drawers, FAB |
+| 4 | `--md-sys-elevation-4` | Modals, bottom sheets |
+| 5 | `--md-sys-elevation-5` | Pickers, date pickers |
 
-## Border Radius
-- **sm**: 6px (inputs, small elements)
-- **md**: 8px (buttons, badges)
-- **lg**: 12px (cards, modals)
-- **xl**: 16px (large containers)
-- **2xl**: 20px (hero elements)
-- **full**: 9999px (circular avatars, pills)
+---
 
-## Elevation (Shadows)
-- **Level 0**: No shadow (flat elements)
-- **Level 1**: `0 1px 2px 0 oklch(0 0 0 / 0.05)` — Subtle lift (cards)
-- **Level 2**: `0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.1)` — Elevated (dropdowns)
-- **Level 3**: `0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.1)` — Modal (dialogs)
-- **Level 4**: `0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.1)` — Popover (tooltips)
+## Motion System
 
-## Motion
-- **Duration**: 
-  - Fast: 150ms (micro-interactions)
-  - Normal: 250ms (standard transitions)
-  - Slow: 400ms (page transitions, modals)
-- **Easing**: 
-  - Default: `cubic-bezier(0.4, 0, 0.2, 1)` (ease-out-quart)
-  - Enter: `cubic-bezier(0, 0, 0.2, 1)` (ease-out-quint)
-  - Exit: `cubic-bezier(0.4, 0, 1, 1)` (ease-in-quart)
+| Durata | Token | Uso |
+|--------|-------|-----|
+| 150ms | `--md-sys-motion-duration-fast` | Hover, small transitions |
+| 250ms | `--md-sys-motion-duration-medium` | Default transitions |
+| 400ms | `--md-sys-motion-duration-slow` | Page transitions |
+| 500ms | `--md-sys-motion-duration-emphasized` | Emphasized animations |
 
-## Component Patterns
+### Easing
+- **Standard**: `cubic-bezier(0.2, 0.0, 0.0, 1.0)`
+- **Emphasized**: `cubic-bezier(0.2, 0.0, 0.0, 1.0)`
+- **Decelerate**: `cubic-bezier(0.0, 0.0, 0.0, 1.0)`
+- **Accelerate**: `cubic-bezier(0.3, 0.0, 1.0, 1.0)`
 
-### Buttons
-- **Primary**: Red-orange background, white text, rounded-lg, shadow on hover
-- **Secondary**: Transparent background, neutral border, rounded-lg
-- **Ghost**: No background/border, text color only
-- **Destructive**: Red-orange background (same as primary for consistency)
+---
 
-### Cards
-- Background: Neutral-900
-- Border: 1px Neutral-600
-- Radius: rounded-lg (12px)
-- Padding: 24px (1.5rem)
-- Shadow: Level 1
+## Typography System
 
-### Inputs
-- Background: Neutral-700
-- Border: 1px Neutral-600
-- Radius: rounded-md (8px)
-- Height: 40px (2.5rem)
-- Focus: 2px ring Primary/20% opacity
+| Token | Size | Uso |
+|-------|------|-----|
+| `--md-sys-typescale-display-large` | 3rem | Hero titles |
+| `--md-sys-typescale-headline-large` | 2.25rem | Page titles |
+| `--md-sys-typescale-headline-medium` | 1.75rem | Section titles |
+| `--md-sys-typescale-headline-small` | 1.375rem | Card titles |
+| `--md-sys-typescale-title-large` | 1.25rem | Subsection |
+| `--md-sys-typescale-body-large` | 1.125rem | Lead text |
+| `--md-sys-typescale-body-medium` | 1rem | Body default |
+| `--md-sys-typescale-body-small` | 0.875rem | Secondary text |
+| `--md-sys-typescale-label-medium` | 0.75rem | Labels |
 
-### Modals/Dialogs
-- Background: Neutral-800
-- Border: 1px Neutral-600
-- Radius: rounded-xl (16px)
-- Padding: 24px
-- Shadow: Level 3
-- Backdrop: oklch(0 0 0 / 0.6) with backdrop-blur-sm
+---
 
-## Visual Hierarchy Rules
-1. **Primary actions** — Red-orange background, prominent placement
-2. **Secondary actions** — Neutral border, same size as primary
-3. **Tertiary actions** — Ghost style, smaller text
-4. **Information** — Neutral-200 text, no background
-5. **Metadata** — Neutral-300 text, caption size
+## Shape System
 
-## Accessibility
-- **Contrast ratio**: Minimum 4.5:1 for body text, 3:1 for large text
-- **Focus states**: 2px ring with Primary color, 2px offset
-- **Touch targets**: Minimum 44x44px for interactive elements
-- **Keyboard navigation**: All interactive elements focusable, logical tab order
+- **Radius base**: `0.75rem` (12px)
+- **Full rounded**: per chips, avatar
+- **Medium rounded**: per cards (12px)
+- **Small rounded**: per inputs (6px)
 
-## Responsive Breakpoints
-- **Mobile**: < 640px (default)
-- **Tablet**: 640px - 1024px (sm:)
-- **Desktop**: > 1024px (lg:)
+---
 
-## Dark Mode Only
-Site is dark-mode only. No light theme toggle. All colors optimized for dark background.
+## State Layers
+
+| Stato | Opacity |
+|-------|---------|
+| Hover | `--md-sys-state-hover-opacity: 0.08` |
+| Pressed | `--md-sys-state-pressed-opacity: 0.12` |
+| Focus | `--md-sys-state-focus-opacity: 0.12` |
+| Drag | `--md-sys-state-drag-opacity: 0.16` |
+| Disabled | `--md-sys-state-disabled-opacity: 0.38` |
+
+---
+
+## Theme Toggle
+
+- **State**: Zustand store con persistenza `localStorage`
+- **Modes**: `light` | `dark` | `system`
+- **Detection**: `prefers-color-scheme: dark`
+- **Apply**: `data-theme` attribute su `<html>`
+
+---
+
+## Compatibility Shim
+
+Per mantenere le 17 pagine esistenti funzionanti durante la transizione, ogni token legacy ha un alias `--old-*` che punta al token corrente.
+
+Esempio:
+```css
+--old-primary: var(--primary);
+--old-destructive: var(--destructive);
+```
+
+---
+
+## Storico Decisioni
+
+- **2024-07-26**: Passaggio da dark-only a dark + light. Introdotto MD3 token system. Fix `--destructive` ≠ `--primary`.
