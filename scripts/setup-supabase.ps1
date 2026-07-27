@@ -54,7 +54,7 @@ if (-not $SkipSecrets) {
         $payload = @"
 {
   "role": "$role",
-  "iss": "supabase-demo",
+  "iss": "relay-r6hub",
   "iat": $iat,
   "exp": $exp
 }
@@ -170,8 +170,8 @@ NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=$anonKey
 SUPABASE_SERVICE_ROLE_KEY=$serviceRoleKey
 
-# Discord
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-id/your-webhook-token
+# Discord (set your webhook URL for production)
+# DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-id/your-webhook-token
 
 # Validation
 VALIDATION_HMAC_SECRET=***REDACTED***

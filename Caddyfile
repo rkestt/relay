@@ -1,6 +1,12 @@
 # r6Hub VPS Caddyfile
 # Set DOMAIN env var or use localhost for dev
 {$DOMAIN:localhost} {
+
+	# LWTS (Kanban board)
+	@lwts host lwts.{$DOMAIN:localhost}
+	handle @lwts {
+		reverse_proxy lwts:8080
+	}
 	# TLS - Caddy auto-provisions Let's Encrypt certs for real domains
 	# For local dev, use: DOMAIN=localhost:80
 

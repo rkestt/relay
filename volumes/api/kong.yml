@@ -1,4 +1,4 @@
-# IMPORTANTE: Sostituire "https://r6hub.yourdomain.com" con dominio production
+# IMPORTANTE: Sostituire "https://Relay.yourdomain.com" con dominio production
 # prima del deploy. Configurare anche NEXT_PUBLIC_SITE_URL in .env
 _format_version: '2.1'
 _transform: true
@@ -49,7 +49,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -83,7 +84,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -117,7 +119,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -153,7 +156,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -206,7 +210,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -259,7 +264,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -314,7 +320,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -367,7 +374,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -420,7 +428,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET
@@ -483,7 +492,8 @@ services:
       - name: cors
         config:
           origins:
-            - "https://r6hub.yourdomain.com"
+            - "https://Relay.yourdomain.com"
+            - "http://localhost:3000"
 
           methods:
             - GET

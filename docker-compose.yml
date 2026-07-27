@@ -3,7 +3,7 @@
 # Stop:   docker compose --env-file .env.supabase down
 # Reset:  docker compose --env-file .env.supabase down -v
 
-name: r6hub-supabase
+name: Relay-supabase
 
 services:
 
@@ -320,9 +320,44 @@ services:
     networks:
       - supabase-network
 
+  # ─── LWTS DB (PostgreSQL) ───────────────────────────────
+  lwts-db:
+    container_name: Relay-lwts-db
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - lwts-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "lwts", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    environment:
+      POSTGRES_USER: lwts
+      POSTGRES_PASSWORD: ${LWTS_DB_PASSWORD}
+      POSTGRES_DB: lwts
+    networks:
+      - supabase-network
+
+  # ─── LWTS (Kanban Board) ──────────────────────────────────
+  lwts:
+    container_name: Relay-lwts
+    image: ghcr.io/oceanplexian/lwts:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      lwts-db:
+        condition: service_healthy
+    environment:
+      DB_URL: postgres://lwts:${LWTS_DB_PASSWORD}@lwts-db:5432/lwts
+      JWT_SECRET: ${LWTS_JWT_SECRET}
+    networks:
+      - supabase-network
+
   # ─── Next.js App ──────────────────────────────────────────
   nextjs:
-    container_name: r6hub-nextjs
+    container_name: Relay-nextjs
     build:
       context: .
       dockerfile: Dockerfile
@@ -350,7 +385,7 @@ services:
 
   # ─── Caddy (Reverse Proxy + TLS) ─────────────────────────
   caddy:
-    container_name: r6hub-caddy
+    container_name: Relay-caddy
     image: caddy:2-alpine
     restart: unless-stopped
     ports:
@@ -372,6 +407,7 @@ volumes:
   db-config:
   caddy_data:
   caddy_config:
+  lwts-pgdata:
 
 networks:
   supabase-network:
