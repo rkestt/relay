@@ -96,7 +96,7 @@ async function main() {
   console.log("\n=== Seeding complete ===");
   console.log(`Lobby code: TESTOP`);
   console.log(`Lobby ID: ${lobbyId}`);
-  console.log(`Test user 1: ${TEST_USER_ID} (test@r6hub.test / Test123!)`);
+  console.log(`Test user 1: ${TEST_USER_ID} (test@relay.test / Test123!)`);
   console.log(`Test user 2: ${TEST_USER_ID} (test2@r6hub.test / Test123!)`);
 }
 

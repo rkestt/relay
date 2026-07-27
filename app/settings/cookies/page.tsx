@@ -32,7 +32,7 @@ export default function CookieSettingsPage() {
 
   if (!mounted) {
     return (
-      <main className="min-h-dvh bg-background">
+      <main className="min-h-dvh bg-surface">
         <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
           <div className="animate-pulse space-y-4">
             <div className="h-8 w-48 rounded bg-accent" />
@@ -44,13 +44,13 @@ export default function CookieSettingsPage() {
   }
 
   return (
-    <main className="min-h-dvh bg-background">
+    <main className="min-h-dvh bg-surface">
       {/* Back navigation */}
-      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
+      <div className="sticky top-0 z-10 border-b border-outline bg-surface/80 backdrop-blur-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-2 px-4 py-2">
           <Link
             href="/"
-            className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="group inline-flex items-center gap-1 text-sm text-on-surface-variant hover:text-on-surface transition-colors"
           >
             <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
             Torna alla home
@@ -61,10 +61,10 @@ export default function CookieSettingsPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface mb-2">
             Gestisci preferenze cookie
           </h1>
-          <p className="text-sm text-muted-foreground leading-relaxed">
+          <p className="text-sm text-on-surface-variant leading-relaxed">
             Puoi modificare in qualsiasi momento le tue preferenze sui cookie. I
             cookie tecnici sono sempre attivi perché necessari al
             funzionamento della piattaforma.
@@ -80,7 +80,7 @@ export default function CookieSettingsPage() {
             <CardContent>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
+                  <span className="text-on-surface-variant">
                     Cookie tecnici
                   </span>
                   <span className="inline-flex items-center gap-1 font-medium text-green-600 dark:text-green-400">
@@ -89,14 +89,14 @@ export default function CookieSettingsPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
+                  <span className="text-on-surface-variant">
                     Cookie analytics
                   </span>
                   <span
                     className={`inline-flex items-center gap-1 font-medium ${
                       consent.analytics
                         ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
+                        : "text-on-surface-variant"
                     }`}
                   >
                     {consent.analytics ? (
@@ -109,14 +109,14 @@ export default function CookieSettingsPage() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
+                  <span className="text-on-surface-variant">
                     Cookie marketing
                   </span>
                   <span
                     className={`inline-flex items-center gap-1 font-medium ${
                       consent.marketing
                         ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
+                        : "text-on-surface-variant"
                     }`}
                   >
                     {consent.marketing ? (
@@ -128,7 +128,7 @@ export default function CookieSettingsPage() {
                     )}
                   </span>
                 </div>
-                <div className="pt-2 text-xs text-muted-foreground border-t border-border">
+                <div className="pt-2 text-xs text-on-surface-variant border-t border-outline">
                   Aggiornato:{" "}
                   {new Date(consent.timestamp).toLocaleString("it-IT", {
                     year: "numeric",
@@ -153,12 +153,12 @@ export default function CookieSettingsPage() {
           <CardContent>
             <div className="space-y-4">
               {/* Necessary - always on */}
-              <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 px-4 py-3">
+              <div className="flex items-center justify-between rounded-lg border border-outline bg-accent/30 px-4 py-3">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-sm font-medium text-on-surface">
                     Cookie tecnici (necessari)
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-on-surface-variant mt-0.5">
                     Autenticazione, sessione, funzionalità di base
                   </p>
                 </div>
@@ -168,12 +168,12 @@ export default function CookieSettingsPage() {
               </div>
 
               {/* Analytics toggle */}
-              <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
+              <label className="flex items-center justify-between rounded-lg border border-outline px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-sm font-medium text-on-surface">
                     Cookie analytics
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-on-surface-variant mt-0.5">
                     Dati anonimizzati per capire come utilizzi la piattaforma
                   </p>
                 </div>
@@ -181,18 +181,18 @@ export default function CookieSettingsPage() {
                   type="checkbox"
                   checked={analytics}
                   onChange={(e) => setAnalytics(e.target.checked)}
-                  className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
+                  className="ml-3 size-4 shrink-0 rounded border-outline text-primary focus:ring-primary/50"
                   aria-label="Attiva cookie analytics"
                 />
               </label>
 
               {/* Marketing toggle */}
-              <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
+              <label className="flex items-center justify-between rounded-lg border border-outline px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">
+                  <p className="text-sm font-medium text-on-surface">
                     Cookie marketing
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-on-surface-variant mt-0.5">
                     Cookie per personalizzare contenuti e offerte
                   </p>
                 </div>
@@ -200,13 +200,13 @@ export default function CookieSettingsPage() {
                   type="checkbox"
                   checked={marketing}
                   onChange={(e) => setMarketing(e.target.checked)}
-                  className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
+                  className="ml-3 size-4 shrink-0 rounded border-outline text-primary focus:ring-primary/50"
                   aria-label="Attiva cookie marketing"
                 />
               </label>
             </div>
           </CardContent>
-          <div className="flex items-center justify-between border-t border-border px-6 py-4">
+          <div className="flex items-center justify-between border-t border-outline px-6 py-4">
             <Link
               href="/cookies"
               className="text-sm text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
@@ -231,7 +231,7 @@ export default function CookieSettingsPage() {
               Come gestire i cookie dal browser
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground space-y-2 leading-relaxed">
+          <CardContent className="text-sm text-on-surface-variant space-y-2 leading-relaxed">
             <p>
               Puoi configurare il tuo browser per bloccare o eliminare i cookie
               in qualsiasi momento. Consulta la guida del tuo browser per le

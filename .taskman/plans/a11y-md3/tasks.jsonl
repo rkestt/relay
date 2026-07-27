@@ -1,0 +1,5 @@
+{"_type":"meta","title":"Accessibility Audit MD3 — WCAG AA Verification","plan_name":"a11y-md3","created_at":"2026-07-26T11:29:06.893Z","base_commit":"15788b0c591b9e6d2b28285b7667b879a9d12388"}
+{"_type":"task","id":"a11y-001","description":"Setup axe-playwright + Lighthouse CI","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:29:06.893Z","updated_at":"2026-07-26T11:59:07.208Z"}
+{"_type":"task","id":"a11y-002","description":"Test keyboard navigation + focus trap","details":"","status":"pending","origin":"plan","depends_on":["a11y-001"],"created_at":"2026-07-26T11:29:06.893Z","updated_at":"2026-07-26T11:59:07.208Z"}
+{"_type":"task","id":"a11y-003","description":"Test contrast ratios + screen reader","details":"","status":"pending","origin":"plan","depends_on":["a11y-002"],"created_at":"2026-07-26T11:29:06.893Z","updated_at":"2026-07-26T11:59:07.208Z"}
+{"_type":"task","id":"a11y-004","description":"Lighthouse audit + zoom test + A11Y_REPORT.md","details":"","status":"pending","origin":"plan","depends_on":["a11y-003"],"created_at":"2026-07-26T11:29:06.893Z","updated_at":"2026-07-26T11:59:07.208Z"}

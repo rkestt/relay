@@ -1,4 +1,4 @@
-# r6hub — Dumb Human Guide
+# Relay — Dumb Human Guide
 
 Mini istruzioni per far girare l'app in locale senza pensarci troppo.
 

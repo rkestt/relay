@@ -1,6 +1,6 @@
 import { test, expect, Page } from "@playwright/test";
 
-const TEST_USER = { email: "test@r6hub.test", password: "Test123!" };
+const TEST_USER = { email: "test@relay.test", password: "Test123!" };
 
 async function loginViaAPI(page: Page) {
   await page.goto("/login", { waitUntil: "networkidle" });
@@ -16,7 +16,7 @@ test.describe("Homepage MD3 refactor (authenticated)", () => {
   });
 
   test("renders main CTAs with correct text", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "r6hub" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Relay" })).toBeVisible();
     await expect(page.getByRole("button", { name: /create lobby/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /join lobby/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /submit strategy/i })).toBeVisible();

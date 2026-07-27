@@ -43,7 +43,7 @@ export async function GET() {
   return new Response(JSON.stringify(exportData, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="r6hub-data-export-${Date.now()}.json"`,
+      "Content-Disposition": `attachment; filename="relay-data-export-${Date.now()}.json"`,
     },
   });
 }

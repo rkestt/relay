@@ -24,6 +24,127 @@ Esegui questi passaggi in ordine prima di modificare qualsiasi file:
    * Snapshot del DOM (`page.content()`)
 3. **Risoluzione:** Identifica il problema dai log runtime e procedi al fix sul codice statico solo come ultimo step.
 
+---
+
+## Verifica Runtime — Protocollo Obbligatorio
+
+Dopo **OGNI** implementazione in BUILD mode, **PRIMA** di acceptance-report:
+
+### 1. Turbopack Health Check
+```bash
+bash test-turbopack-check.sh
+```
+Se fallisce:
+```bash
+pkill -f next-server
+rm -rf .next
+npm run dev
+# Riprovi il health check
+```
+
+### 2. Build Check
+```bash
+npm run build
+```
+Se fallisce: fix errori di compilazione, poi ripeti.
+
+### 3. Verifica Browser (browser-goblin)
+
+**Per ogni pagina modificata + homepage + login:**
+
+a) Apri browser:
+```bash
+browser_open http://localhost:3000/<pagina-modificata>
+```
+
+b) Cattura console errors:
+```bash
+browser_console
+```
+**DEVE essere vuoto** (senza errori critici). Warning di sviluppo sono accettabili.
+
+c) Cattura page errors:
+```bash
+browser_errors
+```
+**DEVE essere vuoto.**
+
+d) Cattura network failures:
+```bash
+browser_network
+```
+**DEVE essere vuoto** (senza 4xx/5xx).
+
+e) Verifica overlay Next.js:
+```bash
+browser_eval("!!document.querySelector('#nextjs__container_build-error, #nextjs__container_errors, [data-nextjs-toast]')")
+```
+**DEVE essere false.**
+
+f) Screenshot visivo:
+```bash
+browser_screenshot
+```
+
+### 4. Multi-Pagina Verification
+Verifica **ALMENO 3 pagine**:
+- Pagina modificata
+- `/` (homepage)
+- `/login`
+- Altre pagine correlate se rilevanti
+
+### 5. E2E Test (Fasi Critiche)
+Se la modifica tocca **componenti condivisi, routing, o layout**:
+```bash
+npx playwright test --project=chromium
+```
+
+### 6. Acceptance Report
+L'acceptance-report **DEVE** includere il blocco `runtimeVerification`:
+```json
+"runtimeVerification": {
+  "turbopackCheck": "passed|failed|skipped (reason)",
+  "buildCheck": "passed|failed",
+  "browserConsoleErrors": [],
+  "browserPageErrors": [],
+  "browserNetworkFailures": [],
+  "nextjsOverlayDetected": false,
+  "pagesChecked": ["/modified", "/", "/login"],
+  "e2eRun": "passed|failed|skipped (reason)",
+  "verifiedBy": "davinci|human|tester",
+  "verificationTool": "browser-goblin|playwright-cli"
+}
+```
+
+**Nessun agente può dichiarare successo senza questo blocco compilato.**
+
+---
+
+## Subagent: Tester (Runtime Verification)
+
+| Agente | Ruolo | Strumenti |
+|--------|-------|-----------|
+| **tester** | Verifica runtime indipendente | Fresh context, browser-goblin + E2E, report PASS/FAIL/BLOCKER |
+
+### Flusso BUILD con Tester
+
+```
+/build
+  └─ God passa "Mode: BUILD" inline
+  └─ human implementa (con specifica approvata)
+  └─ pastor verifica implementazione
+  └─ davinci implementa UI se necessario
+  └─ **tester** verifica runtime (console, network, overlay, multi-pagina)
+  └─ evangelist salva decisioni nel wiki
+```
+
+**Quando chiamare tester:**
+- Dopo OGNI implementazione in BUILD mode (obbligatorio)
+- Per verifiche multi-pagina (homepage + /login + pagina modificata)
+- Per E2E test su componenti condivisi
+
+**Output tester:** Report strutturato con evidenze oggettive (console log, network log, screenshot)
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.

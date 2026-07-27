@@ -62,10 +62,10 @@ export function Header() {
         <Link
           href="/"
           className="flex items-center gap-1 text-lg font-bold text-on-surface"
-          aria-label="r6hub home"
+          aria-label="Relay home"
         >
-          <span className="text-primary">r6</span>
-          <span>hub</span>
+          <span className="text-primary">Re</span>
+          <span>lay</span>
         </Link>
 
         {/* Desktop nav */}

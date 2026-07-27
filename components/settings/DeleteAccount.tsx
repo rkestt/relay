@@ -19,7 +19,7 @@ export function DeleteAccount() {
     const response = await apiFetch("/api/user/account", { method: "DELETE" });
 
     if (response.ok) {
-      localStorage.removeItem("r6hub_room_code");
+      localStorage.removeItem("relay_room_code");
       router.push("/");
       router.refresh();
     } else {

@@ -16,11 +16,17 @@ const nextConfig = {
         protocol: "https",
         hostname: "localhost",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.discordapp.com",
+      },
     ],
     formats: ["image/webp", "image/avif"],
   },
   experimental: {
     scrollRestoration: true,
+    turbopackFileSystemCacheForDev: true,
+    turbopackFileSystemCacheForBuild: true,
   },
 };
 

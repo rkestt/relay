@@ -21,7 +21,7 @@ import { PlayingPhase } from "@/components/lobby/PlayingPhase";
 import { MatchComplete } from "@/components/lobby/MatchComplete";
 import { LeaderControls } from "@/components/lobby/LeaderControls";
 
-const ROOM_CODE_KEY = "r6hub_room_code";
+const ROOM_CODE_KEY = "relay_room_code";
 
 interface LobbyState {
   lobby: {

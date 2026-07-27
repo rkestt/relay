@@ -20,8 +20,8 @@ interface LogEntry {
 }
 
 const MAX_LOGS = 500;
-const STORAGE_KEY = "r6hub_logs";
-const ENABLED_KEY = "r6hub_logs_enabled";
+const STORAGE_KEY = "relay_logs";
+const ENABLED_KEY = "relay_logs_enabled";
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;

@@ -23,7 +23,7 @@ export function ExportData() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `r6hub-data-export-${Date.now()}.json`;
+      a.download = `Relay-data-export-${Date.now()}.json`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

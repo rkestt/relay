@@ -1,0 +1,6 @@
+{"_type":"meta","title":"Design Tokens + Theme Toggle — MD3 Foundation","plan_name":"design-tokens-md3","created_at":"2026-07-26T11:44:41.892Z","base_commit":"15788b0c591b9e6d2b28285b7667b879a9d12388"}
+{"_type":"task","id":"dt-001","description":"Refactor globals.css con palette MD3 + light theme + compati","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:44:41.892Z","updated_at":"2026-07-26T11:58:29.602Z"}
+{"_type":"task","id":"dt-002","description":"Creare ThemeProvider Zustand store","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:44:41.892Z","updated_at":"2026-07-26T11:58:29.602Z"}
+{"_type":"task","id":"dt-003","description":"Creare ThemeToggle component","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:44:41.892Z","updated_at":"2026-07-26T11:58:29.602Z"}
+{"_type":"task","id":"dt-004","description":"Aggiornare DESIGN.md con MD3 specs","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:44:41.892Z","updated_at":"2026-07-26T11:58:29.602Z"}
+{"_type":"task","id":"dt-005","description":"Verifica theme toggle + screenshot","details":"","status":"pending","origin":"plan","depends_on":["dt-004"],"created_at":"2026-07-26T11:44:41.892Z","updated_at":"2026-07-26T11:58:29.602Z"}

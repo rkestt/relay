@@ -96,13 +96,13 @@ export default function AllTasksPage() {
   // ── Loading state ─────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-24 rounded bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-24 rounded bg-surface-variant animate-pulse" />
         </header>
         <div className="p-5 space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-xl bg-muted animate-pulse" />
+            <div key={i} className="h-14 rounded-xl bg-surface-variant animate-pulse" />
           ))}
         </div>
       </div>
@@ -112,9 +112,9 @@ export default function AllTasksPage() {
   // ── Error state ───────────────────────────────────
   if (error) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h1 className="text-base font-bold text-foreground">All Tasks</h1>
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <h1 className="text-base font-bold text-on-surface">All Tasks</h1>
         </header>
         <EmptyState
           icon={
@@ -140,12 +140,12 @@ export default function AllTasksPage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-        <h1 className="text-base font-bold text-foreground">All Tasks</h1>
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+        <h1 className="text-base font-bold text-on-surface">All Tasks</h1>
         {tasks.length > 0 && (
-          <span className="text-xs text-muted-foreground">{tasks.length} total</span>
+          <span className="text-xs text-on-surface-variant">{tasks.length} total</span>
         )}
       </header>
 
@@ -155,7 +155,7 @@ export default function AllTasksPage() {
             <EmptyState
               icon={
                 <svg
-                  className="size-7 text-muted-foreground"
+                  className="size-7 text-on-surface-variant"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -174,7 +174,7 @@ export default function AllTasksPage() {
           ) : (
             <div className="flex flex-col gap-2">
               {/* ── Table header ───────────────────────── */}
-              <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2 text-xs font-semibold tracking-widest text-on-surface-variant uppercase">
                 <div className="col-span-4">Strategy</div>
                 <div className="col-span-2">Lobby</div>
                 <div className="col-span-2">Round</div>
@@ -189,18 +189,18 @@ export default function AllTasksPage() {
                   href={`/lobby/${task.lobby_room_code}/tasks`}
                   className={cn(
                     "grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-3 items-start md:items-center",
-                    "px-4 py-3 rounded-xl border border-border bg-card",
-                    "hover:bg-card/80 hover:border-primary/20 transition-all duration-200",
+                    "px-4 py-3 rounded-xl border border-outline bg-surface-container",
+                    "hover:bg-surface-container/80 hover:border-primary/20 transition-all duration-200",
                     "active:scale-[0.99]",
                   )}
                 >
                   {/* Strategy title (mobile: full width) */}
                   <div className="col-span-4 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">
+                    <p className="text-sm font-medium text-on-surface truncate">
                       {task.strategy_title}
                     </p>
                     {task.strategy_description && (
-                      <p className="text-xs text-muted-foreground truncate mt-0.5 hidden sm:block">
+                      <p className="text-xs text-on-surface-variant truncate mt-0.5 hidden sm:block">
                         {task.strategy_description}
                       </p>
                     )}
@@ -215,21 +215,21 @@ export default function AllTasksPage() {
 
                   {/* Round number */}
                   <div className="col-span-2">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-on-surface-variant">
                       Round {task.round_number}
                     </span>
                   </div>
 
                   {/* Assigned username */}
                   <div className="col-span-2">
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-on-surface-variant">
                       {task.assigned_username ?? "—"}
                     </span>
                   </div>
 
                   {/* Date */}
                   <div className="col-span-2 text-right">
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    <span className="text-xs text-on-surface-variant whitespace-nowrap">
                       {formatDate(task.assigned_at)}
                     </span>
                   </div>

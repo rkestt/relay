@@ -1,15 +1,15 @@
 ---
-title: Project Discovery: r6hub (MVP)
+title: Project Discovery: relay (MVP)
 version: 1.0
 role: Senior Product Manager / Idea Generator
 status: Perimetro Definito
 ---
 
-# r6hub — Project Discovery (MVP)
+# relay — Project Discovery (MVP)
 
 ## 1. Visione del Prodotto
 
-R6 Tactical Sync è un'applicazione "second-screen" (PWA/Mobile) pensata per ridurre la curva di conoscenza in Rainbow Six Siege. Trasforma i 30–45 secondi della Preparation Phase da momento di confusione a fase di esecuzione chirurgica, fornendo task individuali, mirati e visuali basati sulla composizione del team in tempo reale.
+Relay è un'applicazione "second-screen" (PWA/Mobile) pensata per ridurre la curva di conoscenza in Rainbow Six Siege. Trasforma i 30–45 secondi della Preparation Phase da momento di confusione a fase di esecuzione chirurgica, fornendo task individuali, mirati e visuali basati sulla composizione del team in tempo reale.
 
 ## 2. Il Problema (The "Pain")
 
@@ -61,4 +61,4 @@ R6 Tactical Sync è un'applicazione "second-screen" (PWA/Mobile) pensata per rid
 
 ---
 
-_Documento creato come base per definire scope, architettura e priorità per l'MVP di R6 Tactical Sync._
+_Documento creato come base per definire scope, architettura e priorità per l'MVP di Relay._

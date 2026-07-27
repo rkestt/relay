@@ -12,7 +12,7 @@ param(
     [string]$User = "root",
     
     [Parameter(HelpMessage="Server path")]
-    [string]$ServerPath = "/opt/r6hub"
+    [string]$ServerPath = "/opt/Relay"
 )
 
 $Excludes = @(
@@ -63,7 +63,7 @@ function Sync-Files {
     }
     catch {
         Write-Warning "Pipe sync failed. Using git-based sync instead."
-        Write-Host "Run: git push && ssh root@142.132.176.234 'cd /opt/r6hub && git pull'" -ForegroundColor Yellow
+        Write-Host "Run: git push && ssh root@142.132.176.234 'cd /opt/Relay && git pull'" -ForegroundColor Yellow
     }
 }
 
@@ -150,7 +150,7 @@ switch ($choice.ToLower()) {
     "g" { Sync-Git }
     "q" { Sync-Quick }
     "s" { ssh -i $IdentityFile $User@$Host }
-    "l" { ssh -i $IdentityFile $User@$Host "docker logs r6hub-nextjs-dev --tail 50 -f" }
+    "l" { ssh -i $IdentityFile $User@$Host "docker logs Relay-nextjs-dev --tail 50 -f" }
     "x" { return }
     default { Write-Host "Invalid choice" }
 }

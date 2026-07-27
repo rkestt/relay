@@ -14,8 +14,8 @@ import dynamic from "next/dynamic";
 const MapViewer = dynamic(() => import("@/components/maps/MapViewer").then(mod => mod.MapViewer), {
   ssr: false,
   loading: () => (
-    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
-      <span className="text-xs text-muted-foreground">Loading map…</span>
+    <div className="w-full aspect-video rounded-xl bg-surface-variant animate-pulse flex items-center justify-center">
+      <span className="text-xs text-on-surface-variant">Loading map…</span>
     </div>
   ),
 });
@@ -316,16 +316,16 @@ export default function SubmitStrategyPage() {
   // ── Loading state ────────────────────────────────
   if (loading) {
     return (
-      <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <div className="h-5 w-28 rounded bg-muted animate-pulse" />
-          <div className="h-9 w-16 rounded-lg bg-muted animate-pulse" />
+      <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
+        <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+          <div className="h-5 w-28 rounded bg-surface-variant animate-pulse" />
+          <div className="h-9 w-16 rounded-lg bg-surface-variant animate-pulse" />
         </header>
         <div className="flex flex-col gap-6 p-5 max-w-[600px]">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex flex-col gap-2">
-              <div className="h-3 w-20 rounded bg-muted animate-pulse" />
-              <div className="h-11 rounded-xl bg-muted animate-pulse" />
+              <div className="h-3 w-20 rounded bg-surface-variant animate-pulse" />
+              <div className="h-11 rounded-xl bg-surface-variant animate-pulse" />
             </div>
           ))}
         </div>
@@ -336,15 +336,15 @@ export default function SubmitStrategyPage() {
   // ── Success state ────────────────────────────────
   if (success) {
     return (
-      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-background text-foreground min-h-dvh p-6 animate-in fade-in duration-400">
-        <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-[0_0_24px_-4px_oklch(0.70_0.18_145/0.25)]">
+      <div className="flex flex-col flex-1 items-center justify-center gap-5 bg-surface text-on-surface min-h-dvh p-6 animate-in fade-in duration-400">
+        <div className="w-16 h-16 rounded-full bg-success/20 border border-success/30 flex items-center justify-center shadow-1">
           <CheckIcon className="w-8 h-8 text-success animate-in zoom-in duration-300" />
         </div>
         <div className="text-center">
-          <h2 className="text-lg font-bold text-foreground mb-1 animate-in fade-in slide-in-from-bottom-1 duration-400 delay-100">
+          <h2 className="text-lg font-bold text-on-surface mb-1 animate-in fade-in slide-in-from-bottom-1 duration-400 delay-100">
             Strategy submitted for validation!
           </h2>
-          <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-bottom-1 duration-400 delay-150">
+          <p className="text-sm text-on-surface-variant animate-in fade-in slide-in-from-bottom-1 duration-400 delay-150">
             Your strategy has been queued for community review.
           </p>
         </div>
@@ -363,15 +363,15 @@ export default function SubmitStrategyPage() {
 
   // ── Main form ─────────────────────────────────────
   return (
-    <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
+    <div className="flex flex-col flex-1 min-h-dvh bg-surface text-on-surface">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-        <h1 className="text-base font-bold text-foreground">Submit Strategy</h1>
+      <header className="flex items-center justify-between px-5 py-4 border-b border-outline">
+        <h1 className="text-base font-bold text-on-surface">Submit Strategy</h1>
         <div className="flex gap-2">
           <Button
-            variant="ghost"
+            variant="text"
             size="sm"
-            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all duration-200 active:scale-95"
             onClick={() => router.push("/")}
           >
             <BackArrowIcon className="size-4 mr-1.5" />
@@ -393,16 +393,16 @@ export default function SubmitStrategyPage() {
 
           {/* ═══════ Form Section: Basic Info ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-on-surface-variant uppercase">
               <span className="size-1.5 rounded-full bg-primary/40" />
               Basic Info
             </h2>
-            <div className="bg-card border border-border rounded-xl p-4 space-y-4">
+            <div className="bg-surface-container border border-outline rounded-xl p-4 space-y-4">
               {/* ── Title ───────────────────────────────── */}
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="title"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Title
                   <span className="text-destructive">*</span>
@@ -432,7 +432,7 @@ export default function SubmitStrategyPage() {
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="description"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Description
                 </label>
@@ -445,12 +445,12 @@ export default function SubmitStrategyPage() {
                   maxLength={2000}
                   className={cn(
                     "flex w-full rounded-xl border px-3.5 py-3 text-sm transition-all duration-200 resize-none min-h-[100px]",
-                    "bg-input/50 border-border text-foreground",
-                    "placeholder:text-muted-foreground/60",
+                    "bg-input/50 border-outline text-on-surface",
+                    "placeholder:text-on-surface-variant/60",
                     "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:bg-input/80"
                   )}
                 />
-                <p className="text-xs text-muted-foreground/40 mt-1 text-right">
+                <p className="text-xs text-on-surface-variant/40 mt-1 text-right">
                   {description.length}/2000
                 </p>
               </section>
@@ -459,16 +459,16 @@ export default function SubmitStrategyPage() {
 
           {/* ═══════ Form Section: Map/Site/Operator ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-on-surface-variant uppercase">
               <span className="size-1.5 rounded-full bg-primary/40" />
               Map, Site &amp; Operator
             </h2>
-            <div className="bg-card border border-border rounded-xl p-4 space-y-4">
+            <div className="bg-surface-container border border-outline rounded-xl p-4 space-y-4">
               {/* ── Map ──────────────────────────── */}
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="map"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Map
                   <span className="text-destructive">*</span>
@@ -483,9 +483,9 @@ export default function SubmitStrategyPage() {
                   }}
                   className={cn(
                     "flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all duration-200",
-                    "bg-input border-border text-foreground",
+                    "bg-input border-outline text-on-surface",
                     "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
-                    !selectedMapId && "text-muted-foreground",
+                    !selectedMapId && "text-on-surface-variant",
                     validationErrors.map && "border-destructive/50 ring-destructive/20"
                   )}
                 >
@@ -507,7 +507,7 @@ export default function SubmitStrategyPage() {
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="site"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Site
                   <span className="text-destructive">*</span>
@@ -523,10 +523,10 @@ export default function SubmitStrategyPage() {
                   disabled={!selectedMapId || sites.length === 0}
                   className={cn(
                     "flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all duration-200",
-                    "bg-input border-border text-foreground",
+                    "bg-input border-outline text-on-surface",
                     "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
                     (!selectedMapId || sites.length === 0) && "opacity-50 cursor-not-allowed",
-                    !selectedSiteId && sites.length > 0 && "text-muted-foreground",
+                    !selectedSiteId && sites.length > 0 && "text-on-surface-variant",
                     validationErrors.site && "border-destructive/50 ring-destructive/20"
                   )}
                 >
@@ -553,7 +553,7 @@ export default function SubmitStrategyPage() {
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="operator"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Operator
                   <span className="text-destructive">*</span>
@@ -568,9 +568,9 @@ export default function SubmitStrategyPage() {
                   }}
                   className={cn(
                     "flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all duration-200",
-                    "bg-input border-border text-foreground",
+                    "bg-input border-outline text-on-surface",
                     "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
-                    !selectedOperatorId && "text-muted-foreground",
+                    !selectedOperatorId && "text-on-surface-variant",
                     validationErrors.operator && "border-destructive/50 ring-destructive/20"
                   )}
                 >
@@ -592,12 +592,12 @@ export default function SubmitStrategyPage() {
 
           {/* ═══════ Form Section: Tags ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Tags</h2>
-            <div className="bg-card border border-border rounded-xl p-3 space-y-3">
+            <h2 className="text-xs font-semibold tracking-widest text-on-surface-variant uppercase">Tags</h2>
+            <div className="bg-surface-container border border-outline rounded-xl p-3 space-y-3">
               <section className="flex flex-col gap-1.5">
                 <label
                   htmlFor="tags"
-                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase"
+                  className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase"
                 >
                   Tags
                 </label>
@@ -608,7 +608,7 @@ export default function SubmitStrategyPage() {
                   onChange={(e) => setTagsInput(e.target.value)}
                   className="h-12 rounded-xl transition-all duration-200"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-on-surface-variant">
                   Comma-separated keywords
                 </p>
               </section>
@@ -630,10 +630,10 @@ export default function SubmitStrategyPage() {
 
           {/* ═══════ Form Section: Images ═══════ */}
           <div className="flex flex-col gap-2">
-            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Screenshots</h2>
-            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <h2 className="text-xs font-semibold tracking-widest text-on-surface-variant uppercase">Screenshots</h2>
+            <div className="bg-surface-container border border-outline rounded-xl p-4 space-y-3">
               <section className="flex flex-col gap-1.5">
-                <label className="flex items-center gap-1 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                <label className="flex items-center gap-1 text-xs font-semibold tracking-widest text-on-surface-variant uppercase">
                   Images
                   <span className="text-destructive">*</span>
                   {imagePreviews.length > 0 && (
@@ -676,7 +676,7 @@ export default function SubmitStrategyPage() {
                           e.stopPropagation();
                           handleRemoveImage(i);
                         }}
-                        className="absolute top-2 right-2 p-1 bg-card/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        className="absolute top-2 right-2 p-1 bg-surface-container/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                         aria-label={`Remove image ${i + 1}`}
                       >
                         <XIcon className="w-4 h-4" />
@@ -702,13 +702,13 @@ export default function SubmitStrategyPage() {
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
                   "active:scale-[0.99]",
                   imagePreviews.length > 0
-                    ? "border-border bg-card hover:bg-card/80"
-                    : "border-muted bg-background hover:border-muted-foreground/20 hover:bg-card/30"
+                    ? "border-outline bg-surface-container hover:bg-surface-container/80"
+                    : "border-surface-variant bg-surface hover:border-on-surface-variant/20 hover:bg-surface-container/30"
                 )}
               >
-                <div className="w-12 h-12 rounded-2xl border border-border bg-card flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl border border-outline bg-surface-container flex items-center justify-center">
                   <svg
-                    className="w-6 h-6 text-muted-foreground"
+                    className="w-6 h-6 text-on-surface-variant"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
@@ -721,10 +721,10 @@ export default function SubmitStrategyPage() {
                     <path d="M21 15l-5-5L5 21" />
                   </svg>
                 </div>
-                <p className="text-sm text-muted-foreground font-semibold">
+                <p className="text-sm text-on-surface-variant font-semibold">
                   {imagePreviews.length > 0 ? "Add more images" : "Upload screenshots"}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-on-surface-variant">
                   PNG, JPEG, WebP or AVIF (max 20 MB each, up to 10 images)
                 </p>
               </div>
@@ -742,11 +742,11 @@ export default function SubmitStrategyPage() {
           {/* ═══════ Form Section: Map Hotspot Editor ═══════ */}
           {selectedMap && (
             <div className="flex flex-col gap-2">
-              <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Hotspots</h2>
-              <div className="bg-card border border-border rounded-xl p-3 space-y-3">
+              <h2 className="text-xs font-semibold tracking-widest text-on-surface-variant uppercase">Hotspots</h2>
+              <div className="bg-surface-container border border-outline rounded-xl p-3 space-y-3">
                 <section className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                    <label className="flex items-center gap-2 text-xs font-semibold tracking-widest text-on-surface-variant uppercase">
                       <svg
                         className="size-3.5"
                         viewBox="0 0 24 24"
@@ -770,7 +770,7 @@ export default function SubmitStrategyPage() {
                       {hotspots.length > 0 && (
                         <button
                           onClick={handleClearHotspots}
-                          className="text-xs text-muted-foreground hover:text-destructive transition-colors duration-200"
+                          className="text-xs text-on-surface-variant hover:text-destructive transition-colors duration-200"
                         >
                           Clear all
                         </button>
@@ -778,7 +778,7 @@ export default function SubmitStrategyPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-on-surface-variant">
                     Tap on the map to place markers showing key positions and routes.
                   </p>
 
@@ -799,24 +799,24 @@ export default function SubmitStrategyPage() {
                       {/* Hotspot list */}
                       {hotspots.length > 0 && (
                         <div className="flex flex-col gap-2">
-                          <p className="text-xs text-muted-foreground font-medium">
+                          <p className="text-xs text-on-surface-variant font-medium">
                             {hotspots.length} hotspot{hotspots.length !== 1 ? "s" : ""} placed — tap the map to add more
                           </p>
                           <div className="flex flex-wrap gap-2">
                             {hotspots.map((h, i) => (
                               <div
                                 key={h.id}
-                                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border text-xs"
+                                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-container border border-outline text-xs"
                               >
                                 <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                                   {i + 1}
                                 </span>
-                                <span className="text-muted-foreground font-mono">
+                                <span className="text-on-surface-variant font-mono">
                                   {h.x_percent}%, {h.y_percent}%
                                 </span>
                                 <button
                                   onClick={() => handleRemoveHotspot(h.id)}
-                                  className="ml-1 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                                  className="ml-1 p-1 rounded text-on-surface-variant hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                                   aria-label={`Remove hotspot ${i + 1}`}
                                 >
                                   <XIcon className="size-3.5" />
@@ -840,7 +840,7 @@ export default function SubmitStrategyPage() {
           )}
 
           {/* ── Submit ──────────────────────────────── */}
-          <div className="sticky bottom-0 pt-4 pb-3 bg-background border-t border-border/30 mt-2">
+          <div className="sticky bottom-0 pt-4 pb-3 bg-surface border-t border-outline/30 mt-2">
             <Button
               size="lg"
               className={cn(
@@ -849,7 +849,7 @@ export default function SubmitStrategyPage() {
                 "hover:bg-primary-hover active:bg-primary-active",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 "transition-all duration-200",
-                "shadow-[0_0_24px_-4px_oklch(0.65_0.22_25/0.25)]"
+                "shadow-2"
               )}
               onClick={handleSubmit}
               disabled={submitting}

@@ -52,7 +52,7 @@ export const useThemeStore = create<ThemeState>()(
       },
     }),
     {
-      name: "r6hub_theme",
+      name: "relay_theme",
       partialize: (state) => ({ theme: state.theme }),
       onRehydrateStorage: () => (state) => {
         if (state) {

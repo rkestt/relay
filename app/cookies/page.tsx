@@ -37,12 +37,12 @@ const cookieCategories = [
       "Questi cookie permettono di ricordare le preferenze dell'utente per migliorare l'esperienza.",
     cookies: [
       {
-        name: "r6hub_theme",
+        name: "relay_theme",
         purpose: "Preferenza tema (chiaro/scuro)",
         duration: "1 anno",
       },
       {
-        name: "r6hub_lang",
+        name: "relay_lang",
         purpose: "Preferenza lingua interfaccia",
         duration: "1 anno",
       },
@@ -150,7 +150,7 @@ export default function CookiesPage() {
               tempo.
             </p>
             <p>
-              Utilizziamo cookie di prima parte (impostati direttamente da r6hub)
+              Utilizziamo cookie di prima parte (impostati direttamente da Relay)
               e, solo con il tuo consenso, cookie di terze parti per analisi
               statistiche.
             </p>

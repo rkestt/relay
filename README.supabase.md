@@ -1,4 +1,4 @@
-# Supabase Self-Hosted - r6Hub
+# Supabase Self-Hosted - Relay
 
 Stack Supabase locale con Docker per sviluppo e deploy VPS.
 
@@ -102,7 +102,7 @@ SUPABASE_SERVICE_ROLE_KEY=<generato>
 
 1. Copia i file sul VPS:
    ```bash
-   scp docker-compose.yml .env.supabase volumes/ scripts/ vps:~/r6hub/
+   scp docker-compose.yml .env.supabase volumes/ scripts/ vps:~/relay/
    ```
 
 2. Modifica `.env.supabase`:
@@ -141,7 +141,7 @@ SUPABASE_SERVICE_ROLE_KEY=<stessa-chiave-da-env-supabase>
 ## Struttura File
 
 ```
-r6Hub/
+relay/
   docker-compose.yml          # Stack Supabase completo
   .env.supabase               # Configurazione + secrets (NON committare)
   scripts/

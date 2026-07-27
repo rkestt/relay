@@ -1,0 +1,6 @@
+{"_type":"meta","title":"Pagine Secondarie MD3 — Submit, Settings, Tasks","plan_name":"pages-subpages-md3","created_at":"2026-07-26T11:29:06.888Z","base_commit":"15788b0c591b9e6d2b28285b7667b879a9d12388"}
+{"_type":"task","id":"ps-001","description":"Split submit page in subcomponenti","details":"","status":"pending","origin":"plan","created_at":"2026-07-26T11:29:06.888Z","updated_at":"2026-07-26T11:59:07.207Z"}
+{"_type":"task","id":"ps-002","description":"Refactor submit form con MD3 patterns","details":"","status":"pending","origin":"plan","depends_on":["ps-001"],"created_at":"2026-07-26T11:29:06.888Z","updated_at":"2026-07-26T11:59:07.207Z"}
+{"_type":"task","id":"ps-003","description":"Refactor settings pages con toggle MD3","details":"","status":"pending","origin":"plan","depends_on":["ps-002"],"created_at":"2026-07-26T11:29:06.888Z","updated_at":"2026-07-26T11:59:07.207Z"}
+{"_type":"task","id":"ps-004","description":"Refactor tasks pages con Card MD3","details":"","status":"pending","origin":"plan","depends_on":["ps-003"],"created_at":"2026-07-26T11:29:06.888Z","updated_at":"2026-07-26T11:59:07.207Z"}
+{"_type":"task","id":"ps-005","description":"Verifica pagine secondarie + screenshot","details":"","status":"pending","origin":"plan","depends_on":["ps-004"],"created_at":"2026-07-26T11:29:06.888Z","updated_at":"2026-07-26T11:59:07.207Z"}

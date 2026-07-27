@@ -1,7 +1,7 @@
 import { test, expect, Page, ConsoleMessage, Request } from "@playwright/test";
 
 // ── Test config ──────────────────────────────────────────────
-const TEST_USER = { email: "test@r6hub.test", password: "Test123!" };
+const TEST_USER = { email: "test@relay.test", password: "Test123!" };
 
 // ── Helpers ──────────────────────────────────────────────────
 

@@ -61,7 +61,7 @@ export function LogPanel() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `r6hub-logs-${Date.now()}.json`;
+    a.download = `Relay-logs-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
