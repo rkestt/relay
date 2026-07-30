@@ -1,6 +1,16 @@
 # r6hub — Dumb Human Guide
 
-Mini istruzioni per far girare l'app in locale senza pensarci troppo.
+## Linux (comandi rapidi)
+```bash
+# prima volta
+npm install
+docker compose --env-file .env.supabase up -d db kong auth rest realtime storage imgproxy meta studio mailpit
+bash scripts/apply-migrations.sh
+
+# ogni volta
+docker compose --env-file .env.supabase up -d db kong auth rest realtime storage imgproxy meta studio mailpit
+npm run dev
+```
 
 ## Prerequisiti
 

@@ -1,6 +1,9 @@
 # Aggiunti da Andrea
 - Search in ban operators per cercare gli operatori
 
+## Registrazione
+"Voglio ricevere aggiornamenti e novita' via email"
+- Non c'e' questa feature nella nostra app
 ## Post-MVP
 - colori custom per i team (come quelli di r6)
 - bottone home (che riporta nella dashboard della lobby) in ogni pagina utile

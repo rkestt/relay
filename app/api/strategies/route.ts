@@ -305,7 +305,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
+        "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);

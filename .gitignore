@@ -59,3 +59,6 @@ dogfood-output/
 vps-credentials.txt
 
 vps-credentials.txt
+
+# Turbopack AI logs
+turbopack.log

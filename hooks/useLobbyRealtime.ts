@@ -63,6 +63,12 @@ export function useLobbyRealtime(lobbyId: string | null) {
       return;
     }
 
+    // ── Skip SSR (no WebSocket on server) ────────────────────
+    if (typeof window === "undefined") {
+      setConnectionStatus("disconnected");
+      return;
+    }
+
     // ── helpers ──────────────────────────────────────────────
 
     const cleanupPrevious = () => {
@@ -77,6 +83,13 @@ export function useLobbyRealtime(lobbyId: string | null) {
     };
 
     const scheduleReconnect = () => {
+      // Don't retry if already exceeded limit (permanent error)
+      if (retryCountRef.current >= 3) {
+        logger.warn("useLobbyRealtime", "Max reconnect attempts reached — relying on heartbeat", { lobbyId: id });
+        setConnectionStatus("disconnected");
+        return;
+      }
+
       const delay = Math.min(
         INITIAL_RECONNECT_DELAY * 2 ** retryCountRef.current,
         MAX_RECONNECT_DELAY,
@@ -87,7 +100,11 @@ export function useLobbyRealtime(lobbyId: string | null) {
 
       retryTimerRef.current = setTimeout(() => {
         if (!disposedRef.current) {
-          subscribe();
+          try {
+            subscribe();
+          } catch {
+            // subscribe() already handles its own errors
+          }
         }
       }, delay);
     };
@@ -265,21 +282,34 @@ export function useLobbyRealtime(lobbyId: string | null) {
       );
 
       // ── subscribe & track status ────────────────────────────
-      channel.subscribe((status) => {
-        if (disposedRef.current) return;
-        if (status === "SUBSCRIBED") {
-          logger.info("useLobbyRealtime", "SUBSCRIBED", { lobbyId: id });
-          retryCountRef.current = 0;
-          setConnectionStatus("connected");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          logger.warn("useLobbyRealtime", `Channel ${status}`, { lobbyId: id });
-          setConnectionStatus("error");
-          scheduleReconnect();
-        } else if (status === "CLOSED") {
-          logger.info("useLobbyRealtime", "CLOSED", { lobbyId: id });
-          setConnectionStatus("disconnected");
-        }
-      });
+      try {
+        channel.subscribe((status) => {
+          if (disposedRef.current) return;
+          if (status === "SUBSCRIBED") {
+            logger.info("useLobbyRealtime", "SUBSCRIBED", { lobbyId: id });
+            retryCountRef.current = 0;
+            setConnectionStatus("connected");
+          } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+            if (retryCountRef.current < 3) {
+              logger.warn("useLobbyRealtime", `Channel ${status}`, { lobbyId: id, attempt: retryCountRef.current });
+              setConnectionStatus("error");
+              scheduleReconnect();
+            } else {
+              logger.warn("useLobbyRealtime", "Realtime unavailable after 3 retries — relying on heartbeat", { lobbyId: id });
+              cleanupPrevious();
+              setConnectionStatus("disconnected");
+            }
+          } else if (status === "CLOSED") {
+            logger.info("useLobbyRealtime", "CLOSED", { lobbyId: id });
+            setConnectionStatus("disconnected");
+          }
+        });
+      } catch (err) {
+        logger.warn("useLobbyRealtime", "WebSocket unavailable, relying on heartbeat", { lobbyId: id });
+        retryCountRef.current = 999; // suppress further retries
+        supabaseRef.current?.removeChannel(channel);
+        setConnectionStatus("disconnected");
+      }
 
       channelRef.current = channel;
     };

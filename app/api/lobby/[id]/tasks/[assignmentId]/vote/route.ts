@@ -87,13 +87,6 @@ export async function POST(
       );
     }
 
-    if (assignment.user_id === user.id) {
-      return NextResponse.json(
-        { error: "Cannot vote on your own assigned strategy" },
-        { status: 403 },
-      );
-    }
-
     // -- Upsert or delete vote --------------------------------------------
     if (vote_type === "up" || vote_type === "down") {
       const { error: upsertError } = await withTimeout(

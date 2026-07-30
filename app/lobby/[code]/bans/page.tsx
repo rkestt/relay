@@ -153,15 +153,18 @@ export default function BansPage({
         logger.debug("BansPage", "Ban saved, refreshing bans");
         setLastBannedId(operatorId);
         setTimeout(() => setLastBannedId(null), 400);
-        // Refresh bans
-        const stateRes = await apiFetch(`/api/lobby/${lobbyId}/state`);
-        if (stateRes.ok) {
-          const data: LobbyState = await stateRes.json();
-          setBans(data.bans);
-        }
+        // Refresh bans (best-effort — don't fail if refresh fails)
+        try {
+          const stateRes = await apiFetch(`/api/lobby/${lobbyId}/state`);
+          if (stateRes.ok) {
+            const data: LobbyState = await stateRes.json();
+            setBans(data.bans);
+          }
+        } catch { /* ban already succeeded, refresh is best-effort */ }
       } catch (err) {
-        logger.error("BansPage", "Ban failed", err);
-        setError(err instanceof Error ? err.message : "Failed to ban operator");
+        const msg = err instanceof Error ? err.message : "Failed to ban operator";
+        logger.error("BansPage", "Ban failed", { error: msg, operatorId, side, lobbyId });
+        setError(msg);
       } finally {
         setBanning(false);
       }

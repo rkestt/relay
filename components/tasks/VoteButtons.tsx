@@ -10,6 +10,7 @@ interface VoteButtonsProps {
   onVote: (voteType: "up" | "down" | null) => void;
   orientation?: "vertical" | "horizontal";
   size?: "sm" | "md";
+  readOnly?: boolean;
 }
 
 export function VoteButtons({
@@ -18,6 +19,7 @@ export function VoteButtons({
   onVote,
   orientation = "vertical",
   size = "sm",
+  readOnly = false,
 }: VoteButtonsProps) {
   const isVertical = orientation === "vertical";
   const [animatingVote, setAnimatingVote] = useState<"up" | "down" | null>(null);
@@ -28,12 +30,14 @@ export function VoteButtons({
   }, []);
 
   const handleUpvote = (e: React.MouseEvent) => {
+    if (readOnly) return;
     e.stopPropagation();
     triggerVoteAnim("up");
     onVote(userVote === "up" ? null : "up");
   };
 
   const handleDownvote = (e: React.MouseEvent) => {
+    if (readOnly) return;
     e.stopPropagation();
     triggerVoteAnim("down");
     onVote(userVote === "down" ? null : "down");
@@ -49,11 +53,13 @@ export function VoteButtons({
       {/* Upvote */}
       <button
         onClick={handleUpvote}
+        disabled={readOnly}
         className={cn(
           "flex items-center justify-center rounded-md transition-all duration-150",
           "hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           size === "sm" ? "size-7" : "size-9",
-          userVote === "up"
+          readOnly && "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100",
+          !readOnly && userVote === "up"
             ? "text-primary"
             : "text-muted-foreground hover:text-primary",
           animatingVote === "up" && "scale-125",
@@ -83,11 +89,13 @@ export function VoteButtons({
       {/* Downvote */}
       <button
         onClick={handleDownvote}
+        disabled={readOnly}
         className={cn(
           "flex items-center justify-center rounded-md transition-all duration-150",
           "hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
           size === "sm" ? "size-7" : "size-9",
-          userVote === "down"
+          readOnly && "opacity-40 cursor-not-allowed hover:scale-100 active:scale-100",
+          !readOnly && userVote === "down"
             ? "text-destructive"
             : "text-muted-foreground hover:text-destructive",
           animatingVote === "down" && "scale-125",

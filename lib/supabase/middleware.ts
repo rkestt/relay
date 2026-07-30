@@ -36,7 +36,7 @@ function addSecurityHeaders(response: NextResponse): NextResponse {
   );
   response.headers.set(
     "Content-Security-Policy",
-    `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://*.posthog.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""} ${process.env.NEXT_PUBLIC_SUPABASE_REALTIME_URL?.replace(/^ws:/, "http:") ?? ""} ${process.env.NEXT_PUBLIC_SUPABASE_REALTIME_URL ?? ""} https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.posthog.co;`,
+    `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.sentry.io https://*.posthog.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""} ws://localhost:54321 wss://localhost:54321 https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.posthog.co;`,
   );
   return response;
 }
