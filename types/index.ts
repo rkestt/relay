@@ -1,12 +1,45 @@
 // ──────────────────────────────────────────────
-// Database types aligned with 00001_setup_schema.sql
+// Database types — auto-generated from live DB schema
+// Regenerate: node scripts/generate-types.mjs
 // ──────────────────────────────────────────────
 
-export interface Profile {
+export interface Lobby {
   id: string;
-  username: string | null;
-  avatar_url: string | null;
-  created_at: string;
+  room_code: string;
+  leader_id: string;
+  status: "active" | "closed" | null;
+  created_at: string | null;
+  updated_at: string | null;
+  starting_side: "attacker" | "defender" | null;
+  phase: "waiting" | "playing" | "closed" | null;
+  map_id: string | null;
+}
+
+export interface LobbyBan {
+  id: string;
+  lobby_id: string | null;
+  operator_id: string | null;
+  side: "attacker" | "defender" | null;
+  round_id: string | null;
+  created_at: string | null;
+}
+
+export interface LobbyMember {
+  id: string;
+  lobby_id: string | null;
+  user_id: string | null;
+  joined_at: string | null;
+}
+
+export interface LobbySelection {
+  id: string;
+  lobby_id: string | null;
+  user_id: string | null;
+  round_id: string | null;
+  map_id: string | null;
+  site_id: string | null;
+  operator_id: string | null;
+  locked_at: string | null;
 }
 
 export interface Map {
@@ -15,93 +48,50 @@ export interface Map {
   image_url: string | null;
 }
 
-export interface Site {
+export interface OperatorTag {
   id: string;
-  map_id: string;
-  name: string;
-  floor: string | null;
+  operator_id: string | null;
+  tag: string;
 }
 
 export interface Operator {
   id: string;
   name: string;
-  side: "attacker" | "defender";
+  side: "attacker" | "defender" | null;
   icon_url: string | null;
 }
 
-export interface OperatorTag {
+export interface Profile {
   id: string;
-  operator_id: string;
-  tag: string;
-}
-
-export interface Lobby {
-  id: string;
-  room_code: string;
-  leader_id: string;
-  status: "active" | "closed";
-  phase: "waiting" | "playing" | "closed";
-  map_id: string | null;
-  starting_side: "attacker" | "defender" | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface LobbyMember {
-  id: string;
-  lobby_id: string;
-  user_id: string;
-  joined_at: string;
+  username: string | null;
+  avatar_url: string | null;
+  created_at: string | null;
 }
 
 export interface Round {
   id: string;
-  lobby_id: string;
+  lobby_id: string | null;
   round_number: number;
-  status: "active" | "completed";
+  status: "active" | "completed" | null;
+  created_at: string | null;
   team_side: "attacker" | "defender" | null;
   winner_side: "attacker" | "defender" | null;
-  created_at: string;
 }
 
-export interface LobbyBan {
-  id: string;
-  lobby_id: string;
-  operator_id: string;
-  side: "attacker" | "defender";
-  round_id: string;
-  created_at: string;
-}
-
-export interface LobbySelection {
-  id: string;
-  lobby_id: string;
-  user_id: string;
-  round_id: string;
-  map_id: string | null;
-  site_id: string | null;
-  operator_id: string | null;
-  locked_at: string | null;
-}
-
-export interface StrategyTemplate {
+export interface Site {
   id: string;
   map_id: string | null;
-  site_id: string | null;
-  operator_id: string | null;
-  title: string;
-  description: string | null;
-  image_url: string;  // primary image (backward compat)
-  images?: StrategyImage[];  // all images
-  status: "pending" | "approved" | "rejected";
-  created_by: string | null;
-  created_at: string;
+  name: string;
+  floor: string | null;
 }
 
-export interface StrategyTag {
+export interface StrategyHotspot {
   id: string;
-  strategy_id: string;
-  tag: string;
+  strategy_id: string | null;
+  x_percent: number;
+  y_percent: number;
+  label: string | null;
+  image_id: string | null;
 }
 
 export interface StrategyImage {
@@ -110,28 +100,35 @@ export interface StrategyImage {
   image_url: string;
   sort_order: number;
   caption: string | null;
-  created_at: string;
+  created_at: string | null;
 }
 
-export interface StrategyHotspot {
+export interface StrategyTag {
   id: string;
-  strategy_id: string;
-  image_id: string | null;  // FK to strategy_images, NULL = primary image
-  x_percent: number;
-  y_percent: number;
-  label: string | null;
+  strategy_id: string | null;
+  tag: string;
+}
+
+export interface StrategyTemplate {
+  id: string;
+  map_id: string | null;
+  site_id: string | null;
+  title: string;
+  description: string | null;
+  image_url: string;
+  status: "pending" | "approved" | "rejected" | null;
+  created_by: string | null;
+  created_at: string | null;
+  operator_id: string | null;
 }
 
 export interface TaskAssignment {
   id: string;
-  lobby_id: string;
-  user_id: string;
-  round_id: string;
-  strategy_id: string;
-  assigned_at: string;
-  upvotes?: number;
-  downvotes?: number;
-  user_vote?: "up" | "down" | null;
+  lobby_id: string | null;
+  user_id: string | null;
+  round_id: string | null;
+  strategy_id: string | null;
+  assigned_at: string | null;
 }
 
 export interface TaskVote {
@@ -139,15 +136,29 @@ export interface TaskVote {
   task_assignment_id: string;
   user_id: string;
   vote_type: "up" | "down";
-  created_at: string;
+  created_at: string | null;
 }
 
 export interface ValidationQueueItem {
   id: string;
-  strategy_id: string;
+  strategy_id: string | null;
   token_hash: string;
   action: string;
   expires_at: string;
   used_at: string | null;
-  created_at: string;
+  created_at: string | null;
+}
+
+// ── Virtual / computed fields ──
+
+export interface TaskAssignmentWithVotes extends TaskAssignment {
+  upvotes?: number;
+  downvotes?: number;
+  user_vote?: "up" | "down" | null;
+}
+
+export interface StrategyTemplateWithRelations extends StrategyTemplate {
+  images?: StrategyImage[];
+  strategy_tags?: StrategyTag[];
+  strategy_hotspots?: StrategyHotspot[];
 }

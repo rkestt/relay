@@ -56,6 +56,7 @@ export default function TaskDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [finishing, setFinishing] = useState(false);
+  const [, setCurrentUserId] = useState<string | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
 
   // ── Finish round: return to lobby home ─────────
@@ -145,6 +146,7 @@ export default function TaskDetailPage({
           setLoading(false);
           return;
         }
+        setCurrentUserId(userData.user.id);
 
         // Fetch assignment with strategy (including images) and user profile
         const { data: assignment, error: assignErr } = await supabase
@@ -382,6 +384,7 @@ export default function TaskDetailPage({
   const { assignment, hotspots } = data;
   const { strategy } = assignment;
   const score = data.upvotes - data.downvotes;
+
 
   // ── Strategy removed ────────────────────────────────────
   if (!strategy) {

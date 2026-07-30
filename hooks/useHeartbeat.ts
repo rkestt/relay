@@ -112,6 +112,10 @@ export function useHeartbeat(lobbyId: string | null) {
 
       logger.info("useHeartbeat", "sync ok");
     } catch (err) {
+      // Suppress network errors from component unmount (aborted requests)
+      if (err instanceof TypeError && /NetworkError/i.test(err.message)) {
+        return;
+      }
       logger.error("useHeartbeat", "sync error", err);
     }
   };

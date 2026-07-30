@@ -1,0 +1,6 @@
+{"_type":"meta","title":"LWTS Kanban Board — Project Management Integration","plan_name":"lwts-project-management","created_at":"2026-07-26T17:30:11.280Z","base_commit":"1928d35905166f9e7ddf525a3257582c29f3b9f5"}
+{"_type":"task","id":"t-001","description":"Popolare board LWTS con task PRODUCTION_LAUNCH_PLAN.md","details":"","status":"pending","created_at":"2026-07-26T17:30:11.280Z","updated_at":"2026-07-26T17:30:11.280Z"}
+{"_type":"task","id":"t-002","description":"Popolare board con task UI_REFACTOR_PLAN.md + .taskman/plans","details":"","status":"pending","created_at":"2026-07-26T17:30:11.280Z","updated_at":"2026-07-26T17:30:11.280Z"}
+{"_type":"task","id":"t-003","description":"Creare scripts/lwts-sync.ts per sync automatico","details":"","status":"pending","created_at":"2026-07-26T17:30:11.280Z","updated_at":"2026-07-26T17:30:11.280Z"}
+{"_type":"task","id":"t-004","description":"Test Playwright: LWTS reachable + cards esistenti","details":"","status":"pending","created_at":"2026-07-26T17:30:11.280Z","updated_at":"2026-07-26T17:30:11.280Z"}
+{"_type":"task","id":"t-005","description":"Aggiornare wiki con documentazione completa","details":"","status":"pending","created_at":"2026-07-26T17:30:11.280Z","updated_at":"2026-07-26T17:30:11.280Z"}

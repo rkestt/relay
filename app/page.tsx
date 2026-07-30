@@ -16,21 +16,20 @@ export default function HomePage() {
   const router = useRouter();
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [roomCode, setRoomCode] = useState("");
-  const [rejoinCode, setRejoinCode] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(ROOM_CODE_KEY);
-  });
+  const [rejoinCode, setRejoinCode] = useState<string | null>(null);
   const [startingSide, setStartingSide] = useState<"attacker" | "defender">("attacker");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Log mount + rejoin code
+  // Read stored room code on client only (hydration-safe)
   useEffect(() => {
-    logger.info("Landing", "Landing mount");
-    if (rejoinCode) {
-      logger.info("Landing", "Rejoin code found in storage", { code: rejoinCode });
+    const stored = localStorage.getItem(ROOM_CODE_KEY);
+    if (stored) {
+      setRejoinCode(stored);
+      logger.info("Landing", "Rejoin code found in storage", { code: stored });
     }
-  }, [rejoinCode]);
+    logger.info("Landing", "Landing mount");
+  }, []);
 
   const handleCreate = useCallback(async () => {
     logger.info("Landing", "Create lobby click", { startingSide });
@@ -110,16 +109,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-
-      {/* ═══ WIP OVERLAY ═══ — fixed, sopra tutto, solo root page */}
-      <div className="fixed top-0 left-0 right-0 z-[9999] bg-[oklch(0.75_0.16_85)] text-[oklch(0.12_0_0)] text-center font-extrabold tracking-[0.15em] uppercase shadow-[0_0_30px_rgba(0,0,0,0.6)] border-b-4 border-[oklch(0.65_0.20_25)] pointer-events-none"
-           style={{
-             fontSize: "clamp(0.7rem, 2.5vw, 1.4rem)",
-             paddingBlock: "clamp(4px, 1vh, 12px)",
-             animation: "pulse-subtle 2s ease-in-out infinite",
-           }}>
-        WORK IN PROGRESS — features incomplete, data may reset anytime
-      </div>
 
       {/* ── Hero ──────────────────────────────────────── */}
       <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 sm:py-32 gap-12 sm:gap-20">

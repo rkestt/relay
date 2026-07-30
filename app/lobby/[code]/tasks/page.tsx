@@ -49,6 +49,7 @@ export default function TasksPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
+
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
   const { lastSync } = useHeartbeat(lobbyId);
@@ -108,6 +109,7 @@ export default function TasksPage({
         setLoading(false);
         return;
       }
+
 
       const stateRes = await apiFetch(`/api/lobby/${id}/state`);
       if (!stateRes.ok) {

@@ -35,7 +35,7 @@ export default function Error({
           <Button onClick={reset} variant="default">
             Riprova
           </Button>
-          <Button render={<Link href="/" />} variant="outline">
+          <Button render={<Link href="/" />} nativeButton={false} variant="outline">
             Torna alla Home
           </Button>
         </div>

@@ -11,10 +11,10 @@ export default function NotFound() {
           La pagina che stai cercando non esiste o è stata spostata.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button render={<Link href="/" />} variant="default">
+          <Button render={<Link href="/" />} nativeButton={false} variant="default">
             Torna alla Home
           </Button>
-          <Button render={<Link href="/lobby" />} variant="outline">
+          <Button render={<Link href="/lobby" />} nativeButton={false} variant="outline">
             Crea Lobby
           </Button>
         </div>
