@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map } from "@/types";
-import { AlertIcon, CheckIcon } from "@/components/icons";
+import { AlertIcon, CheckIcon, MapIcon } from "@/components/icons";
 
 export default function LobbyMapPage({
   params,
@@ -231,7 +231,10 @@ export default function LobbyMapPage({
       {/* ── Header ─────────────────────────────────────── */}
       <header className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
+          <h1 className="flex items-center gap-2 text-base font-semibold text-foreground">
+            <MapIcon className="size-4 text-primary" />
+            Choose Map
+          </h1>
           <p className="text-xs text-muted-foreground">Room {code}</p>
         </div>
         <Button
@@ -286,23 +289,10 @@ export default function LobbyMapPage({
                   aria-pressed={isSelected}
                   aria-label={isSelected ? `${map.name} (selected)` : map.name}
                 >
-                  <div className="w-10 h-10 mt-3 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                    <svg
-                      className="size-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={1.6}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                      <line x1="8" y1="2" x2="8" y2="18" />
-                      <line x1="16" y1="6" x2="16" y2="22" />
-                    </svg>
-                  </div>
-                  <span className="px-3 pb-3 text-sm font-semibold text-foreground">{map.name}</span>
+                  <span className="pt-5 text-[10px] font-bold tracking-[0.16em] uppercase text-muted-foreground/70">
+                    Map {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="px-3 pb-5 text-sm font-semibold text-foreground">{map.name}</span>
                   {/* Selected checkmark overlay */}
                   {isSelected && (
                     <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
