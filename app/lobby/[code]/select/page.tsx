@@ -559,8 +559,8 @@ export default function SelectPage({
                           banned && "opacity-40 bg-destructive/10 cursor-not-allowed grayscale"
                         )}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
-                          {op.icon_url ? (
+                        {op.icon_url && (
+                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -568,12 +568,8 @@ export default function SelectPage({
                               sizes="48px"
                               className="object-contain"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              {op.name[0]}
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <span className="text-[11px] font-medium text-foreground leading-tight">
                           {op.name}
                         </span>
@@ -645,8 +641,8 @@ export default function SelectPage({
                           banned && "opacity-40 bg-destructive/10 cursor-not-allowed grayscale"
                         )}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
-                          {op.icon_url ? (
+                        {op.icon_url && (
+                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -654,12 +650,8 @@ export default function SelectPage({
                               sizes="48px"
                               className="object-contain"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              {op.name[0]}
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <span className="text-[11px] font-medium text-foreground leading-tight">
                           {op.name}
                         </span>
