@@ -31,7 +31,12 @@ const config = withSentryConfig(nextConfig, {
   widenClientFileUpload: true,
   tunnelRoute: '/monitoring',
   sourcemaps: { disable: true },
-  disableLogger: true,
-  automaticVercelMonitors: true,
+  // Next 16 / Sentry: options moved under webpack (deprecation-free)
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+    automaticVercelMonitors: true,
+  },
 });
 export default config;
