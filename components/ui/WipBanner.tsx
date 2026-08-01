@@ -30,7 +30,8 @@ export function WipBanner() {
   return (
     <div
       className={cn(
-        "sticky top-0 z-40 flex items-center justify-between gap-3 px-4 py-1.5 text-xs font-medium",
+        // pr-16 riserva spazio per l'avatar UserMenu (fixed top-3 right-3 z-50)
+        "sticky top-0 z-40 flex items-center justify-between gap-3 pl-4 pr-16 py-1.5 text-xs font-medium",
         "bg-warning/10 border-b border-warning/20 text-warning"
       )}
     >

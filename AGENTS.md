@@ -24,12 +24,12 @@ Esegui questi passaggi in ordine prima di modificare qualsiasi file:
    * Snapshot del DOM (`page.content()`)
 3. **Risoluzione:** Identifica il problema dai log runtime e procedi al fix sul codice statico solo come ultimo step.
 
-## graphify
+## Conoscenza: LLM Wiki (@evangelist)
 
-This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships.
+graphify è stato sostituito dalla LLM Wiki (`@zosmaai/pi-llm-wiki`, agent `evangelist`).
 
-Rules:
-- For codebase questions, first run `graphify query "<question>"` when graphify-out/graph.json exists. Use `graphify path "<A>" "<B>"` for relationships and `graphify explain "<concept>"` for focused concepts. These return a scoped subgraph, usually much smaller than GRAPH_REPORT.md or raw grep output.
-- If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
-- Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
-- After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+Regole:
+- Per domande su codebase/decisioni/progetti: `wiki_recall`/`wiki_search` prima di grep grezzi.
+- Dopo lavoro significativo: `wiki_observe` per osservazioni, `wiki_retro` per insight duraturi.
+- Per roba wiki: delega a `evangelist` o gestisci direttamente con i tool wiki.
+- Non usare più `graphify` (rimosso dal progetto).

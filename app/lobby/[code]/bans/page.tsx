@@ -331,20 +331,16 @@ export default function BansPage({
                         aria-label={banned ? `Banned: ${op.name}. Click to unban.` : op.name}
                         aria-pressed={banned}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
-                          {op.icon_url ? (
+                        {op.icon_url && (
+                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
                               fill
                               className="object-contain transition-all duration-200"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              {op.name[0]}
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <span className={cn(
                           "text-[11px] font-medium leading-tight transition-all duration-200",
                           banned ? "text-muted-foreground line-through" : "text-foreground"
@@ -397,20 +393,16 @@ export default function BansPage({
                         aria-label={banned ? `Banned: ${op.name}. Click to unban.` : op.name}
                         aria-pressed={banned}
                       >
-                        <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
-                          {op.icon_url ? (
+                        {op.icon_url && (
+                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
                               fill
                               className="object-contain transition-all duration-200"
                             />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                              {op.name[0]}
-                            </div>
-                          )}
-                        </div>
+                          </div>
+                        )}
                         <span className={cn(
                           "text-[11px] font-medium leading-tight transition-all duration-200",
                           banned ? "text-muted-foreground line-through" : "text-foreground"

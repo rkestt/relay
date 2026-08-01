@@ -8,21 +8,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
-import dynamic from "next/dynamic";
 import { VoteButtons } from "@/components/tasks/VoteButtons";
 import Image from "next/image";
-
-const MapViewer = dynamic(() => import("@/components/maps/MapViewer").then(mod => mod.MapViewer), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
-      <span className="text-xs text-muted-foreground">Loading map…</span>
-    </div>
-  ),
-});
 import type {
   StrategyTemplate,
-  StrategyHotspot,
   StrategyImage,
   TaskAssignment,
   Profile,
@@ -36,7 +25,6 @@ interface DetailData {
     user: Profile | null;
   };
   map: Map | null;
-  hotspots: StrategyHotspot[];
   upvotes: number;
   downvotes: number;
   userVote: "up" | "down" | null;
@@ -173,17 +161,8 @@ export default function TaskDetailPage({
           user: Profile | null;
         };
 
-        // Fetch hotspots for this strategy
-        let hotspots: StrategyHotspot[] = [];
         let map: Map | null = null;
         if (fullAssignment.strategy) {
-          const { data: hs } = await supabase
-            .from("strategy_hotspots")
-            .select("*")
-            .eq("strategy_id", fullAssignment.strategy_id);
-
-          hotspots = (hs ?? []) as StrategyHotspot[];
-
           // Fetch map for tactical background
           if (fullAssignment.strategy.map_id) {
             const { data: mapData } = await supabase
@@ -223,7 +202,6 @@ export default function TaskDetailPage({
         setData({
           assignment: fullAssignment,
           map,
-          hotspots,
           upvotes,
           downvotes,
           userVote,
@@ -381,7 +359,7 @@ export default function TaskDetailPage({
     );
   }
 
-  const { assignment, hotspots } = data;
+  const { assignment } = data;
   const { strategy } = assignment;
   const score = data.upvotes - data.downvotes;
 
@@ -607,43 +585,6 @@ export default function TaskDetailPage({
             )}
           </div>
 
-          {/* ── Tactical Map ──────────────────────────────── */}
-          {hotspots.length > 0 && data.map && (
-            <div className="mt-8 pt-6 border-t border-primary/20">
-              <h2 className="text-sm font-semibold text-primary/80 uppercase tracking-wider mb-3">
-                Tactical Map
-              </h2>
-              {data.map.image_url ? (
-                <MapViewer
-                  imageUrl={data.map.image_url}
-                  hotspots={hotspots.map((h) => ({
-                    x_percent: h.x_percent,
-                    y_percent: h.y_percent,
-                    label: h.label ?? "",
-                  }))}
-                />
-              ) : (
-                <div className="aspect-video rounded-xl bg-muted border border-border flex flex-col items-center justify-center gap-2">
-                  <svg
-                    className="size-6 text-muted-foreground"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                  </svg>
-                  <span className="text-muted-foreground text-sm">
-                    Map image not available for {data.map.name}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
