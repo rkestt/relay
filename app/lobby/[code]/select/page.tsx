@@ -13,7 +13,7 @@ import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
 import Image from "next/image";
-import type { Map, Site, Operator, OperatorTag } from "@/types";
+import type { Site, Operator, OperatorTag } from "@/types";
 import { AlertIcon, BackArrowIcon, ArrowRightIcon, CheckIcon, LockIcon, UsersIcon } from "@/components/icons";
 
 type SelectionStep = "site" | "operator";
@@ -41,7 +41,6 @@ export default function SelectPage({
   const [code, setCode] = useState<string>("");
   const [lobbyId, setLobbyId] = useState<string | null>(null);
   const [step, setStep] = useState<SelectionStep>("site");
-  const [, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [operatorTags, setOperatorTags] = useState<OperatorTag[]>([]);
@@ -89,12 +88,10 @@ export default function SelectPage({
   useEffect(() => {
     const supabase = createBrowserClient();
     Promise.all([
-      supabase.from("maps").select("*").then(({ data }) => data ?? []),
       supabase.from("operators").select("*").then(({ data }) => data ?? []),
       supabase.from("operator_tags").select("*").then(({ data }) => data ?? []),
-    ]).then(([mapsData, opsData, tagsData]) => {
-      logger.debug("SelectPage", "Reference data loaded", { maps: mapsData.length, operators: opsData.length, tags: tagsData.length });
-      setMaps(mapsData as Map[]);
+    ]).then(([opsData, tagsData]) => {
+      logger.debug("SelectPage", "Reference data loaded", { operators: opsData.length, tags: tagsData.length });
       setOperators(opsData as Operator[]);
       setOperatorTags(tagsData as OperatorTag[]);
     });

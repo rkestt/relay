@@ -49,10 +49,25 @@ PG_USER="postgres"
 PG_DB="postgres"
 PG_HOST="localhost"
 
+# ─── Detect PostgreSQL container ────────────────────────────────
+# Naming changed across compose setups: legacy "supabase-db", current "supabase_db_relay".
+PG_CONTAINER="${PG_CONTAINER:-}"
+if [[ -z "$PG_CONTAINER" ]]; then
+  for candidate in "${SUPABASE_DB_CONTAINER:-}" supabase_db_relay supabase-db; do
+    [[ -z "$candidate" ]] && continue
+    if docker ps --format '{{.Names}}' | grep -qx "$candidate"; then
+      PG_CONTAINER="$candidate"
+      break
+    fi
+  done
+fi
+[[ -z "$PG_CONTAINER" ]] && { echo -e "\033[31mERROR: no Supabase postgres container found (supabase_db_relay / supabase-db). Is docker compose running?\033[0m"; exit 1; }
+INFO "Using postgres container: $PG_CONTAINER"
+
 # ─── Helper: run SQL via docker exec ────────────────────────
 run_sql() {
   local sql="$1"
-  docker exec supabase-db psql \
+  docker exec "$PG_CONTAINER" psql \
     -U "$PG_USER" -h "$PG_HOST" -d "$PG_DB" \
     -v ON_ERROR_STOP=1 -A -t \
     -c "$sql" 2>/dev/null || true
@@ -63,19 +78,19 @@ run_sql_file() {
   local filename
   filename=$(basename "$file")
   local remote="/tmp/$filename"
-  docker cp "$file" "supabase-db:$remote" 2>/dev/null
-  docker exec supabase-db psql \
+  docker cp "$file" "$PG_CONTAINER:$remote" 2>/dev/null
+  docker exec "$PG_CONTAINER" psql \
     -U "$PG_USER" -h "$PG_HOST" -d "$PG_DB" \
     -v ON_ERROR_STOP=1 \
     -f "$remote" 2>/dev/null
   local code=$?
-  docker exec supabase-db rm -f "$remote" 2>/dev/null || true
+  docker exec "$PG_CONTAINER" rm -f "$remote" 2>/dev/null || true
   return $code
 }
 
 # ─── Check PostgreSQL ───────────────────────────────────────
 echo -e "\n\033[36mChecking PostgreSQL connection...\033[0m"
-if ! docker exec supabase-db pg_isready -U "$PG_USER" -h "$PG_HOST" 2>/dev/null; then
+if ! docker exec "$PG_CONTAINER" pg_isready -U "$PG_USER" -h "$PG_HOST" 2>/dev/null; then
   echo -e "\033[31mERROR: PostgreSQL not reachable. Is docker compose running?\033[0m"
   echo "Run: docker compose --env-file .env.supabase up -d"
   exit 1
@@ -131,7 +146,7 @@ for migration in "${migrations[@]}"; do
 
   if echo "$applied" | grep -qx "$version"; then
     INFO "$filename [skip: already applied]"
-    ((skipped++))
+    skipped=$((skipped+1))
     continue
   fi
 
@@ -139,10 +154,10 @@ for migration in "${migrations[@]}"; do
   if run_sql_file "$migration"; then
     OK "$filename"
     run_sql "INSERT INTO public.schema_migrations (version) VALUES ('$version') ON CONFLICT (version) DO NOTHING;" > /dev/null
-    ((success++))
+    success=$((success+1))
   else
     FAIL "$filename"
-    ((failed++))
+    failed=$((failed+1))
     failed_list="$failed_list $filename"
   fi
 done

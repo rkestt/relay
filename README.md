@@ -167,8 +167,6 @@ r6hub/
 │   └── globals.css                    # Tailwind CSS v4 global styles
 ├── components/
 │   ├── lobby/                # Lobby-specific components (stubs)
-│   ├── maps/
-│   │   └── MapViewer.tsx     # Interactive map with hotspot overlay & SVG markers
 │   ├── tasks/                # Task-specific components (stubs)
 │   ├── ugc/                  # UGC-specific components (stubs)
 │   └── ui/

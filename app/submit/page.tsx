@@ -9,26 +9,9 @@ import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { Badge } from "@/components/ui/badge";
-import dynamic from "next/dynamic";
-
-const MapViewer = dynamic(() => import("@/components/maps/MapViewer").then(mod => mod.MapViewer), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full aspect-video rounded-xl bg-muted animate-pulse flex items-center justify-center">
-      <span className="text-xs text-muted-foreground">Loading map…</span>
-    </div>
-  ),
-});
-import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map, Site, Operator } from "@/types";
 import imageCompression from "browser-image-compression";
 import { AlertIcon, BackArrowIcon, CheckIcon, XIcon } from "@/components/icons";
-
-interface HotspotItem {
-  id: string;
-  x_percent: number;
-  y_percent: number;
-}
 
 function uid(): string {
   return Math.random().toString(36).substring(2, 9);
@@ -88,8 +71,6 @@ export default function SubmitStrategyPage() {
   const [compressing, setCompressing] = useState(false);
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-
-  const [hotspots, setHotspots] = useState<HotspotItem[]>([]);
 
   const [maps, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
@@ -168,8 +149,6 @@ export default function SubmitStrategyPage() {
       });
   }, [selectedMapId]);
 
-  const selectedMap = maps.find((m) => m.id === selectedMapId);
-
   // ── Handle file selection ─────────────────────────
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -230,21 +209,6 @@ export default function SubmitStrategyPage() {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const handlePlaceHotspot = useCallback((x: number, y: number) => {
-    setHotspots((prev) => [
-      ...prev,
-      { id: uid(), x_percent: Math.round(x * 100) / 100, y_percent: Math.round(y * 100) / 100 },
-    ]);
-  }, []);
-
-  const handleRemoveHotspot = useCallback((id: string) => {
-    setHotspots((prev) => prev.filter((h) => h.id !== id));
-  }, []);
-
-  const handleClearHotspots = useCallback(() => {
-    setHotspots([]);
-  }, []);
-
   // ── Validate form ──────────────────────────────────
   const validate = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -262,7 +226,7 @@ export default function SubmitStrategyPage() {
   const handleSubmit = useCallback(async () => {
     if (!validate()) return;
 
-    logger.info("SubmitPage", "Submit strategy click", { title: title.trim(), selectedMapId, selectedSiteId, hotspotCount: hotspots.length });
+    logger.info("SubmitPage", "Submit strategy click", { title: title.trim(), selectedMapId, selectedSiteId });
     setError(null);
     setSubmitting(true);
 
@@ -290,10 +254,6 @@ export default function SubmitStrategyPage() {
           description: description.trim() || undefined,
           tags,
           images: imageUrls,
-          hotspots: hotspots.map((h) => ({
-            x_percent: h.x_percent,
-            y_percent: h.y_percent,
-          })),
         }),
       });
 
@@ -311,7 +271,7 @@ export default function SubmitStrategyPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, rawFiles, userId, tagsInput, description, hotspots, validate]);
+  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, rawFiles, userId, tagsInput, description, validate]);
 
   // ── Loading state ────────────────────────────────
   if (loading) {
@@ -738,106 +698,6 @@ export default function SubmitStrategyPage() {
               />
             </div>
           </div>
-
-          {/* ═══════ Form Section: Map Hotspot Editor ═══════ */}
-          {selectedMap && (
-            <div className="flex flex-col gap-2">
-              <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Hotspots</h2>
-              <div className="bg-card border border-border rounded-xl p-3 space-y-3">
-                <section className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                      <svg
-                        className="size-3.5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                      </svg>
-                      Map Hotspots
-                      {hotspots.length > 0 && (
-                        <span className="ml-1 text-primary font-normal tracking-normal">
-                          ({hotspots.length})
-                        </span>
-                      )}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      {hotspots.length > 0 && (
-                        <button
-                          onClick={handleClearHotspots}
-                          className="text-xs text-muted-foreground hover:text-destructive transition-colors duration-200"
-                        >
-                          Clear all
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground">
-                    Tap on the map to place markers showing key positions and routes.
-                  </p>
-
-                  {/* MapViewer in editable mode */}
-                  {selectedMap.image_url ? (
-                    <>
-                      <MapViewer
-                        imageUrl={selectedMap.image_url}
-                        editable={true}
-                        onPlaceHotspot={handlePlaceHotspot}
-                        hotspots={hotspots.map((h, i) => ({
-                          x_percent: h.x_percent,
-                          y_percent: h.y_percent,
-                          label: String(i + 1),
-                        }))}
-                      />
-
-                      {/* Hotspot list */}
-                      {hotspots.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                          <p className="text-xs text-muted-foreground font-medium">
-                            {hotspots.length} hotspot{hotspots.length !== 1 ? "s" : ""} placed — tap the map to add more
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {hotspots.map((h, i) => (
-                              <div
-                                key={h.id}
-                                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border text-xs"
-                              >
-                                <span className="w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center flex-shrink-0">
-                                  {i + 1}
-                                </span>
-                                <span className="text-muted-foreground font-mono">
-                                  {h.x_percent}%, {h.y_percent}%
-                                </span>
-                                <button
-                                  onClick={() => handleRemoveHotspot(h.id)}
-                                  className="ml-1 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
-                                  aria-label={`Remove hotspot ${i + 1}`}
-                                >
-                                  <XIcon className="size-3.5" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <EmptyState
-                      title="No map image available"
-                      description="Add a map screenshot to enable hotspot placement."
-                      className="py-10"
-                    />
-                  )}
-                </section>
-              </div>
-            </div>
-          )}
 
           {/* ── Submit ──────────────────────────────── */}
           <div className="sticky bottom-0 pt-4 pb-3 bg-background border-t border-border/30 mt-2">

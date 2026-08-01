@@ -57,7 +57,6 @@
 - [ ] Collect real 2D map images for MVP maps (Oregon, Bank, Clubhouse, Kafe, Border)
 - [ ] Optimize images (WebP/AVIF, ≤200KB each)
 - [ ] Add to `public/maps/` directory
-- [ ] Update `maps.image_url` in database
 
 ### Device Testing
 - [ ] Test PWA install on iOS Safari

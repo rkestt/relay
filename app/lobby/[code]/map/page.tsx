@@ -9,7 +9,6 @@ import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
-import Image from "next/image";
 import type { Map } from "@/types";
 import { AlertIcon, CheckIcon } from "@/components/icons";
 
@@ -275,7 +274,7 @@ export default function LobbyMapPage({
                   }}
                   disabled={submitting || confirmed}
                   className={cn(
-                    "group flex flex-col rounded-2xl overflow-hidden border text-left",
+                    "group flex flex-col relative items-center gap-2 rounded-2xl overflow-hidden border text-center",
                     "transition-all duration-200",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     "active:scale-[0.98]",
@@ -287,29 +286,29 @@ export default function LobbyMapPage({
                   aria-pressed={isSelected}
                   aria-label={isSelected ? `${map.name} (selected)` : map.name}
                 >
-                  <div className="aspect-video bg-muted overflow-hidden relative">
-                    {map.image_url ? (
-                      <Image
-                        src={map.image_url}
-                        alt={map.name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                        No image
-                      </div>
-                    )}
-                    {/* Selected checkmark overlay */}
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
-                        <CheckIcon className="size-4 text-primary-foreground" strokeWidth={2.5} />
-                      </div>
-                    )}
+                  <div className="w-10 h-10 mt-3 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                    <svg
+                      className="size-5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.6}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                      <line x1="8" y1="2" x2="8" y2="18" />
+                      <line x1="16" y1="6" x2="16" y2="22" />
+                    </svg>
                   </div>
-                  <div className="px-3 py-2.5">
-                    <span className="text-sm font-semibold text-foreground">{map.name}</span>
-                  </div>
+                  <span className="px-3 pb-3 text-sm font-semibold text-foreground">{map.name}</span>
+                  {/* Selected checkmark overlay */}
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                      <CheckIcon className="size-4 text-primary-foreground" strokeWidth={2.5} />
+                    </div>
+                  )}
                 </button>
               );
             })}

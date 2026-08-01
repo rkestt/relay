@@ -45,7 +45,6 @@ export interface LobbySelection {
 export interface Map {
   id: string;
   name: string;
-  image_url: string | null;
 }
 
 export interface OperatorTag {
