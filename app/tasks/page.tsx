@@ -15,10 +15,11 @@ interface TaskRow {
   lobby_room_code: string;
   round_number: number;
   assigned_username: string | null;
-  assigned_at: string;
+  assigned_at: string | null;
 }
 
-function formatDate(iso: string): string {
+function formatDate(iso: string | null): string {
+  if (!iso) return "—";
   const d = new Date(iso);
   const now = Date.now();
   const diff = now - d.getTime();

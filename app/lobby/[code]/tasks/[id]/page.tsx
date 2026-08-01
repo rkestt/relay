@@ -548,15 +548,19 @@ export default function TaskDetailPage({
                 <UserIcon className="size-4" />
                 {assignment.user?.username ?? "Unknown"}
               </span>
-              <span className="text-muted-foreground">·</span>
-              <span>
-                {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              {assignment.assigned_at && (
+                <>
+                  <span className="text-muted-foreground">·</span>
+                  <span>
+                    {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Map / Site / Operator badges */}

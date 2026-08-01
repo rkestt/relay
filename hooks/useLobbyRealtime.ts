@@ -155,7 +155,8 @@ export function useLobbyRealtime(lobbyId: string | null) {
         (payload) => {
           logger.debug("useLobbyRealtime", "lobby_members DELETE", { old: payload.old });
           if (payload.old) {
-            removeMember((payload.old as LobbyMember).user_id);
+            const uid = (payload.old as LobbyMember).user_id;
+            if (uid) removeMember(uid);
           }
           setLastEventAt(Date.now());
         },

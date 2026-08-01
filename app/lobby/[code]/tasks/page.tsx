@@ -191,7 +191,7 @@ export default function TasksPage({
         .filter((a) => a.strategy)
         .map((a) => a.strategy_id);
 
-      const hotspotsByStrategy = new Map<string, StrategyHotspot[]>();
+      const hotspotsByStrategy = new Map<string | null, StrategyHotspot[]>();
       if (strategyIds.length > 0) {
         const { data: hotspots } = await supabase
           .from("strategy_hotspots")
@@ -361,8 +361,8 @@ export default function TasksPage({
   const sortedTasks = [...tasks].sort((a, b) => {
     if (sortMode === "newest") {
       return (
-        new Date(b.assignment.assigned_at).getTime() -
-        new Date(a.assignment.assigned_at).getTime()
+        new Date(b.assignment.assigned_at ?? 0).getTime() -
+        new Date(a.assignment.assigned_at ?? 0).getTime()
       );
     }
     // Default: by score (already sorted, but re-sort for safety)
