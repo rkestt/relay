@@ -62,3 +62,9 @@ vps-credentials.txt
 
 # Turbopack AI logs
 turbopack.log
+
+# Artifacts locali
+.pi-subagents/artifacts/
+.taskman/
+playwright-report/
+test-results/

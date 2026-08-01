@@ -528,6 +528,9 @@ export default function SelectPage({
                   <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                 </svg>
                 Attackers
+                <span className="ml-auto text-[9px] font-bold tracking-wider uppercase bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                  {filteredOperators.filter((op) => op.side === "attacker").length}
+                </span>
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {filteredOperators
@@ -546,7 +549,7 @@ export default function SelectPage({
                         }}
                         disabled={banned}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
+                          "relative flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
                           "transition-all duration-200",
                           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                           "active:scale-[0.96]",
@@ -557,7 +560,7 @@ export default function SelectPage({
                         )}
                       >
                         {op.icon_url && (
-                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                          <div className="w-12 h-12 rounded-xl bg-attacker/10 overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -565,6 +568,11 @@ export default function SelectPage({
                               sizes="48px"
                               className="object-contain"
                             />
+                          </div>
+                        )}
+                        {selectedOperatorId === op.id && (
+                          <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow">
+                            <CheckIcon className="size-3 text-primary-foreground" strokeWidth={3} />
                           </div>
                         )}
                         <span className="text-[11px] font-medium text-foreground leading-tight">
@@ -610,6 +618,9 @@ export default function SelectPage({
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
                 Defenders
+                <span className="ml-auto text-[9px] font-bold tracking-wider uppercase bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                  {filteredOperators.filter((op) => op.side === "defender").length}
+                </span>
               </h3>
               <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {filteredOperators
@@ -628,7 +639,7 @@ export default function SelectPage({
                         }}
                         disabled={banned}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
+                          "relative flex flex-col items-center gap-1.5 p-2.5 rounded-xl border text-center",
                           "transition-all duration-200",
                           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
                           "active:scale-[0.96]",
@@ -639,7 +650,7 @@ export default function SelectPage({
                         )}
                       >
                         {op.icon_url && (
-                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                          <div className="w-12 h-12 rounded-xl bg-defender/10 overflow-hidden relative">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -647,6 +658,11 @@ export default function SelectPage({
                               sizes="48px"
                               className="object-contain"
                             />
+                          </div>
+                        )}
+                        {selectedOperatorId === op.id && (
+                          <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center shadow">
+                            <CheckIcon className="size-3 text-primary-foreground" strokeWidth={3} />
                           </div>
                         )}
                         <span className="text-[11px] font-medium text-foreground leading-tight">

@@ -309,7 +309,7 @@ export default function BansPage({
                   </span>
                 )}
               </h3>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <div className="flex flex-col gap-1.5">
                 {operators
                   .filter((op) => op.side === "attacker")
                   .map((op) => {
@@ -320,11 +320,11 @@ export default function BansPage({
                         onClick={() => handleBan(op.id, "attacker")}
                         disabled={banning}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 p-2 rounded-xl border text-center transition-all duration-200 ease-out",
+                          "relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all duration-200 ease-out",
                           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          "active:scale-[0.97]",
+                          "active:scale-[0.99]",
                           banned
-                            ? "border-destructive/20 bg-destructive/10 opacity-40 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
+                            ? "border-destructive/20 bg-destructive/10 opacity-45 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
                             : "border-border bg-card hover:border-border/80 hover:bg-card/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
                           lastBannedId === op.id && banned && "animate-pop-in"
                         )}
@@ -332,7 +332,7 @@ export default function BansPage({
                         aria-pressed={banned}
                       >
                         {op.icon_url && (
-                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                          <div className="w-9 h-9 rounded-lg bg-attacker/10 overflow-hidden relative flex-shrink-0">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -342,15 +342,28 @@ export default function BansPage({
                           </div>
                         )}
                         <span className={cn(
-                          "text-[11px] font-medium leading-tight transition-all duration-200",
+                          "flex-1 min-w-0 text-xs font-semibold leading-tight truncate transition-all duration-200",
                           banned ? "text-muted-foreground line-through" : "text-foreground"
                         )}>
                           {op.name}
                         </span>
-                        {banned && (
-                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase animate-fade-in">
+                        {banned ? (
+                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase flex-shrink-0 animate-fade-in">
                             Banned
                           </span>
+                        ) : (
+                          <svg
+                            className="size-4 text-muted-foreground/50 flex-shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="m9 18 6-6-6-6" />
+                          </svg>
                         )}
                       </button>
                     );
@@ -371,7 +384,7 @@ export default function BansPage({
                   </span>
                 )}
               </h3>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <div className="flex flex-col gap-1.5">
                 {operators
                   .filter((op) => op.side === "defender")
                   .map((op) => {
@@ -382,11 +395,11 @@ export default function BansPage({
                         onClick={() => handleBan(op.id, "defender")}
                         disabled={banning}
                         className={cn(
-                          "flex flex-col items-center gap-1.5 p-2 rounded-xl border text-center transition-all duration-200 ease-out",
+                          "relative flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-left transition-all duration-200 ease-out",
                           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                          "active:scale-[0.97]",
+                          "active:scale-[0.99]",
                           banned
-                            ? "border-destructive/20 bg-destructive/10 opacity-40 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
+                            ? "border-destructive/20 bg-destructive/10 opacity-45 grayscale cursor-pointer hover:bg-destructive/20 hover:border-destructive/40 hover:opacity-60"
                             : "border-border bg-card hover:border-border/80 hover:bg-card/80 hover:shadow-2 hover:-translate-y-0.5 cursor-pointer",
                           lastBannedId === op.id && banned && "animate-pop-in"
                         )}
@@ -394,7 +407,7 @@ export default function BansPage({
                         aria-pressed={banned}
                       >
                         {op.icon_url && (
-                          <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden relative">
+                          <div className="w-9 h-9 rounded-lg bg-defender/10 overflow-hidden relative flex-shrink-0">
                             <Image
                               src={op.icon_url}
                               alt={op.name}
@@ -404,15 +417,28 @@ export default function BansPage({
                           </div>
                         )}
                         <span className={cn(
-                          "text-[11px] font-medium leading-tight transition-all duration-200",
+                          "flex-1 min-w-0 text-xs font-semibold leading-tight truncate transition-all duration-200",
                           banned ? "text-muted-foreground line-through" : "text-foreground"
                         )}>
                           {op.name}
                         </span>
-                        {banned && (
-                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase animate-fade-in">
+                        {banned ? (
+                          <span className="text-[9px] font-bold text-destructive tracking-wider uppercase flex-shrink-0 animate-fade-in">
                             Banned
                           </span>
+                        ) : (
+                          <svg
+                            className="size-4 text-muted-foreground/50 flex-shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="m9 18 6-6-6-6" />
+                          </svg>
                         )}
                       </button>
                     );
