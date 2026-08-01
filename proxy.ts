@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { rateLimitMiddleware } from "@/middleware/rate-limit";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Apply rate limiting first
   const rateLimitResponse = await rateLimitMiddleware(request);
   if (rateLimitResponse.status === 429) {
