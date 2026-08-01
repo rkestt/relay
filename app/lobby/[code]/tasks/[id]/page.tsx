@@ -167,7 +167,7 @@ export default function TaskDetailPage({
           if (fullAssignment.strategy.map_id) {
             const { data: mapData } = await supabase
               .from("maps")
-              .select("id, name, image_url")
+              .select("id, name")
               .eq("id", fullAssignment.strategy.map_id)
               .maybeSingle();
 
