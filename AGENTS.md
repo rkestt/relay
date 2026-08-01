@@ -33,3 +33,38 @@ Regole:
 - Dopo lavoro significativo: `wiki_observe` per osservazioni, `wiki_retro` per insight duraturi.
 - Per roba wiki: delega a `evangelist` o gestisci direttamente con i tool wiki.
 - Non usare più `graphify` (rimosso dal progetto).
+
+---
+
+# Operazioni VPS (Hetzner) — Protocollo Agent
+
+Il server di produzione r6hub è su Hetzner Cloud. Ogni operazione (deploy, log, status, firewall, snapshot, debug) va fatta **dall'agent, in autonomia**, usando skill + script dedicati.
+
+## Riferimenti veloci
+
+| Cosa | Dove |
+|---|---|
+| **Playbook completo** | Skill `.pi/skills/hetzner-ops/SKILL.md` — leggere PRIMA di operare |
+| **Script API infra** | `scripts/hetzner-api.sh` (status, power, fw, snapshot) |
+| **Deploy app** | `scripts/vps-deploy.sh` |
+| **Status server** | `scripts/vps-status.sh` |
+| **Log servizi** | `scripts/vps-logs.sh <service>` |
+| **Backup** | `scripts/vps-backup.sh` |
+| SSH | `ssh r6hub-vps` (root, chiave `~/.ssh/id_ed25519_pi_relay`) |
+| Hetzner API | hcloud CLI context `pi-full-access` (token in `~/.config/hcloud/contexts/`) |
+
+## Regole tassative
+
+* **L'agente fa da solo**: deploy, log, status, restart, snapshot, firewall — non chiedere all'utente di farlo. Solo lo **sblocco rete** (quota traffico, `blocked:true`) richiede l'utente dal console Hetzner.
+* **Read-only prima di scrivere**: prima di deploy/restart/firewall, mostra stato corrente e cosa stai per fare.
+* **Mai `docker compose down -v`** sul VPS: perde volumi/DB. Usare `stop`/`restart`.
+* **Token e chiavi mai in git**: `~/.config/hcloud/contexts/*`, `~/.ssh/id_ed25519_pi_relay*`.
+* **`blocked:true` = quota traffico Hetzner**: rete tagliata a monte, non è sshd/firewall/container. Non perdere tempo su fix locali.
+* **Deploy standard**: `scripts/vps-deploy.sh` (push → pull → rebuild → health check).
+
+## Verifica rapida dopo ogni operazione
+
+```bash
+scripts/vps-status.sh                      # sistema + container + health
+scripts/hetzner-api.sh status              # server + blocked flag
+```
