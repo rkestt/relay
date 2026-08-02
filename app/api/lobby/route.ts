@@ -51,7 +51,10 @@ export async function POST(request: Request) {
           .from("profiles")
           .insert({
             id: user.id,
-            username: user.user_metadata?.username ?? `guest-${user.id.slice(0, 8)}`,
+            username:
+              user.user_metadata?.name ??
+              user.user_metadata?.username ??
+              `guest-${user.id.slice(0, 8)}`,
             avatar_url: user.user_metadata?.avatar_url ?? null,
           }),
         15000,

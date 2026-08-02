@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import UserMenu from "@/components/auth/UserMenu";
+import { OnboardingGate } from "@/components/auth/OnboardingGate";
 import { WipBanner } from "@/components/ui/WipBanner";
 import { PageTransition } from "@/components/ui/PageTransition";
 import { CookieBanner } from "@/components/cookie/CookieBanner";
@@ -68,9 +69,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <WipBanner />
         <UserMenu />
-        <AnalyticsProvider>
-          <PageTransition>{children}</PageTransition>
-        </AnalyticsProvider>
+        <OnboardingGate>
+          <AnalyticsProvider>
+            <PageTransition>{children}</PageTransition>
+          </AnalyticsProvider>
+        </OnboardingGate>
         <CookieBanner />
       </body>
     </html>

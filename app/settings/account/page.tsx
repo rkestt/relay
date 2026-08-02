@@ -1,5 +1,15 @@
 import dynamic from "next/dynamic";
 
+const ProfileForm = dynamic(() => import("@/components/settings/ProfileForm").then(mod => mod.ProfileForm), {
+  loading: () => (
+    <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
+      <div className="h-5 w-32 rounded bg-muted" />
+      <div className="h-10 w-64 rounded-lg bg-muted" />
+      <div className="h-10 w-40 rounded-lg bg-muted" />
+    </div>
+  ),
+});
+
 const ExportData = dynamic(() => import("@/components/settings/ExportData").then(mod => mod.ExportData), {
   loading: () => (
     <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
@@ -23,6 +33,7 @@ export default function AccountSettingsPage() {
   return (
     <div className="container max-w-2xl py-8 space-y-8">
       <h1 className="text-3xl font-bold mb-8">Impostazioni Account</h1>
+      <ProfileForm />
       <ExportData />
       <DeleteAccount />
     </div>

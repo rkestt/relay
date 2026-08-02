@@ -17,9 +17,16 @@ export default function UserMenu() {
 
   useEffect(() => {
     const supabase = createBrowserClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
-    });
+
+    const loadUser = () => {
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data.user ?? null);
+      });
+    };
+
+    loadUser();
+    window.addEventListener("relay:profile-updated", loadUser);
+    return () => window.removeEventListener("relay:profile-updated", loadUser);
   }, []);
 
   // Close dropdown on outside click
