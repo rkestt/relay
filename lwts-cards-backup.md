@@ -1,7 +1,7 @@
 # LWTS Cards Backup — 29/07/2026
 
 ## R6H-1 — DB: miglioramenti senza toccare struttura tabelle
-- **Board:** r6hub
+- **Board:** Relay
 - **Colonna:** in-progress
 - **Priorità:** medium
 - **Tag:** blue
@@ -17,7 +17,7 @@
 7. Indice su validation_queue.expires_at
 
 ## R6H-2 — Full Hetzner Access for opencode
-- **Board:** r6hub
+- **Board:** Relay
 - **Colonna:** todo
 - **Priorità:** medium
 - **Tag:** blue

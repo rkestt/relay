@@ -1,7 +1,7 @@
 # LWTS Project Management Integration
 
 ## Goal
-Popolare la board LWTS "Relay" con tutti i task di sviluppo r6hub, creare script di sync, testare tutto.
+Popolare la board LWTS "Relay" con tutti i task di sviluppo Relay, creare script di sync, testare tutto.
 
 ## Stato Attuale
 - LWTS running su localhost:8080 (Docker Compose + PostgreSQL)

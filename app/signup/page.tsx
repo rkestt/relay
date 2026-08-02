@@ -165,7 +165,7 @@ export default function SignupPage() {
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Create account
           </h1>
-          <p className="text-sm text-muted-foreground">Join r6Hub today</p>
+          <p className="text-sm text-muted-foreground">Join Relay today</p>
         </div>
 
         {/* Error */}

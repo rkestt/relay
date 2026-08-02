@@ -1,4 +1,4 @@
-# r6Hub VPS Caddyfile
+# relay VPS Caddyfile
 # Set DOMAIN env var or use localhost for dev
 {$DOMAIN:localhost} {
 	# TLS - Caddy auto-provisions Let's Encrypt certs for real domains

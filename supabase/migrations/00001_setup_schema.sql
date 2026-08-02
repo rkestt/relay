@@ -1,5 +1,5 @@
 -- ============================================================
--- 00001_setup_schema.sql — Core schema for r6hub
+-- 00001_setup_schema.sql — Core schema for relay
 -- Creates all tables, constraints, foreign keys, and indexes.
 -- Uses IF NOT EXISTS for idempotent migrations.
 -- ============================================================

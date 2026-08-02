@@ -31,7 +31,7 @@ Backups saved to `./backups/` with retention of 7 days.
 
 Add to crontab (`crontab -e`):
 ```
-0 2 * * * /path/to/scripts/backup-database.sh >> /var/log/r6hub-backup.log 2>&1
+0 2 * * * /path/to/scripts/backup-database.sh >> /var/log/relay-backup.log 2>&1
 ```
 
 This runs backup daily at 2:00 AM.

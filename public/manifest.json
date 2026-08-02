@@ -1,6 +1,6 @@
 {
-  "name": "r6hub",
-  "short_name": "r6hub",
+  "name": "Relay",
+  "short_name": "Relay",
   "description": "Tactical second-screen companion for Rainbow Six Siege",
   "start_url": "/",
   "display": "standalone",

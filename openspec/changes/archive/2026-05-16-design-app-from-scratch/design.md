@@ -1,6 +1,6 @@
 ## Context
 
-r6hub è una nuova applicazione da costruire da zero. Non esiste codebase preesistente. Il Product Discovery Document (PDD) definisce un MVP di second-screen companion per Rainbow Six Siege: creazione lobby, selezione rapida operatore/sito/mappa, motore di assegnazione task basato su tag, contenuto UGC con validazione, e sincronizzazione real-time. L'intero stack deve essere scelto e architettato ex-novo per supportare un PWA mobile-first ma usabile anche su desktop.
+Relay è una nuova applicazione da costruire da zero. Non esiste codebase preesistente. Il Product Discovery Document (PDD) definisce un MVP di second-screen companion per Rainbow Six Siege: creazione lobby, selezione rapida operatore/sito/mappa, motore di assegnazione task basato su tag, contenuto UGC con validazione, e sincronizzazione real-time. L'intero stack deve essere scelto e architettato ex-novo per supportare un PWA mobile-first ma usabile anche su desktop.
 
 ## Goals / Non-Goals
 

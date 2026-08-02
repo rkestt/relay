@@ -1,4 +1,4 @@
-# Piano di Lancio Produzione - r6hub
+# Piano di Lancio Produzione - Relay
 
 **Data creazione:** 2026-06-12  
 **Stato attuale:** 3.5/10 production-ready  
@@ -61,7 +61,7 @@
   plugins:
     - name: cors
       config:
-        origins: ["https://r6hub.yourdomain.com"]
+        origins: ["https://Relay.yourdomain.com"]
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         headers: ["Authorization", "Content-Type", "X-Client-Info"]
         max_age: 3600
@@ -71,7 +71,7 @@
 **File:** `volumes/api/kong.yml` (linee 47, 57, 67, 79, 108, 137, 168, 197, 226, 265)
 
 **Verifica:**
-- [ ] Richiesta da `https://r6hub.yourdomain.com` funziona
+- [ ] Richiesta da `https://Relay.yourdomain.com` funziona
 - [ ] Richiesta da `https://evil.com` viene bloccata (CORS error)
 
 ---
@@ -249,7 +249,7 @@
     - `task_assignments`
     - `task_votes`
   - Restituire JSON strutturato
-  - Header `Content-Disposition: attachment; filename="r6hub-data-export.json"`
+  - Header `Content-Disposition: attachment; filename="Relay-data-export.json"`
 - [ ] Creare componente `components/settings/ExportData.tsx`:
   - Bottone "Esporta i miei dati"
   - Download automatico file JSON
@@ -445,7 +445,7 @@
 
 **Task:**
 - [ ] Creare `app/not-found.tsx` (404):
-  - Design coerente con brand r6hub
+  - Design coerente con brand Relay
   - Messaggio chiaro "Pagina non trovata"
   - Link a homepage
   - Illustrazione o icona tematica (Rainbow Six)
@@ -523,7 +523,7 @@
   ```
 - [ ] (Opzionale) Upload su storage esterno (S3, B2):
   ```bash
-  aws s3 cp "$BACKUP_DIR/backup-$TIMESTAMP.dump.gz" s3://r6hub-backups/
+  aws s3 cp "$BACKUP_DIR/backup-$TIMESTAMP.dump.gz" s3://Relay-backups/
   ```
 - [ ] Testare restore:
   ```bash
@@ -760,9 +760,9 @@
 **Task:**
 - [ ] Registrarsi a UptimeRobot (gratuito) o Better Stack
 - [ ] Configurare monitor per:
-  - Homepage: `https://r6hub.yourdomain.com/`
-  - API health: `https://r6hub.yourdomain.com/api/health`
-  - Login page: `https://r6hub.yourdomain.com/login`
+  - Homepage: `https://Relay.yourdomain.com/`
+  - API health: `https://Relay.yourdomain.com/api/health`
+  - Login page: `https://Relay.yourdomain.com/login`
 - [ ] Configurare alert:
   - Email quando down
   - SMS (se critico)

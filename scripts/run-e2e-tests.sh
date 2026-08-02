@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCREENSHOTS_DIR="e2e/screenshots"
 
-echo "=== r6hub E2E Test Suite ==="
+echo "=== relay E2E Test Suite ==="
 echo ""
 
 # Ensure screenshots dir exists

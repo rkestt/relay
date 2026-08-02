@@ -1,6 +1,6 @@
 import { test, expect, Page, ConsoleMessage, Request } from '@playwright/test';
 
-const TEST_USER = { email: "test@r6hub.test", password: "Test123!" };
+const TEST_USER = { email: "test@relay.test", password: "Test123!" };
 
 async function loginViaAPI(page: Page) {
   await page.goto("/login", { waitUntil: "networkidle" });

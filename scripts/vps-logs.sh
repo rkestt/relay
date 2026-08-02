@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # ─── Config ─────────────────────────────────────────────────
-HOST="r6hub-vps"
-SERVER_PATH="/opt/r6hub"
+HOST="relay-vps"
+SERVER_PATH="/opt/relay"
 SERVICE="${1:-nextjs}"           # nextjs (default) | caddy | db | auth | storage
 LINES="${2:-100}"
 

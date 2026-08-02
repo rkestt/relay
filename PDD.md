@@ -1,11 +1,11 @@
 ---
-title: Project Discovery: r6hub (MVP)
+title: Project Discovery: Relay (MVP)
 version: 1.0
 role: Senior Product Manager / Idea Generator
 status: Perimetro Definito
 ---
 
-# r6hub — Project Discovery (MVP)
+# Relay — Project Discovery (MVP)
 
 ## 1. Visione del Prodotto
 

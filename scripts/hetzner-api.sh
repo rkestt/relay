@@ -2,9 +2,9 @@
 set -euo pipefail
 
 # ─── Config ─────────────────────────────────────────────────
-SERVER_NAME="r6hub-vps"
+SERVER_NAME="relay-vps"
 SERVER_ID="142381430"
-FW_NAME="r6hub-fw"
+FW_NAME="relay-fw"
 FW_ID="11151434"
 API="https://api.hetzner.cloud/v1"
 

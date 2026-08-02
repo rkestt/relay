@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { AlertIcon, CheckIcon, CopyIcon, CrownIcon, MapIcon, UsersIcon } from "@/components/icons";
 import Image from "next/image";
 
-const ROOM_CODE_KEY = "r6hub_room_code";
+const ROOM_CODE_KEY = "Relay_room_code";
 
 interface LobbyState {
   lobby: {

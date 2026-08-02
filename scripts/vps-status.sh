@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # ─── Config ─────────────────────────────────────────────────
-HOST="r6hub-vps"
-SERVER_PATH="/opt/r6hub"
+HOST="relay-vps"
+SERVER_PATH="/opt/relay"
 
 OK()   { echo -e "\033[32m   OK: $1\033[0m"; }
 INFO() { echo -e "\033[90m   -- $1\033[0m"; }
 
-echo "═══ r6hub VPS Status ═══"
+echo "═══ relay VPS Status ═══"
 INFO "Sistema:"
 ssh "$HOST" 'uptime; echo; df -h / | tail -1; echo; free -h | head -2'
 echo

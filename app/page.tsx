@@ -10,7 +10,7 @@ import { apiFetch } from "@/lib/fetch";
 import { handleApiError } from "@/lib/api-error";
 import { PlusIcon, RefreshIcon, AlertIcon } from "@/components/icons";
 
-const ROOM_CODE_KEY = "r6hub_room_code";
+const ROOM_CODE_KEY = "Relay_room_code";
 
 export default function HomePage() {
   const router = useRouter();
@@ -134,7 +134,7 @@ export default function HomePage() {
 
           <div className="flex flex-col gap-2">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-              r6hub
+              Relay
             </h1>
             <p className="text-base text-muted-foreground font-medium">
               Tactical sync for Rainbow Six Siege

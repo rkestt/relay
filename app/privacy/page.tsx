@@ -13,18 +13,18 @@ const sections = [
     content: (
       <div className="space-y-2">
         <p>
-           Il titolare del trattamento dei dati è r6hub (di seguito, &ldquo;piattaforma&rdquo;).
+           Il titolare del trattamento dei dati è Relay (di seguito, &ldquo;piattaforma&rdquo;).
           Per qualsiasi richiesta relativa ai tuoi dati personali, puoi contattarci
           all&rsquo;indirizzo email:{" "}
           <a
-            href="mailto:privacy@r6hub.app"
+            href="mailto:privacy@Relay.app"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
           >
-            privacy@r6hub.app
+            privacy@Relay.app
           </a>
         </p>
         <p className="text-muted-foreground text-sm">
-          r6hub è una piattaforma second-screen per Rainbow Six Siege, dedicata
+          Relay è una piattaforma second-screen per Rainbow Six Siege, dedicata
           alla gestione di lobby, strategie e coordinamento di squadra.
         </p>
       </div>
@@ -241,10 +241,10 @@ const sections = [
         <p className="text-sm text-muted-foreground mt-3">
           Per esercitare i tuoi diritti, scrivici a{" "}
           <a
-            href="mailto:privacy@r6hub.app"
+            href="mailto:privacy@Relay.app"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
           >
-            privacy@r6hub.app
+            privacy@Relay.app
           </a>
           . Risponderemo entro 30 giorni.
         </p>
@@ -346,7 +346,7 @@ export default function PrivacyPage() {
             </span>
           </p>
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-            Questa Privacy Policy descrive come r6hub raccoglie, utilizza e
+            Questa Privacy Policy descrive come Relay raccoglie, utilizza e
             protegge i dati personali degli utenti. L&apos;utilizzo della
             piattaforma implica l&apos;accettazione di questa policy.
           </p>

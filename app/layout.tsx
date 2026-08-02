@@ -21,7 +21,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   ...generateMetadata({
-    title: "r6hub - Rainbow Six Siege Strategy Platform",
+    title: "Relay - Rainbow Six Siege Strategy Platform",
     description:
       "Piattaforma per gestire lobby e strategie Rainbow Six Siege. Crea lobby, condividi strategie, collabora con il team.",
     image: "/og-default.png",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "r6hub",
+    title: "Relay",
   },
 };
 

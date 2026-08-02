@@ -10,11 +10,11 @@
   <br />
 </div>
 
-# r6hub
+# Relay
 
 **Second-screen tactical companion for Rainbow Six Siege.**
 
-r6hub is a progressive web application that turns a phone or tablet into a real-time tactical command board for Rainbow Six Siege. Create lobbies, pick operators, ban opponents, assign strategies, and coordinate your squad — all synchronized instantly through Supabase Realtime.
+Relay is a progressive web application that turns a phone or tablet into a real-time tactical command board for Rainbow Six Siege. Create lobbies, pick operators, ban opponents, assign strategies, and coordinate your squad — all synchronized instantly through Supabase Realtime.
 
 ---
 
@@ -64,8 +64,8 @@ r6hub is a progressive web application that turns a phone or tablet into a real-
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/r6hub.git
-cd r6hub
+git clone https://github.com/your-org/Relay.git
+cd Relay
 
 # Install dependencies
 npm install
@@ -101,7 +101,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Database Setup
 
-r6hub uses 5 sequential migration files located in `supabase/migrations/`. Run them in order against your Supabase project:
+Relay uses 5 sequential migration files located in `supabase/migrations/`. Run them in order against your Supabase project:
 
 | # | File | Purpose |
 |---|------|---------|
@@ -133,7 +133,7 @@ Open your Supabase project's SQL Editor and execute the contents of each file in
 ## Architecture
 
 ```
-r6hub/
+Relay/
 ├── app/
 │   ├── (auth)/                # Auth-related route group (login/signup placeholder)
 │   ├── (main)/                # Main layout route group

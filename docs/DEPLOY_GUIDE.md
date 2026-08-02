@@ -61,9 +61,9 @@ vercel --prod
 ```
 
 ### 3. Verifica Post-Deploy
-- [ ] Homepage carica: `https://r6hub.vercel.app/`
+- [ ] Homepage carica: `https://Relay.vercel.app/`
 - [ ] Login funziona
-- [ ] API health check: `https://r6hub.vercel.app/api/health`
+- [ ] API health check: `https://Relay.vercel.app/api/health`
 - [ ] Sentry non mostra errori critici
 - [ ] Cookie banner appare
 - [ ] Pagine legali accessibili: `/privacy`, `/terms`, `/cookies`
@@ -99,7 +99,7 @@ curl http://localhost:3000/api/health
 
 #### Opzione 1: Dashboard
 1. Andare su https://vercel.com/dashboard
-2. Selezionare progetto r6hub
+2. Selezionare progetto Relay
 3. Tab "Deployments"
 4. Trovare deployment precedente stabile
 5. Click "..." → "Promote to Production"

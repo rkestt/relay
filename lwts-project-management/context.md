@@ -1,7 +1,7 @@
 # Context: LWTS Project Management Integration
 
 ## Intent
-Integrare LWTS (kanban board su localhost:8080) come strumento di project management per lo sviluppo di r6hub. Popolare la board "Relay" con tutti i task dai piani esistenti, creare script di sync, testare tutto.
+Integrare LWTS (kanban board su localhost:8080) come strumento di project management per lo sviluppo di Relay. Popolare la board "Relay" con tutti i task dai piani esistenti, creare script di sync, testare tutto.
 
 ## Decisioni
 - **Board unica "Relay Development"** con colonne: Backlog, Todo, In Progress, Review, Done, Blocked, Urgent

@@ -1,4 +1,4 @@
-# r6Hub — Design System
+# Relay — Design System
 
 ## Color Strategy
 **Committed** — Red-orange fire palette on dark background. Single saturated accent carries 30-40% of interactive surface.

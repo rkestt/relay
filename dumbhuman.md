@@ -1,4 +1,4 @@
-# r6hub — Dumb Human Guide
+# Relay — Dumb Human Guide
 
 ## Linux (comandi rapidi)
 ```bash
@@ -72,7 +72,7 @@ I container restano up finché non fai `docker stop` o spegni Docker Desktop.
 
 **Frontend (Next.js dev server)** — in background con log:
 ```powershell
-Start-Process -FilePath "cmd.exe" -ArgumentList "/c","npm run dev -- -H 0.0.0.0 > C:\Users\andre\AppData\Local\Temp\opencode\nextjs-dev.log 2>&1" -WorkingDirectory "C:\Projects\r6Hub" -WindowStyle Hidden
+Start-Process -FilePath "cmd.exe" -ArgumentList "/c","npm run dev -- -H 0.0.0.0 > C:\Users\andre\AppData\Local\Temp\opencode\nextjs-dev.log 2>&1" -WorkingDirectory "C:\Projects\Relay" -WindowStyle Hidden
 ```
 - `-H 0.0.0.0` forza il binding su tutte le interfacce (evita problema IPv6 su Windows)
 - Il log finisce in `C:\Users\andre\AppData\Local\Temp\opencode\nextjs-dev.log`

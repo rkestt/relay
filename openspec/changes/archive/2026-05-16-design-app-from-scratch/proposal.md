@@ -4,7 +4,7 @@ Rainbow Six Siege players suffer from decision paralysis during the 30–45 seco
 
 ## What Changes
 
-- Build **r6hub**, a mobile-first PWA that acts as a second-screen tactical companion for Rainbow Six Siege.
+- Build **Relay**, a mobile-first PWA that acts as a second-screen tactical companion for Rainbow Six Siege.
 - Introduce a **low-friction lobby system**: room creation via 6-character codes, local-storage persistence across matches, and sub-5-second operator selection.
 - Assign a **lobby leader** (the creator) with privileges to set attacker and defender bans before each round.
 - Implement a **tag-based task assignment engine** that generates individual, role-specific tasks based on operator archetypes and site selection, preventing duplicate assignments.

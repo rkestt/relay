@@ -1,4 +1,4 @@
-# r6Hub — Product Context
+# Relay — Product Context
 
 ## Users
 Competitive and casual Rainbow Six Siege players who need tactical coordination during matches. Team leaders who organize strategies. Players joining lobbies for coordinated gameplay.

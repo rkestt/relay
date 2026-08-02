@@ -1,9 +1,9 @@
-# r6Hub - Supabase Self-Hosted (Dev + VPS)
+# relay - Supabase Self-Hosted (Dev + VPS)
 # Start:  docker compose --env-file .env.supabase up -d
 # Stop:   docker compose --env-file .env.supabase down
 # Reset:  docker compose --env-file .env.supabase down -v
 
-name: r6hub-supabase
+name: relay-supabase
 
 services:
 
@@ -322,7 +322,7 @@ services:
 
   # ─── Next.js App ──────────────────────────────────────────
   nextjs:
-    container_name: r6hub-nextjs
+    container_name: relay-nextjs
     build:
       context: .
       dockerfile: Dockerfile
@@ -350,7 +350,7 @@ services:
 
   # ─── Caddy (Reverse Proxy + TLS) ─────────────────────────
   caddy:
-    container_name: r6hub-caddy
+    container_name: relay-caddy
     image: caddy:2-alpine
     restart: unless-stopped
     ports:

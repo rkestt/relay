@@ -25,8 +25,8 @@ const nextConfig = {
 };
 
 const config = withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG || 'r6hub',
-  project: process.env.SENTRY_PROJECT || 'r6hub',
+  org: process.env.SENTRY_ORG || 'relay',
+  project: process.env.SENTRY_PROJECT || 'relay',
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: '/monitoring',

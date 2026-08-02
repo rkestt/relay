@@ -36,7 +36,7 @@
 ### 3. Git & GitHub
 - [x] Initialize git repo (`git init`)
 - [x] Create `.gitignore` (node_modules, .env.local, .next)
-- [x] Create GitHub repository (https://github.com/rkestt/r6hub)
+- [x] Create GitHub repository (https://github.com/rkestt/Relay)
 - [x] Push initial commit
 
 ### 4. Deploy
@@ -45,7 +45,7 @@
 - [x] Add environment variables in Vercel dashboard
 - [x] Test live deployment
 
-**Status**: App live and running at https://r6hub-peach.vercel.app
+**Status**: App live and running at https://Relay-peach.vercel.app
 - Homepage loads correctly
 - Supabase connection: configured
 - Discord webhook: configured

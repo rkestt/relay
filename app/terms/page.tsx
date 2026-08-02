@@ -13,13 +13,13 @@ const sections = [
     content: (
       <div className="space-y-2">
         <p>
-          L&apos;utilizzo della piattaforma r6hub implica l&apos;accettazione
+          L&apos;utilizzo della piattaforma Relay implica l&apos;accettazione
           integrale dei presenti Termini di Servizio. Se non accetti uno o più
           termini, ti invitiamo a non utilizzare la piattaforma.
         </p>
         <p className="text-muted-foreground text-sm">
           I presenti termini costituiscono un accordo vincolante tra te
-          (&ldquo;utente&rdquo;) e r6hub (&ldquo;piattaforma&rdquo;). La
+          (&ldquo;utente&rdquo;) e Relay (&ldquo;piattaforma&rdquo;). La
           registrazione o l&apos;accesso alla piattaforma costituisce
           accettazione automatica.
         </p>
@@ -48,7 +48,7 @@ const sections = [
         </ul>
         <p className="text-sm text-muted-foreground">
           L&apos;utente è responsabile per tutte le attività svolte tramite il
-          proprio account. r6hub non sarà responsabile per danni derivanti
+          proprio account. Relay non sarà responsabile per danni derivanti
           dall&apos;uso non autorizzato dell&apos;account.
         </p>
       </div>
@@ -119,7 +119,7 @@ const sections = [
             Contenuti della piattaforma
           </h3>
           <p className="text-muted-foreground">
-            L&apos;interfaccia, il design, il codice e i marchi di r6hub sono di
+            L&apos;interfaccia, il design, il codice e i marchi di Relay sono di
             proprietà esclusiva della piattaforma e sono protetti dalle leggi
             sulla proprietà intellettuale.
           </p>
@@ -131,7 +131,7 @@ const sections = [
           <p className="text-muted-foreground">
             Le strategie, le lobby, i task e qualsiasi altro contenuto creato
             dall&apos;utente sulla piattaforma rimangono di proprietà
-            dell&apos;utente stesso. Con la pubblicazione, l&apos;utente concede a r6hub
+            dell&apos;utente stesso. Con la pubblicazione, l&apos;utente concede a Relay
             una licenza non esclusiva, gratuita e limitata alla piattaforma per
             visualizzare, distribuire e gestire tali contenuti ai soli fini del
             funzionamento del servizio.
@@ -142,7 +142,7 @@ const sections = [
             Rainbow Six Siege
           </h3>
           <p className="text-muted-foreground">
-            Rainbow Six Siege è un marchio registrato di Ubisoft. r6hub è una
+            Rainbow Six Siege è un marchio registrato di Ubisoft. Relay è una
             piattaforma indipendente non affiliata, sponsorizzata o approvata da
             Ubisoft. Tutti i marchi di terzi rimangono di proprietà dei
             rispettivi titolari.
@@ -163,15 +163,15 @@ const sections = [
         </p>
         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
           <li>
-            r6hub non garantisce che la piattaforma sia priva di errori,
+            Relay non garantisce che la piattaforma sia priva di errori,
             interruzioni o vulnerabilità
           </li>
           <li>
-            r6hub non è responsabile per danni diretti o indiretti derivanti
+            Relay non è responsabile per danni diretti o indiretti derivanti
             dall&apos;uso o dall&apos;impossibilità di utilizzo della piattaforma
           </li>
           <li>
-            r6hub non è responsabile per perdita di dati, mancato guadagno o
+            Relay non è responsabile per perdita di dati, mancato guadagno o
             interruzione dell&apos;attività
           </li>
           <li>
@@ -193,7 +193,7 @@ const sections = [
     content: (
       <div className="space-y-3">
         <p>
-          r6hub si riserva il diritto di sospendere o cancellare un account
+          Relay si riserva il diritto di sospendere o cancellare un account
           nei seguenti casi:
         </p>
         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
@@ -215,7 +215,7 @@ const sections = [
     content: (
       <div className="space-y-2">
         <p>
-          r6hub si riserva il diritto di modificare i presenti Termini di
+          Relay si riserva il diritto di modificare i presenti Termini di
           Servizio in qualsiasi momento. Le modifiche verranno comunicate
           tramite:
         </p>
@@ -265,10 +265,10 @@ const sections = [
           <li>
             Email:{" "}
             <a
-              href="mailto:legal@r6hub.app"
+              href="mailto:legal@Relay.app"
               className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
             >
-              legal@r6hub.app
+              legal@Relay.app
             </a>
           </li>
         </ul>
@@ -342,7 +342,7 @@ export default function TermsPage() {
           </p>
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
             I presenti Termini di Servizio regolano l&apos;utilizzo della
-            piattaforma r6hub. Leggi attentamente prima di utilizzare il
+            piattaforma Relay. Leggi attentamente prima di utilizzare il
             servizio.
           </p>
         </div>

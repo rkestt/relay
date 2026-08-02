@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
-const WIP_STORAGE_KEY = "r6hub_wip_dismissed";
+const WIP_STORAGE_KEY = "Relay_wip_dismissed";
 
 export function WipBanner() {
   const [dismissed, setDismissed] = useState(true);

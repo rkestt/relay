@@ -2,8 +2,8 @@
 set -euo pipefail
 
 # ─── Config ─────────────────────────────────────────────────
-HOST="r6hub-vps"                 # ~/.ssh/config
-SERVER_PATH="/opt/r6hub"
+HOST="relay-vps"                 # ~/.ssh/config
+SERVER_PATH="/opt/relay"
 BRANCH="${1:-main}"              # branch da deployare (arg opzionale)
 
 OK()   { echo -e "\033[32m   OK: $1\033[0m"; }

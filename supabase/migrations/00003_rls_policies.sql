@@ -1,5 +1,5 @@
 -- ============================================================
--- 00002_rls_policies.sql — Row-Level Security for r6hub
+-- 00002_rls_policies.sql — Row-Level Security for relay
 -- Enables RLS on every table and grants minimal access.
 -- Assumes authenticated users (auth.uid()) throughout.
 -- ============================================================

@@ -1,8 +1,8 @@
 ---
 name: hetzner-ops
 description: >-
-  Operate the r6hub production VPS on Hetzner Cloud (server r6hub-vps,
-  142.132.176.234, app in /opt/r6hub). Covers SSH access, Hetzner Cloud API
+  Operate the relay production VPS on Hetzner Cloud (server relay-vps,
+  142.132.176.234, app in /opt/relay). Covers SSH access, Hetzner Cloud API
   (hcloud CLI + curl), deploy workflow, logs, status checks, backups, and
   troubleshooting (blocked IPs, firewall, docker). Use when the user asks to
   deploy, check server status, view logs, restart services, manage the
@@ -15,17 +15,17 @@ allowed-tools: Bash(ssh:*), Bash(hcloud:*), Bash(curl:*), Bash(docker:*), Bash(g
 
 ## Panoramica
 
-Infrastruttura di produzione r6hub su Hetzner Cloud.
+Infrastruttura di produzione relay su Hetzner Cloud.
 
 | Risorsa | Valore |
 |---|---|
-| Server | `r6hub-vps` (id 142381430) |
+| Server | `relay-vps` (id 142381430) |
 | IP | `142.132.176.234` (IPv6 `2a01:4f8:c015:da83::/64`) |
 | Tipo | CX23 (2 vCPU / 4GB / 40GB), Ubuntu 24.04, Falkenstein |
-| Firewall | `r6hub-fw` (id 11151434) — porte 22, 80, 443/TCP, 443/UDP, 3001 |
-| Path app | `/opt/r6hub` (repo git) |
-| Servizi | docker compose: `r6hub-nextjs` (3000), `r6hub-caddy` (80/443), supabase stack |
-| SSH | `ssh r6hub-vps` (root, chiave `~/.ssh/id_ed25519_pi_relay`) |
+| Firewall | `relay-fw` (id 11151434) — porte 22, 80, 443/TCP, 443/UDP, 3001 |
+| Path app | `/opt/relay` (repo git) |
+| Servizi | docker compose: `relay-nextjs` (3000), `relay-caddy` (80/443), supabase stack |
+| SSH | `ssh relay-vps` (root, chiave `~/.ssh/id_ed25519_pi_relay`) |
 | Chiave Hetzner project | `pi-relay-linux` (auto-installata a rebuild) |
 
 ## Accesso
@@ -33,8 +33,8 @@ Infrastruttura di produzione r6hub su Hetzner Cloud.
 ### SSH (app + sistema)
 
 ```bash
-ssh r6hub-vps                    # host definito in ~/.ssh/config
-ssh r6hub-vps 'docker ps'        # comando singolo
+ssh relay-vps                    # host definito in ~/.ssh/config
+ssh relay-vps 'docker ps'        # comando singolo
 ```
 
 Config in `~/.ssh/config` (già pronto). Chiave privata: `~/.ssh/id_ed25519_pi_relay` (0600).
@@ -47,7 +47,7 @@ Due modi equivalenti:
 # 1. hcloud CLI (consigliato — output JSON)
 hcloud context use pi-full-access          # se non attivo
 hcloud server list -o columns=name,status,ipv4
-hcloud server describe r6hub-vps --output json
+hcloud server describe relay-vps --output json
 
 # 2. curl diretto (per cose che hcloud non espone, es. stato blocked)
 TOKEN=$(cat ~/.config/hcloud/contexts/pi-full-access)
@@ -61,57 +61,57 @@ curl -s -H "Authorization: Bearer $TOKEN" https://api.hetzner.cloud/v1/servers/1
 ### "Deploy dell'app"
 ```bash
 git push origin main                                      # push locale
-ssh r6hub-vps 'cd /opt/r6hub && git pull'                 # pull sul server
-ssh r6hub-vps 'cd /opt/r6hub && docker compose up -d --build nextjs'   # rebuild + restart
+ssh relay-vps 'cd /opt/relay && git pull'                 # pull sul server
+ssh relay-vps 'cd /opt/relay && docker compose up -d --build nextjs'   # rebuild + restart
 ```
-Dopo: `ssh r6hub-vps 'curl -s http://127.0.0.1:3000/api/health'` → atteso `{"ok":true}` o 200.
+Dopo: `ssh relay-vps 'curl -s http://127.0.0.1:3000/api/health'` → atteso `{"ok":true}` o 200.
 
 ### "Il sito è giù / 502 / timeout"
-1. `hcloud server describe r6hub-vps --output json | jq .server.status` → deve essere `running`
+1. `hcloud server describe relay-vps --output json | jq .server.status` → deve essere `running`
 2. Se `blocked: true` nell'IP (API): rete Hetzner bloccata per quota traffico → **l'utente deve sbloccare dal console** (banner "Traffic quota exceeded"). Non si può sbloccare via API.
-3. Se running e raggiungibile: `ssh r6hub-vps 'cd /opt/r6hub && docker compose ps'`
-4. Controlla container down/crash: `ssh r6hub-vps 'docker compose logs --tail=100 nextjs'`
-5. Health locale: `ssh r6hub-vps 'curl -s http://127.0.0.1:3000/api/health'`
+3. Se running e raggiungibile: `ssh relay-vps 'cd /opt/relay && docker compose ps'`
+4. Controlla container down/crash: `ssh relay-vps 'docker compose logs --tail=100 nextjs'`
+5. Health locale: `ssh relay-vps 'curl -s http://127.0.0.1:3000/api/health'`
 
 ### "Vedi i log"
 ```bash
-ssh r6hub-vps 'docker compose logs --tail=200 -f nextjs'     # app (follow)
-ssh r6hub-vps 'docker compose logs --tail=100 caddy'          # proxy/TLS
-ssh r6hub-vps 'docker compose logs --tail=100 db'             # postgres
+ssh relay-vps 'docker compose logs --tail=200 -f nextjs'     # app (follow)
+ssh relay-vps 'docker compose logs --tail=100 caddy'          # proxy/TLS
+ssh relay-vps 'docker compose logs --tail=100 db'             # postgres
 ```
 
 ### "Restart servizio"
 ```bash
-ssh r6hub-vps 'cd /opt/r6hub && docker compose restart nextjs'
+ssh relay-vps 'cd /opt/relay && docker compose restart nextjs'
 # o rebuild completo:
-ssh r6hub-vps 'cd /opt/r6hub && docker compose up -d --build'
+ssh relay-vps 'cd /opt/relay && docker compose up -d --build'
 ```
 
 ### "Stato server / risorse"
 ```bash
-hcloud server describe r6hub-vps --output json
-ssh r6hub-vps 'uptime && df -h / && free -h && docker ps --format "table {{.Names}}\t{{.Status}}"'
+hcloud server describe relay-vps --output json
+ssh relay-vps 'uptime && df -h / && free -h && docker ps --format "table {{.Names}}\t{{.Status}}"'
 ```
 
 ### "Firewall"
 ```bash
 hcloud firewall list -o columns=name,id
-hcloud firewall describe r6hub-fw --output json | jq .rules
+hcloud firewall describe relay-fw --output json | jq .rules
 # aggiungere/rimuovere regole via API (hcloud non ha comando firewall rule edit completo:
 # usare curl PUT /firewalls/{id}/actions/set_rules)
 ```
 
 ### "Snapshot / backup"
 ```bash
-hcloud server create-image --type snapshot r6hub-vps        # snapshot manuale
+hcloud server create-image --type snapshot relay-vps        # snapshot manuale
 hcloud image list --type snapshot
 ```
 
 ### "Server spento / da riavviare"
 ```bash
-hcloud server poweron r6hub-vps      # accendi
-hcloud server reboot r6hub-vps       # riavvia (se running)
-hcloud server shutdown r6hub-vps     # spegni (graceful)
+hcloud server poweron relay-vps      # accendi
+hcloud server reboot relay-vps       # riavvia (se running)
+hcloud server shutdown relay-vps     # spegni (graceful)
 ```
 
 ## Protocollo operativo (regole)

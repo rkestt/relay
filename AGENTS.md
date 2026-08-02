@@ -38,7 +38,7 @@ Regole:
 
 # Operazioni VPS (Hetzner) — Protocollo Agent
 
-Il server di produzione r6hub è su Hetzner Cloud. Ogni operazione (deploy, log, status, firewall, snapshot, debug) va fatta **dall'agent, in autonomia**, usando skill + script dedicati.
+Il server di produzione Relay è su Hetzner Cloud. Ogni operazione (deploy, log, status, firewall, snapshot, debug) va fatta **dall'agent, in autonomia**, usando skill + script dedicati.
 
 ## Riferimenti veloci
 
@@ -50,7 +50,7 @@ Il server di produzione r6hub è su Hetzner Cloud. Ogni operazione (deploy, log,
 | **Status server** | `scripts/vps-status.sh` |
 | **Log servizi** | `scripts/vps-logs.sh <service>` |
 | **Backup** | `scripts/vps-backup.sh` |
-| SSH | `ssh r6hub-vps` (root, chiave `~/.ssh/id_ed25519_pi_relay`) |
+| SSH | `ssh Relay-vps` (root, chiave `~/.ssh/id_ed25519_pi_relay`) |
 | Hetzner API | hcloud CLI context `pi-full-access` (token in `~/.config/hcloud/contexts/`) |
 
 ## Regole tassative
