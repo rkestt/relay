@@ -26,13 +26,10 @@ Esegui questi passaggi in ordine prima di modificare qualsiasi file:
 
 ## Conoscenza: LLM Wiki (@evangelist)
 
-graphify è stato sostituito dalla LLM Wiki (`@zosmaai/pi-llm-wiki`, agent `evangelist`).
-
 Regole:
 - Per domande su codebase/decisioni/progetti: `wiki_recall`/`wiki_search` prima di grep grezzi.
 - Dopo lavoro significativo: `wiki_observe` per osservazioni, `wiki_retro` per insight duraturi.
 - Per roba wiki: delega a `evangelist` o gestisci direttamente con i tool wiki.
-- Non usare più `graphify` (rimosso dal progetto).
 
 ---
 
