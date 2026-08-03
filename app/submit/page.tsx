@@ -76,9 +76,6 @@ export default function SubmitStrategyPage() {
   const [sites, setSites] = useState<Site[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
   const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
-  const [auxOperatorIds, setAuxOperatorIds] = useState<string[]>([]);
-  const [auxSearch, setAuxSearch] = useState("");
-  const AUX_MAX = 4;
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -219,14 +216,11 @@ export default function SubmitStrategyPage() {
     if (!selectedMapId) errors.map = "Please select a map.";
     if (!selectedSiteId) errors.site = "Please select a site.";
     if (!selectedOperatorId) errors.operator = "Please select an operator.";
-    if (auxOperatorIds.length > AUX_MAX) {
-      errors.aux = `Maximum ${AUX_MAX} auxiliary operators.`;
-    }
     if (rawFiles.length === 0) errors.images = "Please upload at least one screenshot image.";
     if (!userId) errors.user = "You must be signed in to submit a strategy.";
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds.length, rawFiles.length, userId]);
+  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, rawFiles.length, userId]);
 
   // ── Submit form ──────────────────────────────
   const handleSubmit = useCallback(async () => {
@@ -257,7 +251,6 @@ export default function SubmitStrategyPage() {
           map_id: selectedMapId,
           site_id: selectedSiteId,
           operator_id: selectedOperatorId,
-          aux_operator_ids: auxOperatorIds,
           description: description.trim() || undefined,
           tags,
           images: imageUrls,
@@ -278,20 +271,9 @@ export default function SubmitStrategyPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds, rawFiles, userId, tagsInput, description, validate]);
+  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, rawFiles, userId, tagsInput, description, validate]);
 
   // ── Loading state ────────────────────────────────
-  // ── Auxiliary operators toggle ────────────────
-  const toggleAux = useCallback((id: string) => {
-    setAuxOperatorIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((x) => x !== id)
-        : prev.length >= AUX_MAX
-          ? prev
-          : [...prev, id],
-    );
-  }, []);
-
   if (loading) {
     return (
       <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
@@ -565,92 +547,6 @@ export default function SubmitStrategyPage() {
                   <p className="text-xs text-destructive" aria-live="polite">{validationErrors.operator}</p>
                 )}
               </section>
-            </div>
-          </div>
-
-          {/* ═══════ Form Section: Auxiliary Operators ═══════ */}
-          <div className="flex flex-col gap-2">
-            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-              Auxiliary Operators
-              <span
-                className={cn(
-                  "rounded-md border border-border px-1.5 py-0.5 text-[10px] font-bold tracking-normal normal-case",
-                  auxOperatorIds.length >= AUX_MAX && "text-warning border-warning/40 bg-warning/10",
-                )}
-              >
-                {auxOperatorIds.length} / {AUX_MAX}
-              </span>
-            </h2>
-            <div className="bg-card border border-border rounded-xl p-3 space-y-3">
-              {auxOperatorIds.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {auxOperatorIds.map((id) => {
-                    const op = operators.find((o) => o.id === id);
-                    return (
-                      <Badge key={id} variant="secondary" className="text-xs gap-1 pr-1">
-                        {op?.name ?? id}
-                        <button
-                          type="button"
-                          aria-label={`Remove ${op?.name ?? id}`}
-                          onClick={() => toggleAux(id)}
-                          className="rounded-full hover:text-destructive transition-colors"
-                        >
-                          <XIcon className="size-3" />
-                        </button>
-                      </Badge>
-                    );
-                  })}
-                </div>
-              )}
-              <Input
-                placeholder="Search operators…"
-                value={auxSearch}
-                onChange={(e) => setAuxSearch(e.target.value)}
-                className="h-9 rounded-lg"
-              />
-              <div className="max-h-56 overflow-y-auto space-y-0.5 pr-1">
-                {operators
-                  .filter((op) => {
-                    if (op.id === selectedOperatorId) return false;
-                    const q = auxSearch.trim().toLowerCase();
-                    return !q || op.name.toLowerCase().includes(q);
-                  })
-                  .map((op) => {
-                    const selected = auxOperatorIds.includes(op.id);
-                    const disabled = !selected && auxOperatorIds.length >= AUX_MAX;
-                    return (
-                      <label
-                        key={op.id}
-                        className={cn(
-                          "flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm cursor-pointer select-none",
-                          "hover:bg-muted transition-colors",
-                          disabled && "opacity-40 cursor-not-allowed",
-                        )}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          disabled={disabled}
-                          onChange={() => toggleAux(op.id)}
-                          className="accent-[color:var(--primary)] size-4"
-                        />
-                        <span className="font-medium">{op.name}</span>
-                        <span className="text-xs text-muted-foreground capitalize">
-                          {op.side}
-                        </span>
-                      </label>
-                    );
-                  })}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Optional. Add up to {AUX_MAX} operators this strategy also works
-                with — they'll match in strategy search too.
-              </p>
-              {validationErrors.aux && (
-                <p className="text-xs text-destructive" aria-live="polite">
-                  {validationErrors.aux}
-                </p>
-              )}
             </div>
           </div>
 
