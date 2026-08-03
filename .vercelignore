@@ -1,0 +1,8 @@
+volumes/
+.lwts/
+.git/
+.next/
+test-results/
+tmp_rt.txt
+turbopack.log
+playwright-report/
