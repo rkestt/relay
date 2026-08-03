@@ -172,6 +172,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const strategiesQuery = {
       select: vi.fn(() => strategiesQuery),
       eq: vi.fn(() => strategiesQuery),
+      or: vi.fn((_filter: string) => strategiesQuery),
     };
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
@@ -258,6 +259,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const strategiesQuery = {
       select: vi.fn(() => strategiesQuery),
       eq: vi.fn(() => strategiesQuery),
+      or: vi.fn((_filter: string) => strategiesQuery),
     };
 
     const existingQuery = {
@@ -340,5 +342,138 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const body = await response.json();
     expect(body.assignment).toBeDefined();
     expect(body.assignment.strategy.title).toBe("Test Strategy");
+  });
+
+  it("matches strategies via auxiliary operators (strategy_operators junction)", async () => {
+    mockSupabaseClient.auth.getUser.mockResolvedValue({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+
+    const lobbyQuery = {
+      select: vi.fn(() => lobbyQuery),
+      eq: vi.fn(() => lobbyQuery),
+      single: vi.fn(() =>
+        Promise.resolve({ data: { leader_id: "user-1" }, error: null }),
+      ),
+    };
+
+    const roundQuery = {
+      select: vi.fn(() => roundQuery),
+      eq: vi.fn(() => roundQuery),
+      order: vi.fn(() => roundQuery),
+      limit: vi.fn(() => roundQuery),
+      maybeSingle: vi.fn(() =>
+        Promise.resolve({ data: { id: "round-1" }, error: null }),
+      ),
+    };
+
+    const bansQuery = {
+      select: vi.fn(() => bansQuery),
+      eq: vi.fn(() => bansQuery),
+    };
+
+    const selectionsQuery = {
+      select: vi.fn(() => selectionsQuery),
+      eq: vi.fn(() => selectionsQuery),
+    };
+
+    const strategiesQuery = {
+      select: vi.fn(() => strategiesQuery),
+      eq: vi.fn(() => strategiesQuery),
+      or: vi.fn((_filter: string) => strategiesQuery),
+    };
+
+    const existingQuery = {
+      select: vi.fn(() => existingQuery),
+      eq: vi.fn(() => existingQuery),
+    };
+
+    const assignInsert = {
+      insert: vi.fn(() => assignInsert),
+      select: vi.fn(() => assignInsert),
+      single: vi.fn(() =>
+        Promise.resolve({
+          data: { id: "assign-1", lobby_id: "lobby-1", user_id: "user-1", round_id: "round-1", strategy_id: "strat-aux" },
+          error: null,
+        }),
+      ),
+    };
+
+    let taskAssignCallCount = 0;
+    mockSupabaseClient.from.mockImplementation((table: string) => {
+      if (table === "lobbies") return lobbyQuery;
+      if (table === "rounds") return roundQuery;
+      if (table === "lobby_bans") return bansQuery;
+      if (table === "lobby_selections") return selectionsQuery;
+      if (table === "strategy_templates") return strategiesQuery;
+      if (table === "task_assignments") {
+        taskAssignCallCount++;
+        if (taskAssignCallCount >= 2) return assignInsert;
+        return existingQuery;
+      }
+      return { select: vi.fn(), insert: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
+    });
+
+    bansQuery.select.mockReturnValue(bansQuery);
+    bansQuery.eq.mockReturnValue(bansQuery);
+    const bansResult = Promise.resolve({ data: [], error: null });
+    Object.assign(bansQuery, {
+      then: bansResult.then.bind(bansResult),
+      catch: bansResult.catch.bind(bansResult),
+    });
+
+    selectionsQuery.select.mockReturnValue(selectionsQuery);
+    selectionsQuery.eq.mockReturnValue(selectionsQuery);
+    const selectionsResult = Promise.resolve({ data: [], error: null });
+    Object.assign(selectionsQuery, {
+      then: selectionsResult.then.bind(selectionsResult),
+      catch: selectionsResult.catch.bind(selectionsResult),
+    });
+
+    // Strategy matching only via aux operator (main is a different op)
+    const strategiesResult = Promise.resolve({
+      data: [{
+        id: "strat-aux",
+        title: "Aux Match Strategy",
+        description: "A test",
+        image_url: "",
+        created_at: "2025-01-01",
+        operator_id: "op-main-other",
+        strategy_operators: [{ operator_id: "op-1" }],
+      }],
+      error: null,
+    });
+    strategiesQuery.select.mockReturnValue(strategiesQuery);
+    strategiesQuery.eq.mockReturnValue(strategiesQuery);
+    Object.assign(strategiesQuery, {
+      then: strategiesResult.then.bind(strategiesResult),
+      catch: strategiesResult.catch.bind(strategiesResult),
+    });
+
+    const existingResult = Promise.resolve({ data: [], error: null });
+    existingQuery.select.mockReturnValue(existingQuery);
+    existingQuery.eq.mockReturnValue(existingQuery);
+    Object.assign(existingQuery, {
+      then: existingResult.then.bind(existingResult),
+      catch: existingResult.catch.bind(existingResult),
+    });
+
+    const response = await POST(
+      new Request("http://localhost/api/lobby/lobby-1/assign-tasks", {
+        method: "POST",
+        body: JSON.stringify({ user_id: "user-1", operator_id: "op-1" }),
+      }),
+      params,
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.assignment.strategy.title).toBe("Aux Match Strategy");
+
+    // Level 1 query must match main OR junction aux operator
+    const orFilter = strategiesQuery.or.mock.calls[0]?.[0] as string;
+    expect(orFilter).toContain("operator_id.eq.op-1");
+    expect(orFilter).toContain("strategy_operators.operator_id.eq.op-1");
   });
 });

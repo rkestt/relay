@@ -72,3 +72,4 @@ test-results/
 # SQLite runtime files
 .lwts/data/*.db-shm
 .lwts/data/*.db-wal
+MARKETING.md
