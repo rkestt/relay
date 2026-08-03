@@ -13,11 +13,9 @@ import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
   StrategyTemplate,
-  StrategyTemplateWithRelations,
   StrategyHotspot,
   TaskAssignment,
   Profile,
-  Operator,
 } from "@/types";
 import { AlertIcon, BackArrowIcon } from "@/components/icons";
 
@@ -25,7 +23,7 @@ type SortMode = "score" | "newest";
 
 interface FeedTask {
   assignment: TaskAssignment & {
-    strategy: StrategyTemplateWithRelations | null;
+    strategy: StrategyTemplate | null;
     user: Profile | null;
     upvotes: number;
     downvotes: number;
@@ -51,18 +49,6 @@ export default function TasksPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("score");
-  const [operators, setOperators] = useState<Operator[]>([]);
-
-  // ── Load operator reference data (for card badges) ───
-  useEffect(() => {
-    const supabase = createBrowserClient();
-    supabase
-      .from("operators")
-      .select("*")
-      .then(({ data }) => {
-        setOperators((data ?? []) as Operator[]);
-      });
-  }, []);
 
   // ── Realtime & heartbeat ──────────────────────────────
   const { lastEventAt } = useLobbyRealtime(lobbyId);
@@ -142,13 +128,13 @@ export default function TasksPage({
       const { data: assignments } = await supabase
         .from("task_assignments")
         .select(
-          "*, strategy:strategy_templates(*, images:strategy_images(*), strategy_operators(operator_id)), user:profiles(*)",
+          "*, strategy:strategy_templates(*, images:strategy_images(*)), user:profiles(*)",
         )
         .eq("lobby_id", id)
         .eq("round_id", stateData.currentRound.id);
 
       const allAssignments = (assignments ?? []) as (TaskAssignment & {
-        strategy: StrategyTemplateWithRelations | null;
+        strategy: StrategyTemplate | null;
         user: Profile | null;
       })[];
 
@@ -515,7 +501,6 @@ export default function TasksPage({
                   <StrategyCard
                     assignment={assignment}
                     hotspots={hotspots}
-                    operators={operators}
                     username={assignment.user?.username ?? undefined}
                     onVote={(voteType) => handleVote(assignment.id, voteType)}
                     onClick={() => handleCardClick(assignment.id)}

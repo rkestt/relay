@@ -135,15 +135,8 @@ export async function POST(
     const baseQuery = () =>
       supabase
         .from("strategy_templates")
-        .select("id, title, description, image_url, created_at, operator_id, strategy_operators(operator_id)")
+        .select("id, title, description, image_url, created_at, operator_id")
         .eq("status", "approved");
-
-    // Match: main operator (strategy_templates.operator_id) OR any aux
-    // operator (strategy_operators junction) — same priority level.
-    const operatorMatch = () =>
-      baseQuery().or(
-        `operator_id.eq.${operator_id},strategy_operators.operator_id.eq.${operator_id}`,
-      );
 
     let strategies: Array<{
       id: string;
@@ -152,12 +145,11 @@ export async function POST(
       image_url: string | null;
       created_at: string;
       operator_id: string;
-      strategy_operators?: { operator_id: string }[];
     }> | null = null;
     let fallbackLevel = 0;
 
-    // Level 1: operator (main OR aux) + map_id + site_id (perfect match)
-    const q1 = operatorMatch();
+    // Level 1: operator_id + map_id + site_id (perfect match)
+    const q1 = baseQuery().eq("operator_id", operator_id);
     if (mapId) q1.eq("map_id", mapId);
     if (siteId) q1.eq("site_id", siteId);
     const { data: d1 } = await withTimeout(q1, 10000, "strategy search level 1");
@@ -174,28 +166,18 @@ export async function POST(
       const { data: d2 } = await withTimeout(q2, 10000, "strategy search level 2");
       if (d2 && d2.length > 0) {
         // Prioritize strategies for operators teammates have chosen
-        // (main or aux operator matches count)
-        const isTeammate = (s: {
-          operator_id: string;
-          strategy_operators?: { operator_id: string }[];
-        }) =>
-          teammateOperatorIds.has(s.operator_id) ||
-          (s.strategy_operators ?? []).some((so) =>
-            teammateOperatorIds.has(so.operator_id),
-          );
-
         strategies = d2.sort((a, b) => {
-          const aIsTeammate = isTeammate(a) ? 0 : 1;
-          const bIsTeammate = isTeammate(b) ? 0 : 1;
+          const aIsTeammate = teammateOperatorIds.has(a.operator_id) ? 0 : 1;
+          const bIsTeammate = teammateOperatorIds.has(b.operator_id) ? 0 : 1;
           return aIsTeammate - bIsTeammate;
         });
         fallbackLevel = 2;
       }
     }
 
-    // Level 3: operator (main OR aux) only, any map/site
+    // Level 3: operator_id only (right operator, any map/site)
     if (!strategies && (mapId || siteId)) {
-      const { data: d3 } = await withTimeout(operatorMatch(), 10000, "strategy search level 3");
+      const { data: d3 } = await withTimeout(baseQuery().eq("operator_id", operator_id), 10000, "strategy search level 3");
       if (d3 && d3.length > 0) {
         strategies = d3;
         fallbackLevel = 3;

@@ -138,11 +138,6 @@ export interface TaskVote {
   created_at: string | null;
 }
 
-export interface StrategyOperator {
-  strategy_id: string;
-  operator_id: string;
-}
-
 export interface ValidationQueueItem {
   id: string;
   strategy_id: string | null;
@@ -165,5 +160,4 @@ export interface StrategyTemplateWithRelations extends StrategyTemplate {
   images?: StrategyImage[];
   strategy_tags?: StrategyTag[];
   strategy_hotspots?: StrategyHotspot[];
-  strategy_operators?: StrategyOperator[];
 }

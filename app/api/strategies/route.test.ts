@@ -110,27 +110,6 @@ describe("GET /api/strategies", () => {
     const body = await response.json();
     expect(body.strategies).toEqual([]);
   });
-
-  it("includes strategy_operators relation in select", async () => {
-    let selectStr = "";
-    const strategiesQuery = {
-      select: vi.fn((s: string) => {
-        selectStr = s;
-        return strategiesQuery;
-      }),
-      eq: vi.fn(() => strategiesQuery),
-      order: vi.fn(() => Promise.resolve({ data: [], error: null })),
-    };
-
-    mockSupabaseClient.from.mockImplementation((table: string) => {
-      if (table === "strategy_templates") return strategiesQuery;
-      return { select: vi.fn(), eq: vi.fn(), order: vi.fn() };
-    });
-
-    await GET(new Request("http://localhost/api/strategies"));
-
-    expect(selectStr).toContain("strategy_operators(operator_id)");
-  });
 });
 
 describe("POST /api/strategies", () => {
@@ -289,51 +268,5 @@ describe("POST /api/strategies", () => {
     const body = await response.json();
     expect(body.strategy).toBeDefined();
     expect(body.strategy.status).toBe("pending");
-  });
-
-  it("creates auxiliary operator junction rows (dedup, excludes main)", async () => {
-    mockSupabaseClient.auth.getUser.mockResolvedValue({
-      data: { user: { id: "user-1" } },
-      error: null,
-    });
-
-    const adminStrategyInsert = {
-      insert: vi.fn(() => adminStrategyInsert),
-      select: vi.fn(() => adminStrategyInsert),
-      single: vi.fn(() =>
-        Promise.resolve({ data: { id: "strat-1", status: "pending" }, error: null }),
-      ),
-    };
-
-    const adminAuxInsert = {
-      insert: vi.fn(() => Promise.resolve({ error: null })),
-    };
-
-    mockAdminClient.from.mockImplementation((table: string) => {
-      if (table === "strategy_templates") return adminStrategyInsert;
-      if (table === "strategy_operators") return adminAuxInsert;
-      return { insert: vi.fn(() => Promise.resolve({ error: null })), select: vi.fn(), single: vi.fn() };
-    });
-
-    const response = await POST(
-      new Request("http://localhost/api/strategies", {
-        method: "POST",
-        body: JSON.stringify({
-          title: "Multi-Operator Strategy",
-          map_id: "map-1",
-          site_id: "site-1",
-          operator_id: "op-1",
-          image_url: "https://example.com/img.png",
-          aux_operator_ids: ["op-1", "op-2", "op-3", "op-2"],
-        }),
-      }),
-    );
-
-    expect(response.status).toBe(201);
-    // main (op-1) excluded, duplicates collapsed → only op-2, op-3
-    expect(adminAuxInsert.insert).toHaveBeenCalledWith([
-      { strategy_id: "strat-1", operator_id: "op-2" },
-      { strategy_id: "strat-1", operator_id: "op-3" },
-    ]);
   });
 });

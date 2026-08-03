@@ -8,7 +8,6 @@ import type {
   StrategyTemplate,
   StrategyTemplateWithRelations,
   StrategyHotspot,
-  Operator,
 } from "@/types";
 
 interface StrategyCardProps {
@@ -20,7 +19,6 @@ interface StrategyCardProps {
   };
   hotspots: StrategyHotspot[];
   username?: string;
-  operators?: Operator[];
   onVote: (voteType: "up" | "down" | null) => void;
   onClick: () => void;
 }
@@ -38,7 +36,6 @@ function getFirstImage(strategy: StrategyTemplateWithRelations): string | null {
 export function StrategyCard({
   assignment,
   username,
-  operators,
   onVote,
   onClick,
 }: StrategyCardProps) {
@@ -63,39 +60,6 @@ export function StrategyCard({
 
   const thumbnailUrl = getFirstImage(strategy);
   const imageCount = strategy.images?.length ?? 0;
-
-  // ── Operator badges (main + auxiliaries) ────────
-  const opMap = new Map((operators ?? []).map((o) => [o.id, o]));
-  const auxOperatorIds = (strategy.strategy_operators ?? [])
-    .map((so) => so.operator_id)
-    .filter((id) => id !== strategy.operator_id);
-  const showOperators =
-    operators &&
-    operators.length > 0 &&
-    (strategy.operator_id || auxOperatorIds.length > 0);
-  const operatorBadge = (id: string, primary: boolean) => {
-    const op = opMap.get(id);
-    if (!op) return null;
-    return (
-      <span
-        key={id}
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium",
-          primary
-            ? "border-primary/40 bg-primary/15 text-foreground"
-            : "border-border bg-card text-muted-foreground",
-        )}
-      >
-        <span
-          className={cn(
-            "size-1.5 rounded-full bg-current",
-            op.side === "defender" ? "text-defender" : "text-attacker",
-          )}
-        />
-        {op.name}
-      </span>
-    );
-  };
 
   return (
     <div
@@ -157,14 +121,6 @@ export function StrategyCard({
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="M21 15l-5-5L5 21" />
             </svg>
-          </div>
-        )}
-
-        {/* Operators: main (primary) + auxiliaries */}
-        {showOperators && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {strategy.operator_id && operatorBadge(strategy.operator_id, true)}
-            {auxOperatorIds.map((id) => operatorBadge(id, false))}
           </div>
         )}
 

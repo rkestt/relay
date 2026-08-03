@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return validation.error;
     }
 
-    const { title, map_id, site_id, operator_id, aux_operator_ids, description, tags, image_url, hotspots, images } =
+    const { title, map_id, site_id, operator_id, description, tags, image_url, hotspots, images } =
       validation.data;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -81,28 +81,6 @@ export async function POST(request: Request) {
         { error: "Failed to create strategy" },
         { status: 500 },
       );
-    }
-
-    // -- Insert auxiliary operators (strategy_operators junction) --------
-    // Main operator stays on strategy_templates.operator_id; auxiliaries
-    // live here. Non-fatal on error, like tags.
-    if (Array.isArray(aux_operator_ids)) {
-      const auxRows = [...new Set(aux_operator_ids)]
-        .filter((id) => id !== operator_id)
-        .map((id) => ({ strategy_id: strategy.id, operator_id: id }));
-
-      if (auxRows.length > 0) {
-        const { error: auxError } = await withTimeout(
-          adminClient.from("strategy_operators").insert(auxRows),
-          15000,
-          "insert strategy aux operators"
-        );
-
-        if (auxError) {
-          logger.error("API", "Failed to insert aux operators", auxError);
-          // Non-fatal — strategy already created
-        }
-      }
     }
 
     // -- Insert tags ----------------------------------------------------
@@ -327,7 +305,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*), strategy_operators(operator_id)",
+        "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);
