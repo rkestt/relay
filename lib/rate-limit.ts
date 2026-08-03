@@ -103,10 +103,13 @@ function createRatelimit(config: RateLimitConfig) {
 
 // ── Presets ──
 
-/** 5 requests per 15 minutes — for auth endpoints */
+/** 30 requests per 15 minutes — for auth endpoints.
+ *  Generoso di proposito: il router Next genera 2+ richieste per navigazione
+ *  (HTML + RSC) e i prefetch dei Link sono esclusi a monte nel middleware.
+ *  Con 5/15min un singolo utente reale si bloccava dopo 1-2 visite. */
 export const authRateLimit = createRatelimit({
   interval: 15 * 60 * 1000,
-  maxRequests: 5,
+  maxRequests: 30,
   prefix: "ratelimit:auth",
 });
 
