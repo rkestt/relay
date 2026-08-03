@@ -49,8 +49,15 @@ test.afterAll(async () => {
 
 async function login(page: import("@playwright/test").Page) {
   await page.goto("/login", { waitUntil: "networkidle" });
-  await page.fill('input[type="email"]', EMAIL);
-  await page.fill('input[type="password"]', PASSWORD);
+  // Race di hydration: su produzione la pagina carica subito, fill può
+  // atterrare prima che React monti -> valore perso -> bottone disabled.
+  // Re-fill finché il bottone non è attivo (massimo 5 tentativi).
+  for (let i = 0; i < 5; i++) {
+    await page.fill('input[type="email"]', EMAIL);
+    await page.fill('input[type="password"]', PASSWORD);
+    if (await page.locator('button[type="submit"]').isEnabled()) break;
+    await page.waitForTimeout(400);
+  }
   await page.click('button[type="submit"]');
 }
 
@@ -60,7 +67,7 @@ test("onboarding: guest user viene reindirizzato e completa il profilo", async (
   await login(page);
 
   // Gate redirige verso /onboarding (profilo guest-*)
-  await page.waitForURL(/\/onboarding/, { timeout: 20000 });
+  await expect(page).toHaveURL(/\/onboarding/, { timeout: 20000 });
   await expect(
     page.getByRole("heading", { name: /completa il tuo profilo/i }),
   ).toBeVisible();
