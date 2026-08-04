@@ -170,6 +170,39 @@ describe("StrategyCard", () => {
     expect(decodeURIComponent(img.getAttribute("src")!)).toContain("example.com/thumb.png");
   });
 
+  it("renders operator badges (main + auxiliaries)", () => {
+    const assignmentWithOps = {
+      ...baseAssignment,
+      strategy: {
+        ...baseAssignment.strategy!,
+        operator_id: "op-main",
+        strategy_operators: [
+          { strategy_id: "strat-1", operator_id: "op-aux-1" },
+          { strategy_id: "strat-1", operator_id: "op-aux-2" },
+        ],
+      },
+    };
+    const operators = [
+      { id: "op-main", name: "Thermite", side: "attacker" as const, icon_url: null },
+      { id: "op-aux-1", name: "Thatcher", side: "attacker" as const, icon_url: null },
+      { id: "op-aux-2", name: "Kaid", side: "defender" as const, icon_url: null },
+    ];
+
+    render(
+      <StrategyCard
+        assignment={assignmentWithOps}
+        hotspots={[]}
+        operators={operators}
+        onVote={vi.fn()}
+        onClick={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText("Thermite")).toBeInTheDocument();
+    expect(screen.getByText("Thatcher")).toBeInTheDocument();
+    expect(screen.getByText("Kaid")).toBeInTheDocument();
+  });
+
   it("renders placeholder when no thumbnail", () => {
     const noImageAssignment = {
       ...baseAssignment,

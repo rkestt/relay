@@ -12,16 +12,18 @@ import { VoteButtons } from "@/components/tasks/VoteButtons";
 import Image from "next/image";
 import type {
   StrategyTemplate,
+  StrategyTemplateWithRelations,
   StrategyImage,
   TaskAssignment,
   Profile,
   Map,
+  Operator,
 } from "@/types";
 import { AlertIcon, ArrowRightIcon, BackArrowIcon, CheckIcon, SpinnerIcon, UserIcon } from "@/components/icons";
 
 interface DetailData {
   assignment: TaskAssignment & {
-    strategy: (StrategyTemplate & { images: StrategyImage[] }) | null;
+    strategy: (StrategyTemplateWithRelations & { images: StrategyImage[] }) | null;
     user: Profile | null;
   };
   map: Map | null;
@@ -43,6 +45,18 @@ export default function TaskDetailPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [operators, setOperators] = useState<Operator[]>([]);
+
+  // ── Load operator reference data (for badges) ───────
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    supabase
+      .from("operators")
+      .select("*")
+      .then(({ data }) => {
+        setOperators((data ?? []) as Operator[]);
+      });
+  }, []);
   const [finishing, setFinishing] = useState(false);
   const [, setCurrentUserId] = useState<string | null>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
@@ -140,7 +154,7 @@ export default function TaskDetailPage({
         const { data: assignment, error: assignErr } = await supabase
           .from("task_assignments")
           .select(
-            "*, strategy:strategy_templates(*, images:strategy_images(*)), user:profiles(*)",
+            "*, strategy:strategy_templates(*, images:strategy_images(*), strategy_operators(operator_id)), user:profiles(*)",
           )
           .eq("id", taskId)
           .eq("lobby_id", lobby)
@@ -157,7 +171,7 @@ export default function TaskDetailPage({
         }
 
         const fullAssignment = assignment as TaskAssignment & {
-          strategy: (StrategyTemplate & { images: StrategyImage[] }) | null;
+          strategy: (StrategyTemplateWithRelations & { images: StrategyImage[] }) | null;
           user: Profile | null;
         };
 
@@ -297,6 +311,31 @@ export default function TaskDetailPage({
         created_at: strategy.created_at,
       },
     ];
+  }
+
+  // ── Operator badge helper (main + aux) ───────────────
+  function operatorBadge(id: string, primary: boolean) {
+    const op = operators.find((o) => o.id === id);
+    if (!op) return null;
+    return (
+      <span
+        key={id}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium",
+          primary
+            ? "border-primary/40 bg-primary/15 text-foreground"
+            : "bg-card border-border text-muted-foreground",
+        )}
+      >
+        <span
+          className={cn(
+            "size-1.5 rounded-full bg-current",
+            op.side === "defender" ? "text-defender" : "text-attacker",
+          )}
+        />
+        {op.name}
+      </span>
+    );
   }
 
   // ── Loading ──────────────────────────────────────────
@@ -564,13 +603,19 @@ export default function TaskDetailPage({
             </div>
 
             {/* Map / Site / Operator badges */}
-            {data.map && (
-              <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-3">
+              {data.map && (
                 <span className="px-2.5 py-1 rounded-lg bg-card border border-border text-xs font-medium text-muted-foreground">
                   {data.map.name}
                 </span>
-              </div>
-            )}
+              )}
+              {strategy.operator_id &&
+                operatorBadge(strategy.operator_id, true)}
+              {(strategy.strategy_operators ?? [])
+                .map((so) => so.operator_id)
+                .filter((id) => id !== strategy.operator_id)
+                .map((id) => operatorBadge(id, false))}
+            </div>
           </div>
 
           {/* ── Description ──────────────────────────────── */}
