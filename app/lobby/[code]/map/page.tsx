@@ -10,7 +10,7 @@ import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Map } from "@/types";
-import { AlertIcon, CheckIcon, MapIcon } from "@/components/icons";
+import { AlertIcon, BackArrowIcon, CheckIcon, MapIcon } from "@/components/icons";
 
 export default function LobbyMapPage({
   params,
@@ -162,16 +162,17 @@ export default function LobbyMapPage({
   if (!isLeader && lobbyId) {
     return (
       <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-        <header className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
+        <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
           <Button
             variant="ghost"
             size="sm"
             className="h-9 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={() => router.push(`/lobby/${code}`)}
           >
+            <BackArrowIcon className="size-4 mr-1.5" />
             Back
           </Button>
+          <h1 className="text-base font-semibold text-foreground">Choose Map</h1>
         </header>
         <div className="flex flex-col items-center justify-center flex-1 gap-4 px-5">
           <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-card border border-border">
@@ -229,7 +230,16 @@ export default function LobbyMapPage({
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ─────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          onClick={() => router.push(`/lobby/${code}`)}
+        >
+          <BackArrowIcon className="size-4 mr-1.5" />
+          Back
+        </Button>
         <div>
           <h1 className="flex items-center gap-2 text-base font-semibold text-foreground">
             <MapIcon className="size-4 text-primary" />
@@ -237,14 +247,6 @@ export default function LobbyMapPage({
           </h1>
           <p className="text-xs text-muted-foreground">Room {code}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={() => router.push(`/lobby/${code}`)}
-        >
-          Back
-        </Button>
       </header>
 
       <div className="flex flex-col flex-1 gap-4 p-5 pb-8">
@@ -295,7 +297,7 @@ export default function LobbyMapPage({
                   <span className="px-3 pb-5 text-sm font-semibold text-foreground">{map.name}</span>
                   {/* Selected checkmark overlay */}
                   {isSelected && (
-                    <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                    <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-2">
                       <CheckIcon className="size-4 text-primary-foreground" strokeWidth={2.5} />
                     </div>
                   )}

@@ -1,4 +1,6 @@
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { BackArrowIcon } from "@/components/icons";
 
 const ProfileForm = dynamic(() => import("@/components/settings/ProfileForm").then(mod => mod.ProfileForm), {
   loading: () => (
@@ -32,6 +34,14 @@ const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount"
 export default function AccountSettingsPage() {
   return (
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <Link
+        href="/"
+        className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
+        Back to home
+      </Link>
+
       <h1 className="text-h1 font-bold tracking-tight text-foreground">
         Account Settings
       </h1>

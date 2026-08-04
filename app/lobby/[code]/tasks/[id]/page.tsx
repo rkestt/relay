@@ -371,7 +371,7 @@ export default function TaskDetailPage({
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
             <BackArrowIcon className="size-4 mr-1" />
@@ -411,7 +411,7 @@ export default function TaskDetailPage({
           <Button
             variant="ghost"
             size="sm"
-            className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground"
+            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
             onClick={() => router.push(`/lobby/${code}/tasks`)}
           >
             <BackArrowIcon className="size-4 mr-1" />
@@ -443,7 +443,7 @@ export default function TaskDetailPage({
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 min-w-[80px] rounded-lg text-sm text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
           onClick={() => router.push(`/lobby/${code}/tasks`)}
         >
             <BackArrowIcon className="size-4 mr-1" />
@@ -462,19 +462,6 @@ export default function TaskDetailPage({
             orientation="horizontal"
             size="md"
           />
-          <Button
-            size="sm"
-            onClick={handleFinish}
-            disabled={finishing}
-            className="h-9 min-w-[90px] rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-95 hidden md:inline-flex"
-          >
-            {finishing ? (
-              <SpinnerIcon className="size-4 mr-1.5" />
-            ) : (
-              <CheckIcon className="size-4 mr-1.5" />
-            )}
-            Finish
-          </Button>
         </div>
       </header>
 
@@ -637,30 +624,21 @@ export default function TaskDetailPage({
         </div>
       </div>
 
-      {/* ── Sticky Vote Bar (mobile) ────────────────────── */}
-      <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur-sm p-3 md:hidden">
-        <div className="flex items-center justify-between gap-2">
-          <VoteButtons
-            score={score}
-            userVote={data.userVote}
-            onVote={handleVote}
-            orientation="horizontal"
-            size="md"
-          />
-          <Button
-            size="sm"
-            onClick={handleFinish}
-            disabled={finishing}
-            className="h-11 min-w-[100px] rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-95"
-          >
-            {finishing ? (
-              <SpinnerIcon className="size-4 mr-1.5" />
-            ) : (
-              <CheckIcon className="size-4 mr-1.5" />
-            )}
-            Finish
-          </Button>
-        </div>
+      {/* ── Sticky Finish Bar (all sizes) ──────────────── */}
+      <div className="sticky bottom-0 border-t border-border bg-background/95 backdrop-blur-sm p-3">
+        <Button
+          size="lg"
+          onClick={handleFinish}
+          disabled={finishing}
+          className="w-full h-14 rounded-2xl text-base font-bold tracking-wide bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-[0.99]"
+        >
+          {finishing ? (
+            <SpinnerIcon className="size-4 mr-1.5" />
+          ) : (
+            <CheckIcon className="size-4 mr-1.5" />
+          )}
+          Finish
+        </Button>
       </div>
     </div>
   );

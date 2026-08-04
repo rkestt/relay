@@ -58,34 +58,34 @@ export default function UserMenu() {
     <div className="fixed top-3 right-3 z-50" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="size-10 rounded-full border border-neutral-700 overflow-hidden hover:border-amber-500/50 transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+        className="size-10 rounded-full border border-border bg-card overflow-hidden hover:border-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50"
       >
         {avatarUrl ? (
           <img src={avatarUrl} alt="" className="size-full object-cover" />
         ) : (
-          <span className="flex size-full items-center justify-center bg-neutral-800 text-sm font-medium text-neutral-200">
+          <span className="flex size-full items-center justify-center bg-muted text-sm font-medium text-foreground">
             {initial}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 rounded-lg border border-neutral-700 bg-neutral-900 shadow-xl animate-in fade-in">
-          <div className="px-4 py-3 text-sm text-neutral-300 border-b border-neutral-700 truncate">
+        <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-popover shadow-3 animate-in fade-in">
+          <div className="px-4 py-3 text-sm text-muted-foreground border-b border-border truncate">
             {name}
           </div>
           <Link
             href="/settings/account"
-            className="block w-full px-4 py-2.5 text-left text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 transition-colors"
+            className="block w-full px-4 py-2.5 text-left text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             onClick={() => setOpen(false)}
           >
-            Impostazioni account
+            Account settings
           </Link>
           <button
             onClick={handleSignOut}
-            className="w-full px-4 py-2.5 text-left text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 transition-colors rounded-b-lg"
+            className="w-full px-4 py-2.5 text-left text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-b-lg"
           >
-            Sign Out
+            Sign out
           </button>
         </div>
       )}

@@ -61,6 +61,8 @@ async function login(page: import("@playwright/test").Page) {
   await page.click('button[type="submit"]');
 }
 
+test.describe("Account flow", () => {
+
 test("onboarding: guest user viene reindirizzato e completa il profilo", async ({
   page,
 }) => {
@@ -69,10 +71,10 @@ test("onboarding: guest user viene reindirizzato e completa il profilo", async (
   // Gate redirige verso /onboarding (profilo guest-*)
   await expect(page).toHaveURL(/\/onboarding/, { timeout: 20000 });
   await expect(
-    page.getByRole("heading", { name: /completa il tuo profilo/i }),
+    page.getByRole("heading", { name: /complete your profile/i }),
   ).toBeVisible();
 
-  // Salva il nome
+  // Save the name
   await page.fill("#username", NAME);
   await page.click('button[type="submit"]');
   await page.waitForURL(/\/$/, { timeout: 20000 });
@@ -116,14 +118,14 @@ test("profile edit: cambio nome da impostazioni + navbar aggiornata", async ({
   await expect(new URL(page.url()).pathname).toBe("/");
 
   await page.goto("/settings/account", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("heading", { name: /impostazioni account/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /account settings/i })).toBeVisible();
 
   const nameInput = page.locator("#username");
   await expect(nameInput).toHaveValue(NAME, { timeout: 15000 });
   await nameInput.fill(NEW_NAME);
-  await page.click('button:has-text("Salva profilo")');
+  await page.click('button:has-text("Save profile")');
 
-  await expect(page.getByText("Profilo salvato")).toBeVisible();
+  await expect(page.getByText("Profile saved")).toBeVisible();
 
   // Navbar mostra il nuovo nome nel dropdown
   await page.click('button[aria-label]:has(img), button.rounded-full');
@@ -141,3 +143,5 @@ test("profile edit: cambio nome da impostazioni + navbar aggiornata", async ({
     })
     .toBe(NEW_NAME);
 });
+
+}); // end describe

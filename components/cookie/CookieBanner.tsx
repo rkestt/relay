@@ -111,8 +111,7 @@ export function CookieBanner() {
             <CardContent className="p-4 sm:p-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm leading-relaxed text-foreground/90">
-                  Utilizziamo cookie per migliorare la tua esperienza. Leggi la
-                  nostra{" "}
+                  We use cookies to improve your experience. Read our{" "}
                   <Link
                     href="/cookies"
                     className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
@@ -126,25 +125,25 @@ export function CookieBanner() {
                     variant="ghost"
                     size="sm"
                     onClick={rejectAll}
-                    aria-label="Rifiuta tutti i cookie"
+                    aria-label="Reject all cookies"
                   >
-                    Rifiuta tutti
+                    Reject all
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setShowModal(true)}
-                    aria-label="Personalizza preferenze cookie"
+                    aria-label="Customize cookie preferences"
                   >
-                    Personalizza
+                    Customize
                   </Button>
                   <Button
                     variant="default"
                     size="sm"
                     onClick={acceptAll}
-                    aria-label="Accetta tutti i cookie"
+                    aria-label="Accept all cookies"
                   >
-                    Accetta tutti
+                    Accept all
                   </Button>
                 </div>
               </div>
@@ -159,7 +158,7 @@ export function CookieBanner() {
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Preferenze cookie"
+          aria-label="Cookie preferences"
         >
           {/* Backdrop */}
           <div
@@ -179,11 +178,11 @@ export function CookieBanner() {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-popover-foreground">
-                Preferenze cookie
+                Cookie preferences
               </h2>
               <button
                 type="button"
-                aria-label="Chiudi"
+                aria-label="Close"
                 className="inline-flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
                 onClick={() => setShowModal(false)}
               >
@@ -192,22 +191,22 @@ export function CookieBanner() {
             </div>
 
             <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-              Scegli quali cookie autorizzare. I cookie tecnici sono sempre
-              attivi perché necessari al funzionamento della piattaforma.
+              Choose which cookies to allow. Technical cookies are always
+              active because they are required for the platform to work.
             </p>
 
             {/* Necessary - always on */}
             <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 px-4 py-3 mb-3">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground">
-                  Cookie tecnici (necessari)
+                  Technical cookies (required)
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Sempre attivi — autenticazione e funzionalità di base
+                  Always active — authentication and core features
                 </p>
               </div>
               <span className="ml-3 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                Sempre
+                Always
               </span>
             </div>
 
@@ -215,10 +214,10 @@ export function CookieBanner() {
             <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 mb-3 cursor-pointer hover:bg-accent/20 transition-colors">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground">
-                  Cookie analytics
+                  Analytics cookies
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Dati anonimizzati per capire come usi la piattaforma
+                  Anonymized data to understand how you use the platform
                 </p>
               </div>
               <input
@@ -226,7 +225,7 @@ export function CookieBanner() {
                 checked={analyticsChecked}
                 onChange={(e) => setAnalyticsChecked(e.target.checked)}
                 className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
-                aria-label="Attiva cookie analytics"
+                aria-label="Enable analytics cookies"
               />
             </label>
 
@@ -234,10 +233,10 @@ export function CookieBanner() {
             <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 mb-6 cursor-pointer hover:bg-accent/20 transition-colors">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-foreground">
-                  Cookie marketing
+                  Marketing cookies
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Cookie per personalizzare contenuti e offerte
+                  Cookies to personalize content and offers
                 </p>
               </div>
               <input
@@ -245,7 +244,7 @@ export function CookieBanner() {
                 checked={marketingChecked}
                 onChange={(e) => setMarketingChecked(e.target.checked)}
                 className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
-                aria-label="Attiva cookie marketing"
+                aria-label="Enable marketing cookies"
               />
             </label>
 
@@ -255,10 +254,10 @@ export function CookieBanner() {
                 onClick={() => setShowModal(false)}
                 className="inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               >
-                Annulla
+                Cancel
               </button>
               <Button onClick={handleSavePreferences}>
-                Salva preferenze
+                Save preferences
               </Button>
             </div>
           </div>

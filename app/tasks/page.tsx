@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/button";
+import { BackArrowIcon } from "@/components/icons";
 import { logger } from "@/lib/logger";
 import { cn } from "@/lib/utils";
 import type { TaskAssignment, StrategyTemplate, Lobby, Round, Profile } from "@/types";
@@ -34,6 +37,7 @@ function formatDate(iso: string | null): string {
 }
 
 export default function AllTasksPage() {
+  const router = useRouter();
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -143,10 +147,19 @@ export default function AllTasksPage() {
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          onClick={() => router.push("/")}
+        >
+          <BackArrowIcon className="size-4 mr-1.5" />
+          Back
+        </Button>
         <h1 className="text-base font-bold text-foreground">All Tasks</h1>
         {tasks.length > 0 && (
-          <span className="text-xs text-muted-foreground">{tasks.length} total</span>
+          <span className="ml-auto text-xs text-muted-foreground">{tasks.length} total</span>
         )}
       </header>
 

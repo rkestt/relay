@@ -438,14 +438,26 @@ export default function TasksPage({
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          onClick={() => {
+            if (!code) return;
+            router.push(`/lobby/${code}`);
+          }}
+        >
+          <BackArrowIcon className="size-4 mr-1.5" />
+          Back
+        </Button>
         <div>
           <h1 className="text-base font-bold text-foreground">
             Strategies Feed
           </h1>
           <p className="text-xs text-muted-foreground">Room {code}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
           {/* Sort toggle */}
           <button
             onClick={() => setSortMode(sortMode === "score" ? "newest" : "score")}
@@ -466,18 +478,6 @@ export default function TasksPage({
             </svg>
             {sortMode === "score" ? "By Score" : "Newest"}
           </button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-11 min-w-[100px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
-            onClick={() => {
-              if (!code) return;
-              router.push(`/lobby/${code}`);
-            }}
-          >
-            <BackArrowIcon className="size-4 mr-1.5" />
-            Back
-          </Button>
         </div>
       </header>
 

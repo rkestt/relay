@@ -9,7 +9,7 @@ import { useIsClient } from "@/hooks/useIsClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logger } from "@/lib/logger";
-import { AlertIcon, DiscordIcon } from "@/components/icons";
+import { AlertIcon, BackArrowIcon, DiscordIcon } from "@/components/icons";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -153,6 +153,13 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-6">
+      <Link
+        href="/"
+        className="fixed top-4 left-4 z-10 group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
+        Back to home
+      </Link>
       <div
         className={cn(
           "w-full max-w-sm bg-card border border-border rounded-xl p-8",

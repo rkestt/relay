@@ -11,7 +11,7 @@ import { useLobbyRealtime } from "@/hooks/useLobbyRealtime";
 import { useHeartbeat } from "@/hooks/useHeartbeat";
 import Image from "next/image";
 import type { Operator, LobbyBan } from "@/types";
-import { CheckIcon } from "@/components/icons";
+import { BackArrowIcon, CheckIcon } from "@/components/icons";
 
 interface LobbyBanWithOperator extends LobbyBan {
   operators: { id: string; name: string; side: "attacker" | "defender"; icon_url: string | null } | null;
@@ -201,7 +201,16 @@ export default function BansPage({
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ──────────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          onClick={() => router.push(`/lobby/${code}`)}
+        >
+          <BackArrowIcon className="size-4 mr-1.5" />
+          Back
+        </Button>
         <div>
           <h1 className="text-base font-semibold text-foreground">Set Bans</h1>
           <div className="flex items-center gap-2">
@@ -218,14 +227,6 @@ export default function BansPage({
             )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-11 rounded-xl text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-          onClick={() => router.push(`/lobby/${code}`)}
-        >
-          Back
-        </Button>
       </header>
 
       <div className="flex flex-col gap-5 p-5 pb-8">

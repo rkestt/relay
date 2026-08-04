@@ -89,7 +89,7 @@ export default function CookiesPage() {
             className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
-            Torna alla home
+            Back to home
           </Link>
         </div>
       </div>

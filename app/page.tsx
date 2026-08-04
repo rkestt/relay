@@ -324,7 +324,7 @@ export default function HomePage() {
         >
           <div
             className={cn(
-              "w-full max-w-sm bg-popover border border-border rounded-xl p-6 shadow-lg",
+              "w-full max-w-sm bg-popover border border-border rounded-xl p-6 shadow-3",
               "animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
             )}
           >

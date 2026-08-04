@@ -53,7 +53,7 @@ export default function CookieSettingsPage() {
             className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
-            Torna alla home
+            Back to home
           </Link>
         </div>
       </div>
@@ -62,12 +62,12 @@ export default function CookieSettingsPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2">
-            Gestisci preferenze cookie
+            Manage cookie preferences
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Puoi modificare in qualsiasi momento le tue preferenze sui cookie. I
-            cookie tecnici sono sempre attivi perché necessari al
-            funzionamento della piattaforma.
+            You can change your cookie preferences at any time. Technical
+            cookies are always active because they are required for the
+            platform to work.
           </p>
         </div>
 
@@ -75,62 +75,58 @@ export default function CookieSettingsPage() {
         {consent && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-base">Stato attuale</CardTitle>
+              <CardTitle className="text-base">Current status</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    Cookie tecnici
+                    Technical cookies
                   </span>
-                  <span className="inline-flex items-center gap-1 font-medium text-green-600 dark:text-green-400">
+                  <span className="inline-flex items-center gap-1 font-medium text-success">
                     <CheckIcon className="size-3.5" />
-                    Attivi
+                    Active
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    Cookie analytics
+                    Analytics cookies
                   </span>
                   <span
                     className={`inline-flex items-center gap-1 font-medium ${
-                      consent.analytics
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
+                      consent.analytics ? "text-success" : "text-muted-foreground"
                     }`}
                   >
                     {consent.analytics ? (
                       <>
-                        <CheckIcon className="size-3.5" /> Attivi
+                        <CheckIcon className="size-3.5" /> Active
                       </>
                     ) : (
-                      "Disattivati"
+                      "Disabled"
                     )}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    Cookie marketing
+                    Marketing cookies
                   </span>
                   <span
                     className={`inline-flex items-center gap-1 font-medium ${
-                      consent.marketing
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
+                      consent.marketing ? "text-success" : "text-muted-foreground"
                     }`}
                   >
                     {consent.marketing ? (
                       <>
-                        <CheckIcon className="size-3.5" /> Attivi
+                        <CheckIcon className="size-3.5" /> Active
                       </>
                     ) : (
-                      "Disattivati"
+                      "Disabled"
                     )}
                   </span>
                 </div>
                 <div className="pt-2 text-xs text-muted-foreground border-t border-border">
-                  Aggiornato:{" "}
-                  {new Date(consent.timestamp).toLocaleString("it-IT", {
+                  Updated:{" "}
+                  {new Date(consent.timestamp).toLocaleString("en-US", {
                     year: "numeric",
                     month: "long",
                     day: "numeric",
@@ -147,7 +143,7 @@ export default function CookieSettingsPage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-base">
-              Preferenze cookie
+              Cookie preferences
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -156,14 +152,14 @@ export default function CookieSettingsPage() {
               <div className="flex items-center justify-between rounded-lg border border-border bg-accent/30 px-4 py-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    Cookie tecnici (necessari)
+                    Technical cookies (required)
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Autenticazione, sessione, funzionalità di base
+                    Authentication, session, core features
                   </p>
                 </div>
                 <span className="ml-3 shrink-0 rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                  Sempre attivi
+                  Always active
                 </span>
               </div>
 
@@ -171,10 +167,10 @@ export default function CookieSettingsPage() {
               <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    Cookie analytics
+                    Analytics cookies
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Dati anonimizzati per capire come utilizzi la piattaforma
+                    Anonymized data to understand how you use the platform
                   </p>
                 </div>
                 <input
@@ -182,7 +178,7 @@ export default function CookieSettingsPage() {
                   checked={analytics}
                   onChange={(e) => setAnalytics(e.target.checked)}
                   className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
-                  aria-label="Attiva cookie analytics"
+                  aria-label="Enable analytics cookies"
                 />
               </label>
 
@@ -190,10 +186,10 @@ export default function CookieSettingsPage() {
               <label className="flex items-center justify-between rounded-lg border border-border px-4 py-3 cursor-pointer hover:bg-accent/20 transition-colors">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-foreground">
-                    Cookie marketing
+                    Marketing cookies
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Cookie per personalizzare contenuti e offerte
+                    Cookies to personalize content and offers
                   </p>
                 </div>
                 <input
@@ -201,7 +197,7 @@ export default function CookieSettingsPage() {
                   checked={marketing}
                   onChange={(e) => setMarketing(e.target.checked)}
                   className="ml-3 size-4 shrink-0 rounded border-border text-primary focus:ring-primary/50"
-                  aria-label="Attiva cookie marketing"
+                  aria-label="Enable marketing cookies"
                 />
               </label>
             </div>
@@ -211,15 +207,15 @@ export default function CookieSettingsPage() {
               href="/cookies"
               className="text-sm text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
             >
-              Leggi la Cookie Policy
+              Read the Cookie Policy
             </Link>
             <div className="flex items-center gap-3">
               {saved && (
-                <span className="text-xs text-green-600 dark:text-green-400 animate-in fade-in duration-200">
-                  Preferenze salvate
+                <span className="text-xs text-success animate-in fade-in duration-200">
+                  Preferences saved
                 </span>
               )}
-              <Button onClick={handleSave}>Salva preferenze</Button>
+              <Button onClick={handleSave}>Save preferences</Button>
             </div>
           </div>
         </Card>
@@ -228,20 +224,18 @@ export default function CookieSettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              Come gestire i cookie dal browser
+              How to manage cookies in your browser
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground space-y-2 leading-relaxed">
             <p>
-              Puoi configurare il tuo browser per bloccare o eliminare i cookie
-              in qualsiasi momento. Consulta la guida del tuo browser per le
-              istruzioni specifiche.
+              You can configure your browser to block or delete cookies at any
+              time. Check your browser&apos;s guide for specific instructions.
             </p>
             <p>
-              La disabilitazione dei cookie tecnici potrebbe compromettere il
-              corretto funzionamento della piattaforma. I cookie analytics e
-              marketing possono essere disattivati senza impatto sulla
-              funzionalità base.
+              Disabling technical cookies may affect the platform&apos;s core
+              functionality. Analytics and marketing cookies can be turned off
+              without impact on core features.
             </p>
           </CardContent>
         </Card>

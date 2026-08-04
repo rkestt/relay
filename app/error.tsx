@@ -22,21 +22,21 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-6 max-w-md px-4">
         <div className="text-8xl font-bold text-destructive/20">500</div>
-        <h1 className="text-3xl font-bold text-white">
-          Qualcosa è Andato Storto
+        <h1 className="text-3xl font-bold text-foreground">
+          Something Went Wrong
         </h1>
-        <p className="text-slate-400">
-          Si è verificato un errore imprevisto. Riprova o torna alla home.
+        <p className="text-muted-foreground">
+          An unexpected error occurred. Try again or go back home.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button onClick={reset} variant="default">
-            Riprova
+            Try Again
           </Button>
           <Button render={<Link href="/" />} nativeButton={false} variant="outline">
-            Torna alla Home
+            Back to Home
           </Button>
         </div>
       </div>

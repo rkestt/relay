@@ -33,7 +33,7 @@ export function OnboardingForm() {
       router.push("/");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore durante il salvataggio");
+      setError(err instanceof Error ? err.message : "Failed to save profile");
       setLoading(false);
     }
   };
@@ -43,10 +43,10 @@ export function OnboardingForm() {
       <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
         <div className="flex flex-col gap-1.5 text-center mb-8">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Completa il tuo profilo
+            Complete your profile
           </h1>
           <p className="text-sm text-muted-foreground">
-            Scegli un nome per comparire in lobby e nella community
+            Choose a name to appear in lobbies and the community
           </p>
         </div>
 
@@ -67,7 +67,7 @@ export function OnboardingForm() {
               htmlFor="username"
               className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
-              Nome
+              Name
             </label>
             <Input
               id="username"
@@ -75,7 +75,7 @@ export function OnboardingForm() {
               autoComplete="nickname"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Il tuo nome"
+              placeholder="Your name"
               maxLength={40}
               required
               autoFocus
@@ -89,7 +89,7 @@ export function OnboardingForm() {
             disabled={loading || !username.trim()}
             className="w-full h-11"
           >
-            {loading ? "Salvataggio..." : "Continua"}
+            {loading ? "Saving..." : "Continue"}
           </Button>
         </form>
       </div>

@@ -343,19 +343,17 @@ export default function SubmitStrategyPage() {
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
       {/* ── Header ───────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4 border-b border-border">
+      <header className="flex items-center gap-3 px-5 py-4 border-b border-border">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
+          onClick={() => router.push("/")}
+        >
+          <BackArrowIcon className="size-4 mr-1.5" />
+          Back
+        </Button>
         <h1 className="text-base font-bold text-foreground">Submit Strategy</h1>
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-11 min-w-[80px] rounded-xl text-sm font-medium text-muted-foreground hover:bg-card hover:text-foreground transition-all duration-200 active:scale-95"
-            onClick={() => router.push("/")}
-          >
-            <BackArrowIcon className="size-4 mr-1.5" />
-            Back
-          </Button>
-        </div>
       </header>
 
       <div className="flex-1 overflow-y-auto">

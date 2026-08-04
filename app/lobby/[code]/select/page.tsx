@@ -311,8 +311,24 @@ export default function SelectPage({
 
   return (
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
-      {/* ── Step Indicator ─────────────────────────────── */}
+      {/* ── Step Indicator + Back ──────────────────────── */}
       <header className="flex items-center gap-2 px-5 py-4 border-b border-border">
+        <button
+          onClick={() => {
+            if (step === "site") {
+              logger.info("SelectPage", "Back to lobby");
+              router.push(`/lobby/${code}`);
+            } else {
+              logger.info("SelectPage", "Back to sites");
+              setStepDirection("left");
+              setStep("site");
+            }
+          }}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200 active:scale-95"
+          aria-label={step === "site" ? "Back to Lobby" : "Back to Sites"}
+        >
+          <BackArrowIcon className="size-4" />
+        </button>
         {steps.map((s, i) => {
           const isComplete = i < currentStepIndex;
           const isActive = step === s;
@@ -383,17 +399,6 @@ export default function SelectPage({
             "flex flex-col gap-3",
             stepDirection === "right" ? "animate-slide-in-right" : "animate-fade-in"
           )} key="site-step">
-            <button
-              onClick={() => {
-                logger.info("SelectPage", "Back to lobby");
-                router.push(`/lobby/${code}`);
-              }}
-              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200 active:scale-95"
-            >
-              <BackArrowIcon className="size-4" />
-              Back to Lobby
-            </button>
-
             {sites.length === 0 ? (
               <EmptyState
                 title="No sites for this map"
@@ -442,18 +447,6 @@ export default function SelectPage({
             "flex flex-col gap-4",
             stepDirection === "right" ? "animate-slide-in-right" : "animate-fade-in"
           )} key="operator-step">
-            <button
-              onClick={() => {
-                logger.info("SelectPage", "Back to sites");
-                setStepDirection("left");
-                setStep("site");
-              }}
-              className="flex items-center gap-2 self-start px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-card transition-all duration-200 active:scale-95"
-            >
-              <BackArrowIcon className="size-4" />
-              Back to Sites
-            </button>
-
             {/* ── Search & Filter ─────────────────────────── */}
             <div className="flex flex-col gap-3">
               {/* Search input */}
