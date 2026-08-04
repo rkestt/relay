@@ -220,7 +220,7 @@ describe("POST /api/strategies", () => {
     const response = await POST(
       new Request("http://localhost/api/strategies", {
         method: "POST",
-        body: JSON.stringify({ title: "Test Strategy", map_id: "map-1", site_id: "site-1", operator_id: "op-1" }),
+        body: JSON.stringify({ title: "Test Strategy", map_id: "map-1", site_id: "site-1", operator_id: "op-1", side: "attacker" }),
       }),
     );
 
@@ -276,6 +276,7 @@ describe("POST /api/strategies", () => {
           map_id: "map-1",
           site_id: "site-1",
           operator_id: "op-1",
+          side: "attacker",
           image_url: "https://example.com/img.png",
           description: "A test strategy",
           tags: ["fast", "aggressive"],
@@ -323,6 +324,7 @@ describe("POST /api/strategies", () => {
           map_id: "map-1",
           site_id: "site-1",
           operator_id: "op-1",
+          side: "attacker",
           image_url: "https://example.com/img.png",
           aux_operator_ids: ["op-1", "op-2", "op-3", "op-2"],
         }),

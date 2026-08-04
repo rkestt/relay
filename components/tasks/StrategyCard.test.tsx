@@ -34,6 +34,7 @@ const baseAssignment = {
     status: "approved" as const,
     created_by: "user-1",
     created_at: "2024-01-01T00:00:00Z",
+    side: "attacker" as const,
   },
 };
 

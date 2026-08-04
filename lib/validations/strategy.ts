@@ -6,6 +6,7 @@ export const createStrategySchema = z.object({
   map_id: z.string().min(1, 'Map ID richiesto'),
   site_id: z.string().min(1, 'Site ID richiesto'),
   operator_id: z.string().min(1, 'Operator ID richiesto'),
+  side: z.enum(['attacker', 'defender'], { message: 'Lato richiesto (attacker o defender)' }),
   aux_operator_ids: z
     .array(z.string().min(1))
     .max(4, 'Massimo 4 operatori ausiliari')

@@ -119,6 +119,7 @@ export interface StrategyTemplate {
   created_by: string | null;
   created_at: string | null;
   operator_id: string | null;
+  side: "attacker" | "defender" | null;
 }
 
 export interface TaskAssignment {

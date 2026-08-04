@@ -36,7 +36,7 @@ export default function AccountSettingsPage() {
     <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       <Link
         href="/"
-        className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="fixed top-4 left-4 z-10 group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         <BackArrowIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
         Back to home

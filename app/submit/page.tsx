@@ -61,6 +61,7 @@ export default function SubmitStrategyPage() {
   const [userId, setUserId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
+  const [side, setSide] = useState<"attacker" | "defender" | null>(null);
   const [selectedMapId, setSelectedMapId] = useState<string>("");
   const [selectedSiteId, setSelectedSiteId] = useState<string>("");
   const [description, setDescription] = useState("");
@@ -75,6 +76,9 @@ export default function SubmitStrategyPage() {
   const [maps, setMaps] = useState<Map[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [operators, setOperators] = useState<Operator[]>([]);
+  const filteredOperators = side
+    ? operators.filter((op) => op.side === side)
+    : operators;
   const [selectedOperatorId, setSelectedOperatorId] = useState<string>("");
   const [auxOperatorIds, setAuxOperatorIds] = useState<string[]>([]);
   const [auxSearch, setAuxSearch] = useState("");
@@ -100,6 +104,15 @@ export default function SubmitStrategyPage() {
       }
     });
   }, []);
+
+  // ── Reset operator selections when side changes ──
+  const handleSideChange = useCallback((nextSide: "attacker" | "defender") => {
+    setSide(nextSide);
+    setSelectedOperatorId("");
+    setAuxOperatorIds([]);
+    setAuxSearch("");
+    if (validationErrors.side) setValidationErrors((prev) => ({ ...prev, side: "" }));
+  }, [validationErrors.side]);
 
   // ── Load maps ─────────────────────────────────────
   useEffect(() => {
@@ -215,6 +228,7 @@ export default function SubmitStrategyPage() {
   // ── Validate form ──────────────────────────────────
   const validate = useCallback((): boolean => {
     const errors: Record<string, string> = {};
+    if (!side) errors.side = "Please choose a side (Attacker or Defender).";
     if (!title.trim()) errors.title = "Title is required.";
     if (!selectedMapId) errors.map = "Please select a map.";
     if (!selectedSiteId) errors.site = "Please select a site.";
@@ -226,7 +240,7 @@ export default function SubmitStrategyPage() {
     if (!userId) errors.user = "You must be signed in to submit a strategy.";
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds.length, rawFiles.length, userId]);
+  }, [side, title, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds.length, rawFiles.length, userId]);
 
   // ── Submit form ──────────────────────────────
   const handleSubmit = useCallback(async () => {
@@ -254,6 +268,7 @@ export default function SubmitStrategyPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title.trim(),
+          side,
           map_id: selectedMapId,
           site_id: selectedSiteId,
           operator_id: selectedOperatorId,
@@ -278,7 +293,7 @@ export default function SubmitStrategyPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [title, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds, rawFiles, userId, tagsInput, description, validate]);
+  }, [title, side, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds, rawFiles, userId, tagsInput, description, validate]);
 
   // ── Loading state ────────────────────────────────
   // ── Auxiliary operators toggle ────────────────
@@ -366,6 +381,47 @@ export default function SubmitStrategyPage() {
               <p className="text-sm text-destructive">{error}</p>
             </div>
           )}
+
+          {/* ═══════ Form Section: Side ═══════ */}
+          <div className="flex flex-col gap-2">
+            <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              <span className="size-1.5 rounded-full bg-primary/40" />
+              Side
+            </h2>
+            <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Strategy side">
+                {(
+                  [
+                    { value: "attacker", label: "Attacker", icon: "🎯", accent: "text-emerald-600 border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/15" },
+                    { value: "defender", label: "Defender", icon: "🛡️", accent: "text-rose-600 border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/15" },
+                  ] as const
+                ).map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={side === s.value}
+                    onClick={() => {
+                      logger.debug("SubmitPage", "Side selected", { side: s.value });
+                      handleSideChange(s.value);
+                    }}
+                    className={cn(
+                      "flex items-center justify-center gap-2 h-12 rounded-xl border text-sm font-semibold transition-all duration-200 active:scale-95",
+                      side === s.value
+                        ? s.accent
+                        : "border-border bg-input/50 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <span aria-hidden>{s.icon}</span>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              {validationErrors.side && (
+                <p className="text-xs text-destructive" aria-live="polite">{validationErrors.side}</p>
+              )}
+            </div>
+          </div>
 
           {/* ═══════ Form Section: Basic Info ═══════ */}
           <div className="flex flex-col gap-2">
@@ -542,18 +598,20 @@ export default function SubmitStrategyPage() {
                     setSelectedOperatorId(e.target.value);
                     if (validationErrors.operator) setValidationErrors((prev) => ({ ...prev, operator: "" }));
                   }}
+                  disabled={!side}
                   className={cn(
                     "flex h-12 w-full rounded-xl border px-3 py-2 text-sm transition-all duration-200",
                     "bg-input border-border text-foreground",
                     "focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
                     !selectedOperatorId && "text-muted-foreground",
+                    !side && "opacity-50 cursor-not-allowed",
                     validationErrors.operator && "border-destructive/50 ring-destructive/20"
                   )}
                 >
                   <option value="" disabled>
-                    Select an operator…
+                    {side ? `Select an ${side}…` : "Choose a side first…"}
                   </option>
-                  {operators.map((op) => (
+                  {filteredOperators.map((op) => (
                     <option key={op.id} value={op.id}>
                       {op.name} ({op.side})
                     </option>
@@ -601,13 +659,14 @@ export default function SubmitStrategyPage() {
                 </div>
               )}
               <Input
-                placeholder="Search operators…"
+                placeholder={side ? "Search operators…" : "Choose a side first…"}
                 value={auxSearch}
                 onChange={(e) => setAuxSearch(e.target.value)}
+                disabled={!side}
                 className="h-9 rounded-lg"
               />
               <div className="max-h-56 overflow-y-auto space-y-0.5 pr-1">
-                {operators
+                {filteredOperators
                   .filter((op) => {
                     if (op.id === selectedOperatorId) return false;
                     const q = auxSearch.trim().toLowerCase();
@@ -642,7 +701,7 @@ export default function SubmitStrategyPage() {
               </div>
               <p className="text-xs text-muted-foreground">
                 Optional. Add up to {AUX_MAX} operators this strategy also works
-                with — they'll match in strategy search too.
+                with — they&apos;ll match in strategy search too.
               </p>
               {validationErrors.aux && (
                 <p className="text-xs text-destructive" aria-live="polite">

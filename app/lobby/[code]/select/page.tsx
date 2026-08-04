@@ -369,13 +369,13 @@ export default function SelectPage({
             </div>
           );
         })}
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3 shrink-0">
           {lobbyState && (
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <span className="font-medium text-foreground">
                 {lobbyState.selections.filter(s => s.locked_at).length}/{lobbyState.members.length}
               </span>
-              <span>locked in</span>
+              <span className="hidden sm:inline">locked in</span>
             </div>
           )}
           {lobbyState?.currentRound?.team_side && (

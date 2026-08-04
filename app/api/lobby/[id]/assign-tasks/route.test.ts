@@ -13,6 +13,21 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
 }));
 
+// Thenable mock for supabase.from("operators").select("side").eq(...).maybeSingle()
+function makeOperatorsQuery(side: "attacker" | "defender" = "attacker") {
+  const q = {
+    select: vi.fn(() => q),
+    eq: vi.fn(() => q),
+    maybeSingle: vi.fn(() => q),
+  };
+  const p = Promise.resolve({ data: { side }, error: null });
+  Object.assign(q, {
+    then: p.then.bind(p),
+    catch: p.catch.bind(p),
+  });
+  return q;
+}
+
 import { POST } from "@/app/api/lobby/[id]/assign-tasks/route";
 
 describe("POST /api/lobby/[id]/assign-tasks", () => {
@@ -181,6 +196,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
       if (table === "lobby_bans") return bansQuery;
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "strategy_templates") return strategiesQuery;
+      if (table === "operators") return makeOperatorsQuery();
       return { select: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
     });
 
@@ -285,6 +301,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
       if (table === "lobby_bans") return bansQuery;
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "strategy_templates") return strategiesQuery;
+      if (table === "operators") return makeOperatorsQuery();
       if (table === "task_assignments") {
         taskAssignCallCount++;
         if (taskAssignCallCount >= 2) return assignInsert;
@@ -407,6 +424,7 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
       if (table === "lobby_bans") return bansQuery;
       if (table === "lobby_selections") return selectionsQuery;
       if (table === "strategy_templates") return strategiesQuery;
+      if (table === "operators") return makeOperatorsQuery();
       if (table === "task_assignments") {
         taskAssignCallCount++;
         if (taskAssignCallCount >= 2) return assignInsert;
@@ -475,5 +493,143 @@ describe("POST /api/lobby/[id]/assign-tasks", () => {
     const orFilter = strategiesQuery.or.mock.calls[0]?.[0] as string;
     expect(orFilter).toContain("operator_id.eq.op-1");
     expect(orFilter).toContain("strategy_operators.operator_id.eq.op-1");
+  });
+
+  it("level 2 fallback filters strategies by the operator's side", async () => {
+    mockSupabaseClient.auth.getUser.mockResolvedValue({
+      data: { user: { id: "user-1" } },
+      error: null,
+    });
+
+    const lobbyQuery = {
+      select: vi.fn(() => lobbyQuery),
+      eq: vi.fn(() => lobbyQuery),
+      single: vi.fn(() =>
+        Promise.resolve({ data: { leader_id: "user-1" }, error: null }),
+      ),
+    };
+    const roundQuery = {
+      select: vi.fn(() => roundQuery),
+      eq: vi.fn(() => roundQuery),
+      order: vi.fn(() => roundQuery),
+      limit: vi.fn(() => roundQuery),
+      maybeSingle: vi.fn(() =>
+        Promise.resolve({ data: { id: "round-1" }, error: null }),
+      ),
+    };
+    const bansQuery = {
+      select: vi.fn(() => bansQuery),
+      eq: vi.fn(() => bansQuery),
+    };
+    const selectionsQuery = {
+      select: vi.fn(() => selectionsQuery),
+      eq: vi.fn(() => selectionsQuery),
+    };
+
+    // Level 1 (operator match) returns nothing → falls to level 2
+    const strategiesQuery = {
+      select: vi.fn(() => strategiesQuery),
+      eq: vi.fn(() => strategiesQuery),
+      or: vi.fn((_f: string) => strategiesQuery),
+    };
+
+    mockSupabaseClient.from.mockImplementation((table: string) => {
+      if (table === "lobbies") return lobbyQuery;
+      if (table === "rounds") return roundQuery;
+      if (table === "lobby_bans") return bansQuery;
+      if (table === "lobby_selections") return selectionsQuery;
+      if (table === "strategy_templates") return strategiesQuery;
+      if (table === "operators") return makeOperatorsQuery("defender");
+      if (table === "task_assignments") {
+        taskAssignCallCount++;
+        if (taskAssignCallCount >= 2) return assignInsert;
+        return existingQuery;
+      }
+      return { select: vi.fn(), insert: vi.fn(), eq: vi.fn(), single: vi.fn(), maybeSingle: vi.fn() };
+    });
+
+    const existingQuery = {
+      select: vi.fn(() => existingQuery),
+      eq: vi.fn(() => existingQuery),
+    };
+    existingQuery.select.mockReturnValue(existingQuery);
+    existingQuery.eq.mockReturnValue(existingQuery);
+    const existingResult = Promise.resolve({ data: [], error: null });
+    Object.assign(existingQuery, {
+      then: existingResult.then.bind(existingResult),
+      catch: existingResult.catch.bind(existingResult),
+    });
+
+    const assignInsert = {
+      insert: vi.fn(() => assignInsert),
+      select: vi.fn(() => assignInsert),
+      single: vi.fn(() =>
+        Promise.resolve({
+          data: { id: "assign-1", strategy_id: "strat-def", title: "Def" },
+          error: null,
+        }),
+      ),
+    };
+    assignInsert.insert.mockReturnValue(assignInsert);
+    assignInsert.select.mockReturnValue(assignInsert);
+    let taskAssignCallCount = 0;
+
+    bansQuery.select.mockReturnValue(bansQuery);
+    bansQuery.eq.mockReturnValue(bansQuery);
+    const bansResult = Promise.resolve({ data: [], error: null });
+    Object.assign(bansQuery, {
+      then: bansResult.then.bind(bansResult),
+      catch: bansResult.catch.bind(bansResult),
+    });
+
+    selectionsQuery.select.mockReturnValue(selectionsQuery);
+    selectionsQuery.eq.mockReturnValue(selectionsQuery);
+    // Round selections: map+site set (triggers level 2)
+    const selectionsResult = Promise.resolve({
+      data: [{ map_id: "map-1", site_id: "site-1", operator_id: null }],
+      error: null,
+    });
+    Object.assign(selectionsQuery, {
+      then: selectionsResult.then.bind(selectionsResult),
+      catch: selectionsResult.catch.bind(selectionsResult),
+    });
+
+    // Level 1 → empty; level 2 → one defender strategy
+    strategiesQuery.select.mockReturnValue(strategiesQuery);
+    strategiesQuery.eq.mockReturnValue(strategiesQuery);
+    // 1st resolution (level 1) is empty; 2nd (level 2) resolves with the strategy
+    const emptyResult = Promise.resolve({ data: [], error: null });
+    const defResult = Promise.resolve({
+      data: [{ id: "strat-def", title: "Def", description: null, image_url: "", created_at: "2025-01-01", operator_id: "op-def", side: "defender", strategy_operators: [] }],
+      error: null,
+    });
+    let thenCount = 0;
+    const thenable = {
+      then: (onOk: (v: unknown) => unknown, onErr?: (e: unknown) => unknown) => {
+        thenCount += 1;
+        return thenCount === 1 ? emptyResult.then(onOk, onErr) : defResult.then(onOk, onErr);
+      },
+      catch: (onErr: (e: unknown) => unknown) => {
+        thenCount += 1;
+        return thenCount === 1 ? emptyResult.catch(onErr) : defResult.catch(onErr);
+      },
+    };
+    Object.assign(strategiesQuery, thenable);
+
+    const response = await POST(
+      new Request("http://localhost/api/lobby/lobby-1/assign-tasks", {
+        method: "POST",
+        body: JSON.stringify({ user_id: "user-1", operator_id: "op-def" }),
+      }),
+      params,
+    );
+
+    expect(response.status).toBe(200);
+
+    // Level 2 query must be filtered by the operator's side
+    const sideCalls = strategiesQuery.eq.mock.calls
+      .map((c: unknown[]) => c[0])
+      .filter((k: unknown) => k === "side");
+    expect(sideCalls.length).toBeGreaterThan(0);
   });
 });

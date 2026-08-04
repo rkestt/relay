@@ -119,9 +119,23 @@ export function StrategyCard({
       {/* Content column */}
       <div className="flex flex-col flex-1 min-w-0 py-4 pr-4 pl-1">
         {/* Title - h3 */}
-        <h3 className="text-base font-semibold text-foreground truncate">
-          {strategy.title}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-base font-semibold text-foreground truncate">
+            {strategy.title}
+          </h3>
+          {strategy.side && (
+            <span
+              className={cn(
+                "shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                strategy.side === "defender"
+                  ? "border-rose-500/40 bg-rose-500/10 text-rose-500"
+                  : "border-emerald-500/40 bg-emerald-500/10 text-emerald-500",
+              )}
+            >
+              {strategy.side === "defender" ? "🛡 DEF" : "🎯 ATK"}
+            </span>
+          )}
+        </div>
 
         {/* Description - 2-line clamp */}
         {strategy.description && (

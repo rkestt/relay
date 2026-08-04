@@ -97,6 +97,18 @@ export async function POST(
       );
     }
 
+    // -- Fetch the requested operator's side (for faction-consistent matching)
+    const { data: reqOperator } = await withTimeout(
+      supabase
+        .from("operators")
+        .select("side")
+        .eq("id", operator_id)
+        .maybeSingle(),
+      10000,
+      "fetch operator side"
+    );
+    const operatorSide = reqOperator?.side ?? null;
+
     // -- Fetch banned operators for this round ----------------------------
     const { data: bans } = await withTimeout(
       supabase
@@ -135,7 +147,7 @@ export async function POST(
     const baseQuery = () =>
       supabase
         .from("strategy_templates")
-        .select("id, title, description, image_url, created_at, operator_id, strategy_operators(operator_id)")
+        .select("id, title, description, image_url, created_at, operator_id, side, strategy_operators(operator_id)")
         .eq("status", "approved");
 
     // Match: main operator (strategy_templates.operator_id) OR any aux
@@ -152,6 +164,7 @@ export async function POST(
       image_url: string | null;
       created_at: string;
       operator_id: string;
+      side: "attacker" | "defender" | null;
       strategy_operators?: { operator_id: string }[];
     }> | null = null;
     let fallbackLevel = 0;
@@ -171,6 +184,8 @@ export async function POST(
       const q2 = baseQuery();
       if (mapId) q2.eq("map_id", mapId);
       if (siteId) q2.eq("site_id", siteId);
+      // Faction-consistent: only strategies for the requested operator's side
+      if (operatorSide) q2.eq("side", operatorSide);
       const { data: d2 } = await withTimeout(q2, 10000, "strategy search level 2");
       if (d2 && d2.length > 0) {
         // Prioritize strategies for operators teammates have chosen

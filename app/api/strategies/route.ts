@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return validation.error;
     }
 
-    const { title, map_id, site_id, operator_id, aux_operator_ids, description, tags, image_url, hotspots, images } =
+    const { title, map_id, site_id, operator_id, side, aux_operator_ids, description, tags, image_url, hotspots, images } =
       validation.data;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -64,6 +64,7 @@ export async function POST(request: Request) {
           map_id,
           site_id,
           operator_id,
+          side,
           description: description || null,
           image_url: imageUrl,
           status: "pending",
@@ -327,7 +328,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*), strategy_operators(operator_id)",
+        "id, title, description, image_url, status, map_id, site_id, operator_id, side, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*), strategy_operators(operator_id)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);
