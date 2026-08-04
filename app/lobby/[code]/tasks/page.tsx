@@ -12,7 +12,6 @@ import { useHeartbeat } from "@/hooks/useHeartbeat";
 import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
-  StrategyTemplate,
   StrategyTemplateWithRelations,
   StrategyHotspot,
   TaskAssignment,
