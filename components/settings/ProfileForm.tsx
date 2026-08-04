@@ -65,7 +65,7 @@ export function ProfileForm() {
       // Notifica UserMenu per rinfrescare il nome in navbar
       window.dispatchEvent(new Event("relay:profile-updated"));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Errore durante il salvataggio");
+      setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export function ProfileForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profilo</CardTitle>
+        <CardTitle>Profile</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSave} className="space-y-4">
@@ -83,14 +83,14 @@ export function ProfileForm() {
               htmlFor="username"
               className="text-xs font-medium uppercase tracking-wider text-muted-foreground"
             >
-              Nome
+              Name
             </label>
             <Input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Il tuo nome"
+              placeholder="Your name"
               maxLength={40}
               required
             />
@@ -103,12 +103,12 @@ export function ProfileForm() {
           )}
           {saved && (
             <p className="text-sm text-success" role="status">
-              Profilo salvato
+              Profile saved
             </p>
           )}
 
           <Button type="submit" disabled={loading || !username.trim()}>
-            {loading ? "Salvataggio..." : "Salva profilo"}
+            {loading ? "Saving..." : "Save profile"}
           </Button>
         </form>
       </CardContent>

@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 
 const ProfileForm = dynamic(() => import("@/components/settings/ProfileForm").then(mod => mod.ProfileForm), {
   loading: () => (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
+    <div className="rounded-lg border border-border bg-card p-6 space-y-4 animate-pulse">
       <div className="h-5 w-32 rounded bg-muted" />
       <div className="h-10 w-64 rounded-lg bg-muted" />
       <div className="h-10 w-40 rounded-lg bg-muted" />
@@ -12,7 +12,7 @@ const ProfileForm = dynamic(() => import("@/components/settings/ProfileForm").th
 
 const ExportData = dynamic(() => import("@/components/settings/ExportData").then(mod => mod.ExportData), {
   loading: () => (
-    <div className="rounded-xl border border-border bg-card p-6 space-y-4 animate-pulse">
+    <div className="rounded-lg border border-border bg-card p-6 space-y-4 animate-pulse">
       <div className="h-5 w-40 rounded bg-muted" />
       <div className="h-3 w-64 rounded bg-muted/60" />
       <div className="h-10 w-36 rounded-lg bg-muted" />
@@ -22,7 +22,7 @@ const ExportData = dynamic(() => import("@/components/settings/ExportData").then
 
 const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount").then(mod => mod.DeleteAccount), {
   loading: () => (
-    <div className="rounded-xl border border-red-200 bg-card p-6 space-y-4 animate-pulse">
+    <div className="rounded-lg border border-destructive/20 bg-card p-6 space-y-4 animate-pulse">
       <div className="h-5 w-32 rounded bg-muted" />
       <div className="h-10 w-44 rounded-lg bg-muted" />
     </div>
@@ -31,8 +31,11 @@ const DeleteAccount = dynamic(() => import("@/components/settings/DeleteAccount"
 
 export default function AccountSettingsPage() {
   return (
-    <div className="container max-w-2xl py-8 space-y-8">
-      <h1 className="text-3xl font-bold mb-8">Impostazioni Account</h1>
+    <div className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
+      <h1 className="text-h1 font-bold tracking-tight text-foreground">
+        Account Settings
+      </h1>
+
       <ProfileForm />
       <ExportData />
       <DeleteAccount />

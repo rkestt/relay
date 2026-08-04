@@ -29,7 +29,7 @@ export function ExportData() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch {
-      alert("Errore durante l'esportazione dei dati");
+      alert("Error exporting your data");
     } finally {
       setLoading(false);
     }
@@ -38,15 +38,15 @@ export function ExportData() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Esporta i tuoi dati</CardTitle>
+        <CardTitle>Export your data</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground mb-4">
-          Scarica una copia di tutti i tuoi dati personali in formato JSON.
+          Download a copy of all your personal data in JSON format.
         </p>
         <Button onClick={handleExport} disabled={loading} variant="outline">
           <DownloadIcon className="mr-2 h-4 w-4" />
-          {loading ? "Esportazione..." : "Esporta dati"}
+          {loading ? "Exporting..." : "Export data"}
         </Button>
       </CardContent>
     </Card>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/fetch";
 
 export function DeleteAccount() {
@@ -13,7 +14,7 @@ export function DeleteAccount() {
   const router = useRouter();
 
   const handleDelete = async () => {
-    if (confirmText !== "ELIMINA") return;
+    if (confirmText !== "DELETE") return;
 
     setLoading(true);
     const response = await apiFetch("/api/user/account", { method: "DELETE" });
@@ -23,50 +24,50 @@ export function DeleteAccount() {
       router.push("/");
       router.refresh();
     } else {
-      alert("Errore durante l'eliminazione dell'account");
+      alert("Error deleting your account");
       setLoading(false);
     }
   };
 
   return (
-    <Card className="border-red-200">
+    <Card className="border-destructive/20">
       <CardHeader>
-        <CardTitle className="text-red-600">Elimina Account</CardTitle>
+        <CardTitle className="text-destructive">Delete Account</CardTitle>
       </CardHeader>
       <CardContent>
         {!showConfirm ? (
           <Button variant="destructive" onClick={() => setShowConfirm(true)}>
-            Elimina il mio account
+            Delete my account
           </Button>
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Questa azione è irreversibile. Tutti i tuoi dati personali
-              verranno eliminati.
+              This action is irreversible. All your personal data will be
+              permanently deleted.
             </p>
             <p className="text-sm font-medium">
-              Digita &quot;ELIMINA&quot; per confermare:
+              Type &quot;DELETE&quot; to confirm:
             </p>
-            <input
+            <Input
               type="text"
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              placeholder="ELIMINA"
+              placeholder="DELETE"
+              aria-label="Type DELETE to confirm"
             />
             <div className="flex gap-2">
               <Button
                 variant="destructive"
                 onClick={handleDelete}
-                disabled={confirmText !== "ELIMINA" || loading}
+                disabled={confirmText !== "DELETE" || loading}
               >
-                {loading ? "Eliminazione..." : "Conferma eliminazione"}
+                {loading ? "Deleting..." : "Confirm deletion"}
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowConfirm(false)}
               >
-                Annulla
+                Cancel
               </Button>
             </div>
           </div>
