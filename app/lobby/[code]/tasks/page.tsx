@@ -13,7 +13,6 @@ import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
   StrategyTemplateWithRelations,
-  StrategyHotspot,
   TaskAssignment,
   Profile,
   Operator,
@@ -30,7 +29,6 @@ interface FeedTask {
     downvotes: number;
     user_vote: "up" | "down" | null;
   };
-  hotspots: StrategyHotspot[];
 }
 
 interface LobbyState {
@@ -199,25 +197,6 @@ export default function TasksPage({
         userVoteMap.set(v.task_assignment_id, v.vote_type);
       }
 
-      // ── Batch-fetch all hotspots ────────────────────────
-      const strategyIds = allAssignments
-        .filter((a) => a.strategy)
-        .map((a) => a.strategy_id);
-
-      const hotspotsByStrategy = new Map<string | null, StrategyHotspot[]>();
-      if (strategyIds.length > 0) {
-        const { data: hotspots } = await supabase
-          .from("strategy_hotspots")
-          .select("*")
-          .in("strategy_id", strategyIds);
-
-        for (const h of (hotspots ?? []) as StrategyHotspot[]) {
-          const existing = hotspotsByStrategy.get(h.strategy_id) ?? [];
-          existing.push(h);
-          hotspotsByStrategy.set(h.strategy_id, existing);
-        }
-      }
-
       // ── Merge everything into FeedTask list ─────────────
       const tasksWithVotes: FeedTask[] = allAssignments
         .map((assignment) => {
@@ -232,8 +211,6 @@ export default function TasksPage({
               downvotes: counts.downvotes,
               user_vote: userVoteMap.get(assignment.id) ?? null,
             },
-            hotspots:
-              hotspotsByStrategy.get(assignment.strategy_id) ?? [],
           };
         })
         .sort((a, b) => {
@@ -505,7 +482,7 @@ export default function TasksPage({
             />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sortedTasks.map(({ assignment, hotspots }, index) => (
+              {sortedTasks.map((assignment, index) => (
                 <div
                   key={assignment.id}
                   className="animate-slide-up"
@@ -513,7 +490,6 @@ export default function TasksPage({
                 >
                   <StrategyCard
                     assignment={assignment}
-                    hotspots={hotspots}
                     operators={operators}
                     username={assignment.user?.username ?? undefined}
                     onVote={(voteType) => handleVote(assignment.id, voteType)}

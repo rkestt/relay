@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       return validation.error;
     }
 
-    const { title, map_id, site_id, operator_id, side, aux_operator_ids, description, tags, image_url, hotspots, images } =
+    const { title, map_id, site_id, operator_id, side, aux_operator_ids, description, tags, image_url, images } =
       validation.data;
 
     logger.info("API", "POST /api/strategies start", { title, map_id, site_id });
@@ -124,47 +124,6 @@ export async function POST(request: Request) {
         if (tagError) {
           logger.error("API", "Failed to insert tags", tagError);
           // Non-fatal — strategy already created
-        }
-      }
-    }
-
-    // -- Insert hotspots -------------------------------------------------
-    if (Array.isArray(hotspots)) {
-      const hotspotRows = hotspots
-        .filter(
-          (
-            h,
-          ): h is {
-            x_percent: number;
-            y_percent: number;
-            label?: string;
-            image_id?: string;
-          } =>
-            typeof h === "object" &&
-            h !== null &&
-            typeof (h as Record<string, unknown>).x_percent === "number" &&
-            typeof (h as Record<string, unknown>).y_percent === "number",
-        )
-        .map((h) => ({
-          strategy_id: strategy.id,
-          x_percent: h.x_percent,
-          y_percent: h.y_percent,
-          label: h.label || null,
-          image_id: h.image_id || null,
-        }));
-
-      if (hotspotRows.length > 0) {
-        const { error: hotspotError } = await withTimeout(
-          adminClient
-            .from("strategy_hotspots")
-            .insert(hotspotRows),
-          15000,
-          "insert strategy hotspots"
-        );
-
-        if (hotspotError) {
-          logger.error("API", "Failed to insert hotspots", hotspotError);
-          // Non-fatal
         }
       }
     }
@@ -328,7 +287,7 @@ export async function GET(request: Request) {
     let query = supabase
       .from("strategy_templates")
       .select(
-        "id, title, description, image_url, status, map_id, site_id, operator_id, side, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*), strategy_operators(operator_id)",
+        "id, title, description, image_url, status, map_id, site_id, operator_id, side, created_by, created_at, strategy_tags(*), strategy_images(*), strategy_operators(operator_id)",
       );
 
     if (map_id) query = query.eq("map_id", map_id);

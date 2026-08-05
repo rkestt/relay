@@ -7,7 +7,6 @@ import type {
   TaskAssignment,
   StrategyTemplate,
   StrategyTemplateWithRelations,
-  StrategyHotspot,
   Operator,
 } from "@/types";
 
@@ -18,7 +17,6 @@ interface StrategyCardProps {
     upvotes?: number;
     downvotes?: number;
   };
-  hotspots: StrategyHotspot[];
   username?: string;
   operators?: Operator[];
   onVote: (voteType: "up" | "down" | null) => void;

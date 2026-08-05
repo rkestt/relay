@@ -14,17 +14,6 @@ export const createStrategySchema = z.object({
   difficulty: z.enum(['easy', 'medium', 'hard']).optional(),
   tags: z.array(z.string().max(50)).max(20, 'Massimo 20 tag').optional(),
   image_url: z.string().url('URL immagine non valido').optional(),
-  hotspots: z
-    .array(
-      z.object({
-        x_percent: z.number().min(0).max(100),
-        y_percent: z.number().min(0).max(100),
-        label: z.string().max(100).optional(),
-        image_id: z.string().min(1).optional(),
-      }),
-    )
-    .max(50, 'Massimo 50 hotspot')
-    .optional(),
   images: z.array(z.string().url('URL immagine non valido')).max(10, 'Massimo 10 immagini').optional(),
 });
 

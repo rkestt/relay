@@ -247,10 +247,6 @@ describe("POST /api/strategies", () => {
       insert: vi.fn(() => Promise.resolve({ error: null })),
     };
 
-    const adminHotspotsInsert = {
-      insert: vi.fn(() => Promise.resolve({ error: null })),
-    };
-
     const adminImagesInsert = {
       insert: vi.fn(() => Promise.resolve({ error: null })),
     };
@@ -262,7 +258,6 @@ describe("POST /api/strategies", () => {
     mockAdminClient.from.mockImplementation((table: string) => {
       if (table === "strategy_templates") return adminStrategyInsert;
       if (table === "strategy_tags") return adminTagsInsert;
-      if (table === "strategy_hotspots") return adminHotspotsInsert;
       if (table === "strategy_images") return adminImagesInsert;
       if (table === "validation_queue") return adminQueueInsert;
       return { insert: vi.fn(), select: vi.fn(), single: vi.fn() };
@@ -280,7 +275,6 @@ describe("POST /api/strategies", () => {
           image_url: "https://example.com/img.png",
           description: "A test strategy",
           tags: ["fast", "aggressive"],
-          hotspots: [{ x_percent: 50, y_percent: 30, label: "Plant" }],
           images: ["https://example.com/img1.png", "https://example.com/img2.png"],
         }),
       }),

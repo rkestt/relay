@@ -43,7 +43,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={baseAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />
@@ -59,7 +58,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={baseAssignment}
-        hotspots={[]}
         username="PlayerOne"
         onVote={vi.fn()}
         onClick={vi.fn()}
@@ -73,7 +71,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={baseAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />
@@ -104,7 +101,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={assignmentWithMultipleImages}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />
@@ -120,7 +116,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={baseAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={onClick}
       />
@@ -143,7 +138,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={removedAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />
@@ -159,7 +153,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={baseAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />
@@ -192,7 +185,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={assignmentWithOps}
-        hotspots={[]}
         operators={operators}
         onVote={vi.fn()}
         onClick={vi.fn()}
@@ -217,7 +209,6 @@ describe("StrategyCard", () => {
     render(
       <StrategyCard
         assignment={noImageAssignment}
-        hotspots={[]}
         onVote={vi.fn()}
         onClick={vi.fn()}
       />

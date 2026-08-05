@@ -62,11 +62,6 @@ export async function DELETE() {
       "delete strategy tags"
     );
     await withTimeout(
-      supabase.from("strategy_hotspots").delete().in("strategy_id", strategyIds),
-      15000,
-      "delete strategy hotspots"
-    );
-    await withTimeout(
       supabase.from("strategy_images").delete().in("strategy_id", strategyIds),
       15000,
       "delete strategy images"

@@ -84,15 +84,6 @@ export interface Site {
   floor: string | null;
 }
 
-export interface StrategyHotspot {
-  id: string;
-  strategy_id: string | null;
-  x_percent: number;
-  y_percent: number;
-  label: string | null;
-  image_id: string | null;
-}
-
 export interface StrategyImage {
   id: string;
   strategy_id: string;
@@ -165,6 +156,5 @@ export interface TaskAssignmentWithVotes extends TaskAssignment {
 export interface StrategyTemplateWithRelations extends StrategyTemplate {
   images?: StrategyImage[];
   strategy_tags?: StrategyTag[];
-  strategy_hotspots?: StrategyHotspot[];
   strategy_operators?: StrategyOperator[];
 }
