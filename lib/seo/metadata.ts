@@ -13,7 +13,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://relay.yourdomain.co
 export function generateMetadata({
   title,
   description,
-  image = "/og-default.png",
+  image = "/logo/export/relay-og-1200x630.png",
   url = "",
   type = "website",
 }: MetadataProps): Metadata {

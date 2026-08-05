@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Relay">
+<rect width="128" height="128" rx="28" fill="#12141A"/>
+<g transform="translate(64,64) scale(1.5) translate(-32,-32)">
+<path fill="#E84A2E" d="M8 6h48v16H8zM8 22h14v36H8zM44 22h12v22H44zM22 50l22-6 14 14H22z"/>
+</g>
+</svg>

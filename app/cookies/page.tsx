@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackArrowIcon } from "@/components/icons";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 
 const cookieCategories = [
   {
@@ -83,7 +84,12 @@ export default function CookiesPage() {
     <main className="min-h-dvh bg-background">
       {/* Back navigation */}
       <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-2">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-2">
+          <RelayLogo
+            variant="mark"
+            className="size-5 text-primary shrink-0"
+            ariaLabel="Relay"
+          />
           <Link
             href="/"
             className="group inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"

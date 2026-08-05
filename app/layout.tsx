@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     title: "Relay - Rainbow Six Siege Strategy Platform",
     description:
       "Piattaforma per gestire lobby e strategie Rainbow Six Siege. Crea lobby, condividi strategie, collabora con il team.",
-    image: "/og-default.png",
+    image: "/logo/export/relay-og-1200x630.png",
   }),
   manifest: "/manifest.json",
   appleWebApp: {

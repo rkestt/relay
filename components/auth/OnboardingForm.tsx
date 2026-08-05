@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 import { apiFetch } from "@/lib/fetch";
 import { AlertIcon } from "@/components/icons";
 
@@ -41,7 +42,12 @@ export function OnboardingForm() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-6">
       <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
-        <div className="flex flex-col gap-1.5 text-center mb-8">
+        <div className="flex flex-col items-center gap-1.5 text-center mb-8">
+          <RelayLogo
+            variant="mark"
+            className="size-10 text-primary mb-2"
+            ariaLabel="Relay"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Complete your profile
           </h1>

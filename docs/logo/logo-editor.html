@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Logo Editor — modifica a mano</title>
+<style>
+:root{ --bg:#12141A; --panel:#1A1D26; --panel2:#21232C; --line:#3E424D; --fg:#F4F5F7; --muted:#C6C9D1; --fire:#E84A2E; --fire-dim:#B83A22; }
+*{box-sizing:border-box;margin:0;padding:0}
+@font-face{font-family:"Anta";font-style:normal;font-weight:400;font-display:swap;src:url(data:font/woff2;base64,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) format("woff2");}
+body{background:var(--bg);color:var(--fg);font-family:Geist,Segoe UI,system-ui,sans-serif;min-height:100vh}
+header{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+header h1{font-size:15px;font-weight:600;letter-spacing:-0.2px}
+header .hint{color:var(--muted);font-size:12px;flex:1;min-width:200px}
+.btn{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn:hover{border-color:var(--fire)}
+.btn.fire{background:var(--fire);border-color:var(--fire);color:#fff}
+.btn.dim{opacity:.7}
+main{display:grid;grid-template-columns:1fr 300px;gap:0;min-height:calc(100vh - 49px)}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+#stageWrap{background:var(--bg);padding:24px;display:flex;align-items:center;justify-content:center;position:relative}
+#stage{width:100%;max-width:760px;background:var(--bg);border:1px solid var(--line);border-radius:12px;touch-action:none;cursor:grab}
+#stage.dragging{cursor:grabbing}
+#panel{background:var(--panel);border-left:1px solid var(--line);padding:16px;overflow-y:auto;max-height:calc(100vh - 49px)}
+#panel h2{font-size:12px;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin:18px 0 10px;font-weight:600}
+#panel h2:first-child{margin-top:0}
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:13px}
+.ctl label{color:var(--fg);flex:0 0 auto}
+.ctl .val{color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums;width:44px;text-align:right}
+.ctl input[type=range]{flex:1;accent-color:var(--fire)}
+.ctl input[type=color]{width:34px;height:26px;border:1px solid var(--line);border-radius:6px;background:none;padding:2px;cursor:pointer}
+.swatches{display:flex;gap:8px;margin:4px 0 12px}
+.sw{width:30px;height:30px;border-radius:8px;border:2px solid transparent;cursor:pointer}
+.sw.on{border-color:var(--fg)}
+#snapRow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+#snapRow button{flex:1;min-width:90px;padding:7px 4px;font-size:11px;text-align:center}
+.actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:110px;text-align:center}
+#codeBox{width:100%;height:150px;background:var(--bg);color:#9FE08A;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:Geist Mono,ui-monospace,monospace;font-size:11px;line-height:1.5;resize:vertical;white-space:pre}
+#outPath{font-size:10.5px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--fire);color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:9}
+#toast.show{opacity:1}
+#help{color:var(--muted);font-size:11.5px;line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:10.5px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Relay Logo Editor</h1>
+  <span class="hint">Trascina il mark e la scritta «elay» · sliders per scala/gap/baseline · snapshot per ripristinare</span>
+  <button class="btn" id="btnReset">↺ Reset</button>
+  <button class="btn" id="btnSnapshot">⏺ Snapshot</button>
+  <button class="btn" id="btnCopySvg">⧉ Copia SVG</button>
+  <button class="btn" id="btnPng">⬇ PNG</button>
+</header>
+<main>
+  <div id="stageWrap">
+    <svg id="stage" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+      <rect id="bg" x="0" y="0" width="200" height="100" fill="#12141A"/>
+      <line id="guideBaseline" x1="0" y1="50" x2="200" y2="50" stroke="#3E424D" stroke-width="0.4" stroke-dasharray="2 2" opacity="0.6"/>
+      <line id="guideAsc" x1="0" y1="0" x2="200" y2="0" stroke="#3E424D" stroke-width="0.3" stroke-dasharray="1 2" opacity="0.4"/>
+      <g id="gMark" style="cursor:move"></g>
+      <g id="gText" style="cursor:move"></g>
+    </svg>
+  </div>
+  <aside id="panel">
+    <h2>Mark «R»</h2>
+    <div class="ctl"><label>Scala</label><input type="range" id="sScale" min="40" max="150" value="62"><span class="val" id="vScale">0.62</span></div>
+    <div class="ctl"><label>Spaziatura dal testo</label><input type="range" id="sGap" min="0" max="30" value="11"><span class="val" id="vGap">11</span></div>
+    <div class="swatches" id="markSwatches"></div>
+    <h2>Allineamento</h2>
+    <div id="snapRow">
+      <button class="btn" id="snapBaseline">⬇ baseline</button>
+      <button class="btn" id="snapCap">⬆ ascender</button>
+      <button class="btn" id="snapCenter">◎ centra</button>
+    </div>
+    <div class="ctl"><label>Offset Y mark</label><input type="range" id="sMarkY" min="-15" max="15" value="0"><span class="val" id="vMarkY">0</span></div>
+    <h2>Testo «elay»</h2>
+    <div class="ctl"><label>Dimensione</label><input type="range" id="sSize" min="24" max="60" value="40"><span class="val" id="vSize">40</span></div>
+    <div class="ctl"><label>Letter-spacing</label><input type="range" id="sLS" min="-5" max="2" step="0.5" value="-0.5"><span class="val" id="vLS">-0.5</span></div>
+    <div class="ctl"><label>Baseline testo</label><input type="range" id="sBase" min="30" max="70" value="50"><span class="val" id="vBase">50</span></div>
+    <div class="ctl"><label>Offset Y testo</label><input type="range" id="sTextY" min="-15" max="15" value="0"><span class="val" id="vTextY">0</span></div>
+    <h2>Risultato</h2>
+    <textarea id="codeBox" readonly spellcheck="false"></textarea>
+    <div class="actions">
+      <button class="btn dim" id="btnCopyPath">Copia path</button>
+      <button class="btn dim" id="btnFill">↕ Mark su una riga</button>
+    </div>
+    <p id="help">
+      <b>Mouse:</b> trascina mark o scritta.<br>
+      <b>Snap:</b> mette la base del mark sulla baseline del testo (consigliato).<br>
+      <b>Snapshot:</b> salva la posizione attuale; ripristina con lo stesso bottone.<br>
+      <b>PNG:</b> scarica il lockup come PNG (stage attuale).
+    </p>
+  </aside>
+</main>
+<div id="toast"></div>
+<script>
+/* ── fonte Anta embeddata (base64) ──────────── */
+const ANTA = "d09GMgABAAAAABCgAA4AAAAAJPQAABBGAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGkYbkRwcgUIGYACBFBEICqhEnnULgRYAATYCJAOCKAQgBYQSB4FNG5Ueo6KOklbpEkWpHIwH/6HANmDaaP1iTKKy2S4WYLqMJFPia31H3hU4AhgYgQ9DkD3fwswjLBP6W69qscQJFtiqBsIA4aerjZF5bHjiT31/Zl06xhaNBqxgFdwgQ7gA2LMop1U9kmWSMURGUICU7G4AwQ7TMfsQ2Tlgeu3x/PM3PP/1f+BpoAGWJoEOl9BwyBOe2XZ/Wvct3sx8HJycBLXrjgDmt5MTmKC0085OABLvW/OdveOZ3aPYAmsU7kcY3uRTgGDNRbX8fHV0iX0loK5uAfz7384b2AQaeLo4gS+QQAKPJ5PHu8Fu9zn+Wvw5zYZHGIBsAD6R4ey96rrh8bR/d/eJA1kkm6uhyUun9NaonJJ0VvfpYFY/pLwvwX9aK7PzgjMq6bBLOsRCRyUuQsbIrq2aqfzq7gXurRBVCHvD3ZMOoQJWgIewgH0IDlCucHesTpM8Y86cZWL52Ct1UIQjhDDG6Gr7J4t47kTrpML8P4oBBACw1AghPD1iZEYSpSBp0pAMASQkF8mXjxQqQgjISVqwo66lB+l3dGsFejyALgTSnoQ9pzdWkLhcqAcn3yargaBVCIWbsQokj5tm9qmgBFWVhFrUoR4NaFxHKmJOzbDxpsE6mL3kP19HJrNhUrV+YpQoRbXCLEVdOwfyxJeF8ZQFNP5fr6G0mnNCX3jFr3jd+5SjE9ecmOUkG9xbl9KOUpbHTE7qcQx2gchS9vbGtEYUK1Rhjazj0lnyZV+9dAD6iEYuaiYKuU59t0kPKRePJ1Z12HqP9uxzV8LjTfkIaFBZ1UqHSDMX0BlHol2S9CCMmhL2d1gPtYTjBDsweZ7UMiJCekok0DPRSpDCcHlDosmQJAtMshx2RbqTSyaPsGy58rkueI29Ssn8yskK2pceUqlKGAE1RgEuqpbBFzdALpR6N5GhgF/n8JREGHq3KAWfG1sALTQU6BANN0FEKrMJNLgKp01UlUxPEj7tSECBrx8kkssL1ahJLdBTSznCmAEsBOTEh8FjOt2lZzDaMJJuDQFTGhY0qXHQ81qDLRdYhMmsgLuC1BXo3Qppg+ZojErIR2ELJZPILyTqluI7HM00yWpqW45ATbdLYdZJkmtThu6TW7n5BYRJ8hQoVGqfClXS8DEC5iihggZaIybTcdIjDDDCjEQ7K5ADC+zkyHDCDQ/8CJriqBKsJ5I9RwlHc7ixZrJL5EcEAybVgcIKlzFfEjAdJE61JaRHFVgstSzKEcnCyYq2PcoFP4JlYRcUiBooAOmCXxxtt7lZp6WhJAzBkcLoq+OAyU3ovy/XkTVPBKI6AARNXkahQ6CDdmnMPrs2VId6NGQaeVMGtGhJjMAtFBPi6m1k56IWLDBEC4W6pb4EQQAEtWLx+xVmwfz0iDK0zkrfUJPJuL2yxwLH2d6SrKu9lT+o5JiVeBCBbbnH5PIabPT49Ht+NorExxfAR9oUIuAfYlQ6Z8kWCUq29SjGOB1g86FXmp1XxdyAW2wg29hibN3z/dUaKSBsigtzUDZ//nrj/popMzbmuUJC8WfZXxdPAKs1ue13D4vPUQYAHwC/KGLACgdYoDE9HLJ4RwYzxgLEv7JkYedTqtKQg13hSWIrmy5QQZq7SlTXKLqkdptNne//fT1vp0Ec8sbXaVAWAwA1AF/gDOEL6QsAEIDddgzjceCxcaIU8ZBCIk+wMu5Q8Mj13RfQVUtrThyIJvXRr0W+HL2zvGccDVvTU5qs1EmWjzIG0107rRFepNQ6Juc3Zlp6kjrjNVQ7yBMJWiNYrpmspXrlhSD/tToxOsMfEqqMI6VnKbHBQy7pcI0qV8hnf/7DMemBGMX5S3O//lAx7eE/4G8gbozpKgJl2JHtCjkTQreepXb6q/VBfz+Bj3lqKLEnXCjeOOeNPNMklIDRMoFZkTAu1TuozOIccR/LOPM1Ky632iQZvkkbND0DFatk4g0uOTcm2d2glZgv+BJBRzupBNTpGYXdOjYdVGJjuG7Dtw76LRNx8kAqF17EyyTVCXkAkZJjXTxITy7bxMetO7yLD5F1b8gq1zATWJRen4BotMHliiwvnp25AG22UbTmWzo4ouKjGey2cbtaik6vIs6vkqtjmoHmUqqAEuBAE8ylCJyTsiPdnsUkAk2zlPOG3oCM4ip04CxWSrmM1VcohxJolOhIIT5/1yTZQMROjtyIp51+at8PECBaWGrtWSDUvUi0ntZ8F2tdaWFA58yuTO/iHDnilesHejVN2HmURS1R103U5pCIdX6njiK3LCUuKPUAMSFF5rJBPDIlUyzUj428MJa6pQxyFnfKZH2NyU/WlKchm377BsSnnbbH/Aev9K6K/XXSBIhGDHfKXA1sTEYKm6w2Oz1a41adHFGxNFVa7XVFoyXaHd6sc9iPOtrKlcdC2DKAsZVH90eLTx7fmsG0yUb2sOiSmiWRDrsjHu0kR1++ZWyZ/Bw9/f0AC8EsDVvMcdk+pD1FM4/vCfxJLb4022AmwKiZFpKKLLs4nWPIBTsuO1CjgngdgM/yk1FI036lfJbHGxHHVIbnwrRKvZlT4+vwo8drHlI5RtDfmyWW5AHZoyWZL5FESUdUIK0sZgcX8Cg0kpi16snbx/+IVxvr9hou5WKW8/txf3Kf1oy/332n8wf/g//O0/v6V+vktuk2rbBFFlRHygfJ0nEm2xTzwFisw+Nx2Et7hodNeiZk87Fvk3sZVvMzl5NOx4HkwzmNZZXeEWHn0SN3vSjCopVQJP5O/Co8N9tciOVS+NrvQWr2ry7H71yMfhn/vrNcIiuyy8uoL3e/X7uzWFwos/6Zflm9r7Q0LleIpYt3LMi/fOx0yCIhk7IEt3wJa540Dv3yUNS+fLH1FIOXmLviV4+gqxaNZT+dbMQfXKzuN3rpJomIEtQS2u1tFITv6YjHXy6V3/4QpNxdrdlQcbvkomUU+GGlAVQfL/nwECSp4BCZbr69v31VJMCOmLa4cPuC/J9O6wHFx5Lttz/2wYa7++AkXIrBxaWJ7ofjTy7HS0ritusfXpEI9bC9bc35ydno5C6EuWjnPaOMlxJOto2okc1G/ILu6ocWy+OyFGOdgfTLowRV6XWXVGLvX/VD9DKW1YSrOFbVR4RhYxCnSOxymaLwDY9Y/5MI8RMjq8XnNB92w43GC4ZDhAWf0jscGHUt+VeDngZA6ycmtIhjlb4R4YP4Z3IOhflP5GRhj0/0+liVUzhW5Xxe/w7kxLsIy60lHhJ/PNp3kr2VAYIqdnz8+JFX2Jvt3Py/LUuEDKQ6If53Pm0pfsdClIneWXJMEYFWWyz9lFjaL7Fu8uokfh2gPRjT7qX/sfjP2CaQIS/2QBkulz1+WgKsFhgxKU3vTF9CzzVRk9GVsRTmtthxsi8SpFxf/8bw2s9Q0H20asuueLd2NHfLljfaQVpHJDg6PhVJOweVyukca9s47Zf8vvvv7KeT4HgE4KsYkmQby6VrDGd529Kt4eAYPiwXNDYWgLS2yLer6akSJ6p3hnj7GntQcIm2KpkORSYiIAfJTJiLNdXjvG0jtRWXLt+LpKeSnb6PsTAgNUXe9qbCuZwYhJfkbFh1ny0nzajZvs2Z6bI7Hknc+qnVjVphJ+HugoDQaWC43fN5/FvHVscgYnEVhnLiqXn20Hv8Hz+1ETbdkeNsm9IzY1mi+gurHWVzwaKxyM2oNa3E73JYETByFTVnmchOVn38lrgHxYzT1JJtOiHezGxqyjSZ2fQzTlzTlHbuRcUNqKEl7Zq+sqtsp2mG71xx0Rt/M333ZTcXTO2q+HJ6I1JTWtDYSCe0dZIk2aEm815uNlrtHG9T97/mfmf3I/cd/kTZYDu5oKmBFmvewU2oxcEKNhlHNfU+Ahy7WVhpUA/VR/1S6yn1UdNXA3xRWvHFo5GtPcnVjI2wsawtroaO+ITSjNi24K4DdsZaWx9stn+DrrrtlLwzHkW2H7Sm2cKOgz0xguykTJDs4uztqUbb2w/ZCuzq9we7IIAUsefo3epktO9iW8WOT3e/Gz4ctbwHhIo/z3ZwQrqMI7mgscHbgk8CtFLOWf6B+a1PUuPi19QhEUwg7tz6/+vF/3vod4aULuKDFRtTN96tTYrgVTzIC9sMMdM5Q/xeIPsMw/1z50S1V83Pf28LXfd5z2gK+gFpPdItsvGwvq5UGA8Dp6+un3vHZVPMvCTuyf/c5NRTdWNax4anH99st1uK37EoL99uvqioVB5/YKF6SfXjJRVxCbU2ifQS+hDRHSWbJO9yMiqRAFJjT396BPsdBSdbpeJlay6cPiO5y+TDIIWNxUcEzccqXDg3+eoV3nGuZ+3xiuXnHxxvAQU738sQWmKVYqHbZtSk+QpT0rGf4/n4q1GdYXTBqdcWZB+wd/hjPKPqI/yXs5BuPxr7anOHr4/8KmLwg7IqD6JyMrIKkrtkirQ+WgG92Ntv8zt5Jk3kUoEZDD4SYVVtROgK6tzJ4RJAqCQwuj4q3Gx0hKWZ78R5vmvoLyK+BaN8q+1uUQkksVYrSVq+KCRd1rNS+Kylt0jL//nT9vORADY+4np7XLs6mxRaYDV9THAI2k7bo2mtoyFjV06MjIWYYW1CaOF1Pzsc+nYez89K32vLy8JpzAtTLFgnxNY+va/QmyIk0XTypTIJLe0y9KYAQvN5RtNG+FZB8zEa/2qE0bUx4WbUUQE1G3WGadYg1/ZM61nTJRS0Jvu8VnDARaS7O0K+Y6jp0i0TT5/99HjA1jIVnAm6mmYCz579DO8dOlunQtMBQK//RFbxiY59Yjj2aNbYf8/MI6//iQb7mFR8JEofm339yJD5b7NHt379yeX3cqWb/5VXYOERvi/j2Jdf44aEv1WaKgDA54vWF/hbH/519Br93muelKPgIHDMLN43lGtTVdmf2/hn/WwTbJpBFCyw8ZGoVTRQiC7jdga1/Gd6JGf0LP2v4A602LA1nCpcpzbijZ/MKJkVCuE1PS5rnIIFXkEY8sk0jFSt0TrSEYNCWlgooHLTV6OQfwwJwvnwwGSa/yhm8R05GCubsFnpwouZ8eXiDtRpwsfhQW/BB27nOYgG5yMdBxbCdVmUeN8WdbG6sUeiIkQ2JHjgbcjBZgrVAADA8zTq48BpPTsq8u+VF65RBlxk481SMzjUM8DPfmkcUflnHKP33ThOyEPjeKmuGqfQo22cIFUR6QcDLrZg0jWbZGFaJTNtxQzRimLdknmTBdpcUGhYt2FWpcaOCuoys7YtidaGPtowuPMugUWu0ZVAl7FUNDOitvm6VXPm3dZZeOwYqARRMGmxoEJTiyd4a87CEq0RtGmnK6tV1mBUlGq3um86qLBu3qy5pqw8EpUK1EOYlo2k6LBh1YJpk7YU2NZzVrtnHcXHqmfNK9O3TQiZtGpZWI+D4tZTpkPDrAjw5MKd+N5T8SnyDzvPxp41sPMisfdygZvH6vrel+ug0Dtzyh27+WNV9C6Sf/NA2fvbo0atOvUaNGrSrEVruD2qQ6cu3Xr06tNvwKAhw0aMegJPIkGiJMlSpEqTLkNm44yHa4ET6AhzNbExvTPNqrv4/x+0m3J7ZV6SKgkAAAA=";
+
+/* ── geometria base del mark (viewBox 64, baseline y58) ── */
+const MARK = [
+  "M8 6h48v16H8z",        // top bar
+  "M8 22h14v36H8z",       // stem
+  "M44 22h12v22H44z",     // wall
+  "M22 50l22-6 14 14H22z" // leg
+];
+
+/* ── stato ── */
+const S = {
+  scale: 0.615, gap: 11, markY: 0,
+  size: 40, ls: -0.5, baseline: 50, textY: 0,
+  markColor: "#E84A2E", textColor: "#F4F5F7",
+  markPos: null, textPos: null   // override posizioni (drag)
+};
+let snapshot = null;
+let dragging = null; // 'mark' | 'text'
+let dragStart = null;
+
+const VB_W = 200, VB_H = 100;
+const stage = document.getElementById('stage');
+const gMark = document.getElementById('gMark');
+const gText = document.getElementById('gText');
+
+/* ── helper ── */
+function clamp(v, a, b){ return Math.min(b, Math.max(a, v)); }
+const $ = id => document.getElementById(id);
+function toast(msg){ const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 1600); }
+
+/* ── geometria mark in unità stage ── */
+// mark base: x8..58, y6..58 (top bar top = y6, baseline = y58)
+function markGeom(){
+  const s = S.scale;
+  // ancoraggio: bottom del mark = baseline testo (y=S.baseline) + offset markY
+  const bottomY = S.baseline + S.markY;
+  const topY = bottomY - 52 * s;
+  const x0 = S.markPos ? S.markPos.x : 30;
+  const y0 = S.markPos ? S.markPos.y : topY;
+  const sx = x0, sy = y0;
+  const T = (x, y) => [sx + (x - 8) * s, sy + (y - 6) * s];
+  const shapes = [
+    [[8,6],[56,6],[56,22],[8,22]],
+    [[8,22],[22,22],[22,58],[8,58]],
+    [[44,22],[56,22],[56,44],[44,44]],
+    [[22,50],[44,44],[58,58],[22,58]],
+  ];
+  return shapes.map(p => {
+    const pts = p.map(pt => T(pt[0], pt[1]));
+    return "M" + pts.map(pt => pt.map(v => +v.toFixed(2)).join(" ")).join("L") + "Z";
+  });
+}
+
+function textX(){
+  const markRight = (S.markPos ? S.markPos.x : 30) + (58 - 8) * S.scale;
+  return markRight + S.gap;
+}
+
+function render(){
+  const markPaths = markGeom();
+  gMark.innerHTML = markPaths.map(d => `<path fill="${S.markColor}" d="${d}"/>`).join('');
+  const tx = S.textPos ? S.textPos.x : textX();
+  const ty = S.baseline + S.textY;
+  gText.innerHTML = `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" font-family="Anta, Geist, Segoe UI, system-ui, sans-serif" font-size="${S.size}" letter-spacing="${S.ls}" fill="${S.textColor}">elay</text>`;
+  const g = $('guideBaseline'); g.setAttribute('y1', S.baseline); g.setAttribute('y2', S.baseline);
+  updateCode();
+}
+
+function updateCode(){
+  const markPaths = markGeom();
+  const tx = S.textPos ? S.textPos.x : textX();
+  const ty = S.baseline + S.textY;
+  const out = [
+    `<svg viewBox="0 0 ${VB_W} ${VB_H}">`,
+    `<rect width="${VB_W}" height="${VB_H}" fill="#12141A"/>`,
+    `  <path fill="${S.markColor}" d="${markPaths.join('')}"/>`,
+    `  <text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" font-family="Anta,Geist,sans-serif" font-size="${S.size}" letter-spacing="${S.ls}" fill="${S.textColor}">elay</text>`,
+    `</svg>`
+  ].join('\n');
+  $('codeBox').value = out;
+  $('outPath') && ($('outPath').textContent = markPaths.join(''));
+}
+
+/* ── snap ── */
+function snapBaseline(){ S.markPos = null; S.markY = 0; render(); }
+function snapCap(){
+  // top del mark = ascender testo (cap+ ~ top di 'l' ≈ baseline - 0.77*size)
+  const ascTop = S.baseline - 0.77 * S.size;
+  S.markPos = null;
+  S.markY = ascTop - (S.baseline - 52 * S.scale); // top del mark attuale
+  S.markY = ascTop - S.baseline + 52 * S.scale;
+  render();
+}
+function snapCenter(){
+  // centra il mark rispetto al testo (bbox)
+  const mH = 52 * S.scale;
+  const textH = 0.77 * S.size; // ascender
+  const markTop = S.baseline - mH + S.markY;
+  const textTop = S.baseline - 0.77 * S.size;
+  S.markY += (textTop + textH / 2) - (markTop + mH / 2);
+  S.markPos = null;
+  render();
+}
+
+/* ── drag ── */
+function svgPoint(ev){
+  const r = stage.getBoundingClientRect();
+  return { x: (ev.clientX - r.left) / r.width * VB_W, y: (ev.clientY - r.top) / r.height * VB_H };
+}
+stage.addEventListener('pointerdown', ev => {
+  if (ev.target.closest('#gMark')) { dragging = 'mark'; }
+  else if (ev.target.closest('#gText')) { dragging = 'text'; }
+  else return;
+  dragStart = { ...svgPoint(ev), mark: S.markPos, text: S.textPos };
+  stage.classList.add('dragging');
+  stage.setPointerCapture(ev.pointerId);
+});
+stage.addEventListener('pointermove', ev => {
+  if (!dragging) return;
+  const p = svgPoint(ev);
+  const dx = p.x - dragStart.x, dy = p.y - dragStart.y;
+  if (dragging === 'mark') {
+    S.markPos = { x: dragStart.mark ? dragStart.mark.x + dx : (30 + dx), y: dragStart.mark ? dragStart.mark.y + dy : (S.baseline + S.markY - 52 * S.scale + dy) };
+  } else {
+    S.textPos = { x: dragStart.text ? dragStart.text.x + dx : (textX() + dx), y: dragStart.text ? dragStart.text.y + dy : (S.baseline + S.textY + dy) };
+  }
+  render();
+});
+stage.addEventListener('pointerup', () => { dragging = null; stage.classList.remove('dragging'); });
+
+/* ── controlli ── */
+function bindSlider(id, key, fmt, fn, parse){
+  const el = $(id);
+  const conv = parse || (v => v);
+  el.addEventListener('input', () => { S[key] = conv(parseFloat(el.value)); if (fn) fn(); render(); });
+  const v = $(id.replace('s','v'));
+  el.addEventListener('input', () => { v.textContent = fmt(conv(parseFloat(el.value))); });
+  v.textContent = fmt(conv(S[key]));
+}
+bindSlider('sScale', 'scale', v => v.toFixed(2), () => { S.markPos = null; }, v => v / 100);
+bindSlider('sGap', 'gap', v => v.toFixed(0), () => { S.textPos = null; });
+bindSlider('sMarkY', 'markY', v => (v > 0 ? '+' : '') + v, () => { S.markPos = null; });
+bindSlider('sSize', 'size', v => v.toFixed(0), () => { S.textPos = null; });
+bindSlider('sLS', 'ls', v => v.toFixed(1), () => { S.textPos = null; });
+bindSlider('sBase', 'baseline', v => v.toFixed(0), () => { S.markPos = null; S.textPos = null; });
+bindSlider('sTextY', 'textY', v => (v > 0 ? '+' : '') + v, () => { S.textPos = null; });
+
+/* swatches mark */
+const markSw = [
+  ['#E84A2E', 'fire'], ['#F4F5F7', 'bianco'], ['#12141A', 'navy']
+];
+function buildSwatches(container, colors, onPick){
+  const el = $(container);
+  el.innerHTML = '';
+  colors.forEach(([hex, name]) => {
+    const d = document.createElement('div');
+    d.className = 'sw' + (S.markColor === hex ? ' on' : '');
+    d.style.background = hex;
+    d.title = name;
+    d.addEventListener('click', () => {
+      S.markColor = hex; render();
+      el.querySelectorAll('.sw').forEach(s => s.classList.remove('on'));
+      d.classList.add('on');
+    });
+    el.appendChild(d);
+  });
+}
+buildSwatches('markSwatches', markSw);
+
+$('btnReset').addEventListener('click', () => { Object.assign(S, { scale:0.615, gap:11, markY:0, size:40, ls:-0.5, baseline:50, textY:0, markPos:null, textPos:null }); $('sScale').value=62; $('sGap').value=11; $('sMarkY').value=0; $('sSize').value=40; $('sLS').value=-0.5; $('sBase').value=50; $('sTextY').value=0; render(); toast('Reset'); });
+$('btnSnapshot').addEventListener('click', () => {
+  if (snapshot) { Object.assign(S, snapshot); snapshot = null; $('btnSnapshot').textContent = '⏺ Snapshot'; render(); toast('Snapshot ripristinato'); }
+  else { snapshot = JSON.parse(JSON.stringify(S)); $('btnSnapshot').textContent = '↩ Ripristina'; toast('Snapshot salvato'); }
+});
+$('btnCopySvg').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('codeBox').value); toast('SVG copiato'); } catch { $('codeBox').select(); document.execCommand('copy'); toast('SVG copiato (seleziona e copia)'); } });
+$('btnCopyPath').addEventListener('click', async () => {
+  const path = markGeom().join('');
+  try { await navigator.clipboard.writeText(path); toast('Path copiato'); } catch { toast('Seleziona il path dal box'); }
+});
+$('btnFill').addEventListener('click', () => {
+  // espande il mark a tutta altezza (stile app icon): scale 1, ancorato in alto
+  S.scale = 1; S.markPos = null; S.markY = 0;
+  $('sScale').value = 100;
+  render(); toast('Mark scala 1.0');
+});
+$('snapBaseline').addEventListener('click', snapBaseline);
+$('snapCap').addEventListener('click', snapCap);
+$('snapCenter').addEventListener('click', snapCenter);
+
+/* PNG export */
+$('btnPng').addEventListener('click', async () => {
+  toast('Genero PNG…');
+  const W = 800, H = 400;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#12141A'; ctx.fillRect(0, 0, W, H);
+  const svgStr = $('codeBox').value;
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+  const img = new Image();
+  img.onload = () => {
+    try {
+      ctx.drawImage(img, 0, 0, W, H);
+      const a = document.createElement('a');
+      a.download = 'relay-lockup-editor.png';
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+      toast('PNG scaricato');
+    } catch (e) {
+      downloadSvgFallback('Sandbox blocca il canvas — scarico SVG al posto del PNG');
+    }
+  };
+  img.onerror = () => downloadSvgFallback('Errore PNG — scarico SVG');
+});
+function downloadSvgFallback(msg){
+  const a = document.createElement('a');
+  a.download = 'relay-lockup-editor.svg';
+  a.href = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent($('codeBox').value);
+  a.click();
+  toast(msg);
+}
+  img.src = url;
+});
+
+/* init */
+render();
+</script>
+</body>
+</html>

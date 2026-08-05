@@ -1,10 +1,18 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center space-y-6 max-w-md px-4">
+        <div className="flex justify-center">
+          <RelayLogo
+            variant="mark"
+            className="size-10 text-primary/40"
+            ariaLabel="Relay"
+          />
+        </div>
         <div className="text-8xl font-bold text-primary/20">404</div>
         <h1 className="text-3xl font-bold text-foreground">Page Not Found</h1>
         <p className="text-muted-foreground">

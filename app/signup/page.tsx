@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useIsClient } from "@/hooks/useIsClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 import { logger } from "@/lib/logger";
 import { AlertIcon, BackArrowIcon, DiscordIcon } from "@/components/icons";
 
@@ -168,7 +169,12 @@ export default function SignupPage() {
         )}
       >
         {/* Header */}
-        <div className="flex flex-col gap-1.5 text-center mb-8">
+        <div className="flex flex-col items-center gap-1.5 text-center mb-8">
+          <RelayLogo
+            variant="mark"
+            className="size-10 text-primary mb-2"
+            ariaLabel="Relay"
+          />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Create account
           </h1>

@@ -7,6 +7,7 @@ import { createBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { handleApiError, errorMessage } from "@/lib/api-error";
@@ -464,6 +465,11 @@ export default function LobbyPage({
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
+              <RelayLogo
+                variant="mark"
+                className="size-5 text-primary"
+                ariaLabel="Relay"
+              />
               <span className="text-xs font-mono font-bold tracking-widest text-muted-foreground uppercase">
                 Room
               </span>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RelayLogo } from "@/components/ui/RelayLogo";
 import { logger } from "@/lib/logger";
 import { apiFetch } from "@/lib/fetch";
 import { handleApiError } from "@/lib/api-error";
@@ -115,27 +116,15 @@ export default function HomePage() {
 
         {/* Logomark + Title */}
         <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="flex items-center justify-center w-16 h-16 rounded-2xl border border-border bg-card">
-            <svg
-              aria-hidden="true"
-              className="size-8 text-primary"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z" />
-              <path d="M2 17l10 5 10-5" />
-              <path d="M2 12l10 5 10-5" />
-            </svg>
-          </div>
+          <h1 className="m-0">
+            <RelayLogo
+              variant="lockup"
+              className="h-14 sm:h-16 w-auto"
+              ariaLabel="Relay"
+            />
+          </h1>
 
           <div className="flex flex-col gap-2">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-              Relay
-            </h1>
             <p className="text-base text-muted-foreground font-medium">
               Tactical sync for Rainbow Six Siege
             </p>
