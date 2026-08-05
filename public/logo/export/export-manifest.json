@@ -1,0 +1,65 @@
+{
+  "generated": "2026-08-02T19:50:39.153Z",
+  "files": [
+    {
+      "name": "relay-favicon-16.png",
+      "width": 16,
+      "height": 16,
+      "bytes": 242
+    },
+    {
+      "name": "relay-favicon-32.png",
+      "width": 32,
+      "height": 32,
+      "bytes": 285
+    },
+    {
+      "name": "relay-favicon-48.png",
+      "width": 48,
+      "height": 48,
+      "bytes": 386
+    },
+    {
+      "name": "relay-appicon-192.png",
+      "width": 192,
+      "height": 192,
+      "bytes": 2551
+    },
+    {
+      "name": "relay-appicon-512.png",
+      "width": 512,
+      "height": 512,
+      "bytes": 7288
+    },
+    {
+      "name": "relay-appicon-512-maskable.png",
+      "width": 512,
+      "height": 512,
+      "bytes": 3529
+    },
+    {
+      "name": "relay-apple-touch-180.png",
+      "width": 180,
+      "height": 180,
+      "bytes": 2442
+    },
+    {
+      "name": "relay-avatar-1024.png",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 6414
+    },
+    {
+      "name": "relay-banner-1500x500.png",
+      "width": 1500,
+      "height": 500,
+      "bytes": 12296
+    },
+    {
+      "name": "relay-og-1200x630.png",
+      "width": 1200,
+      "height": 630,
+      "bytes": 27921
+    }
+  ]
+}
