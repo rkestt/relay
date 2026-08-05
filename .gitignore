@@ -74,3 +74,4 @@ test-results/
 .lwts/data/*.db-wal
 MARKETING.md
 .supabase-creds.env
+.lwts/data/*.db
