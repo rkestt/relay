@@ -5,18 +5,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@/lib/supabase/client";
 import { LibraryStrategyCard } from "@/components/tasks/LibraryStrategyCard";
 import { logger } from "@/lib/logger";
+import type { StrategyTemplateWithRelations, StrategyTag, StrategyImage } from "@/types";
 
 interface MapRow { id: string; name: string }
 interface OperatorRow { id: string; name: string }
 
-interface StrategyListItem {
+interface StrategyListItem extends StrategyTemplateWithRelations {
   id: string;
   title: string;
   description: string | null;
   image_url: string;
   operator_id: string | null;
-  strategy_tags?: { id: string; tag: string }[];
-  strategy_images?: { id: string; image_url: string; sort_order: number }[];
+  strategy_tags?: StrategyTag[];
+  images?: StrategyImage[];
 }
 
 interface Pagination { page: number; pageSize: number; total: number; totalPages: number }
@@ -89,7 +90,21 @@ function StrategiesBrowser() {
         if (data.error) {
           setError(data.error);
         } else {
-          setStrategies(data.strategies ?? []);
+          // Mappa strategy_images → images (la card usa il nome `images`)
+          const items: StrategyListItem[] = (data.strategies ?? []).map(
+            (s: Record<string, unknown>) => {
+              const { strategy_images, ...rest } = s as {
+                strategy_images?: StrategyImage[];
+                [k: string]: unknown;
+              };
+              return {
+                ...(rest as unknown as StrategyTemplateWithRelations),
+                images: strategy_images ?? [],
+                strategy_tags: (rest.strategy_tags ?? []) as StrategyTag[],
+              };
+            },
+          );
+          setStrategies(items);
           setPagination(data.pagination ?? null);
         }
       })
@@ -196,7 +211,7 @@ function StrategiesBrowser() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {strategies.map((s) => (
-            <LibraryStrategyCard key={s.id} strategy={s as never} />
+            <LibraryStrategyCard key={s.id} strategy={s} />
           ))}
         </div>
       )}

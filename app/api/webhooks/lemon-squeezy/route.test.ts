@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const mockAdminClient = {
-  auth: { admin: { listUsers: vi.fn() } },
   from: vi.fn(() => ({
     update: vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn() })) })),
     upsert: vi.fn(),
@@ -27,19 +26,29 @@ function sign(body: string, secret: string): string {
 describe("POST /api/webhooks/lemon-squeezy", () => {
   const USER_ID = "d8823048-609f-4941-9e5d-8c8bfc3c7641";
   const SECRET = "test-webhook-secret";
+  const SUPABASE_URL = "http://127.0.0.1:54321";
+
+  // Mock del lookup admin users (GET /auth/v1/admin/users?filter=email)
+  function mockAdminLookup(users: { id: string; email: string }[]) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string | URL) =>
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ users }),
+        }),
+      ),
+    );
+  }
 
   beforeEach(() => {
     vi.resetModules();
+    vi.unstubAllGlobals();
     process.env.LEMON_SQUEEZY_WEBHOOK_SECRET = SECRET;
     process.env.LEMON_SQUEEZY_API_KEY = "test-api-key";
-    mockAdminClient.auth.admin.listUsers.mockResolvedValue({
-      data: {
-        users: [
-          { id: USER_ID, email: "pro@test.local" },
-        ],
-      },
-      error: null,
-    });
+    process.env.NEXT_PUBLIC_SUPABASE_URL = SUPABASE_URL;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-key";
+    mockAdminLookup([{ id: USER_ID, email: "pro@test.local" }]);
     mockAdminClient.from.mockReturnValue({
       update: vi.fn(() => ({
         eq: vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ error: null }) })),
@@ -121,10 +130,7 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
   });
 
   it("risponde 200 handled:false per email sconosciuta (no retry LS)", async () => {
-    mockAdminClient.auth.admin.listUsers.mockResolvedValue({
-      data: { users: [{ id: USER_ID, email: "pro@test.local" }] },
-      error: null,
-    });
+    mockAdminLookup([{ id: USER_ID, email: "pro@test.local" }]);
     const payload = {
       meta: { event_name: "subscription_created" },
       data: { id: "ls-9", attributes: { user_email: "nobody@nowhere.test" } },

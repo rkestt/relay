@@ -72,18 +72,38 @@ export async function POST(request: Request) {
 
   const adminClient = createAdminClient();
 
-  // Risolvi l'utente via email (auth.users → profiles)
-  const { data: authUser } = await adminClient.auth.admin.listUsers();
-  const user = authUser?.users.find(
-    (u) => u.email?.toLowerCase().trim() === email,
-  );
+  // Risolvi l'utente via email — lookup diretto (niente listUsers paginato)
+  // GoTrue admin API: GET /auth/v1/admin/users?filter=<email>
+  let userId: string | null = null;
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users?filter=${encodeURIComponent(
+        email,
+      )}`,
+      {
+        headers: {
+          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
+        },
+        cache: "no-store",
+      },
+    );
+    if (res.ok) {
+      const body = await res.json();
+      const matched = (body?.users ?? []).find(
+        (u: { email?: string }) =>
+          u.email?.toLowerCase().trim() === email,
+      );
+      if (matched) userId = matched.id;
+    }
+  } catch (e) {
+    logger.error("LS", "admin users lookup failed", e);
+  }
 
-  if (!user) {
+  if (!userId) {
     logger.warn("LS", "No r6hub user for webhook email", { email });
     return NextResponse.json({ ok: true, handled: false });
   }
-
-  const userId = user.id;
 
   // License key di riferimento (se presente nel payload)
   const licenseKey =

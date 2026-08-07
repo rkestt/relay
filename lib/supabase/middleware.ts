@@ -12,6 +12,7 @@ const publicPaths = [
   "/_next",
   "/favicon.ico",
   "/icons",
+  "/images",
   "/maps",
   "/manifest.json",
 ];
