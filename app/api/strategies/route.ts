@@ -3,7 +3,6 @@ import { withTimeout } from "@/lib/supabase/timeout";
 import { logger } from "@/lib/logger";
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import crypto from "crypto";
 import { createStrategySchema, validateRequest } from "@/lib/validations";
 
 // ──────────────────────────────────────────────
@@ -170,105 +169,6 @@ export async function POST(request: Request) {
     }
 
     // -- Generate validation tokens & queue entries ----------------------
-    const secret = process.env.VALIDATION_HMAC_SECRET;
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
-    const validationLinks: Record<string, string> = {};
-
-    if (secret) {
-      for (const action of ["approve", "reject"] as const) {
-        const timestamp = new Date().toISOString();
-        const payload = `${strategy.id}:${action}:${timestamp}`;
-        const token = crypto
-          .createHmac("sha256", secret)
-          .update(payload)
-          .digest("hex");
-
-        const expiresAt = new Date(
-          Date.now() + 7 * 24 * 60 * 60 * 1000,
-        ).toISOString();
-
-        const { error: queueError } = await withTimeout(
-          adminClient
-            .from("validation_queue")
-            .insert({
-              strategy_id: strategy.id,
-              token_hash: token,
-              action,
-              expires_at: expiresAt,
-              created_at: timestamp,
-            }),
-          15000,
-          "insert validation queue entry"
-        );
-
-        if (queueError) {
-          logger.error(
-            "API",
-            "Failed to insert validation queue entry",
-            queueError,
-          );
-        } else {
-          validationLinks[
-            action
-          ] = `${baseUrl}/api/validate?token=${token}&strategyId=${strategy.id}&action=${action}`;
-        }
-      }
-    }
-
-    // -- Call Discord webhook -------------------------------------------
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (webhookUrl) {
-        const tagList = Array.isArray(tags)
-          ? tags.filter((t): t is string => typeof t === "string").join(", ")
-          : "None";
-
-        const description = Object.entries(validationLinks)
-          .map(([action, url]) => {
-            const emoji = action === "approve" ? "✅" : "❌";
-            const label =
-              action.charAt(0).toUpperCase() + action.slice(1);
-            return `${emoji} [${label}](${url})`;
-          })
-          .join("\n");
-
-        const embed: Record<string, unknown> = {
-          title: "New Strategy Submitted",
-          color: 0x5865f2,
-          fields: [
-            { name: "Title", value: String(title), inline: true },
-            { name: "Status", value: "Pending", inline: true },
-            { name: "Submitted by", value: user.id, inline: true },
-            { name: "Tags", value: tagList || "None" },
-          ],
-          timestamp: new Date().toISOString(),
-        };
-
-        if (description) {
-          embed.description = description;
-        }
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-        try {
-          await fetch(webhookUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ embeds: [embed] }),
-            signal: controller.signal,
-          });
-        } catch (webhookError: unknown) {
-          if (webhookError instanceof Error && webhookError.name === "AbortError") {
-            logger.warn("API", "Discord webhook timeout after 5s");
-          } else {
-            logger.error("API", "Failed to call Discord webhook", webhookError);
-          }
-        } finally {
-          clearTimeout(timeoutId);
-        }
-    }
-
     logger.debug("API", "POST /api/strategies success", { strategyId: strategy.id, status: strategy.status });
 
     // Invalidate cache so new strategy appears immediately

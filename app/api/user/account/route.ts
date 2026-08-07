@@ -71,11 +71,6 @@ export async function DELETE() {
       15000,
       "delete strategy images"
     );
-    await withTimeout(
-      supabase.from("validation_queue").delete().in("strategy_id", strategyIds),
-      15000,
-      "delete validation queue"
-    );
   }
 
   // 5. Anonymize strategy templates (keep records, remove creator reference)

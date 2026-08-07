@@ -25,8 +25,7 @@ r6hub is a progressive web application that turns a phone or tablet into a real-
 - **🎯 Operator Selection** — Each player picks their operator per round. Selections lock once confirmed.
 - **🚫 Ban System** — Squad leaders ban operators per side per round. Bans persist across rounds with automatic carry-over.
 - **📋 Task Assignment** — Smart assigner matches operator archetype tags to approved strategy templates, finds the best-fitting unassigned strategy, and allocates it per player per round.
-- **🧠 UGC Strategies** — Community-driven strategy templates with map overlays, hotspots (clickable markers), tags, and a moderation pipeline.
-- **✅ Discord Validation** — Strategies submitted via the app trigger a Discord webhook embed with approve/reject links secured by HMAC-SHA256 tokens. One-click moderation from Discord.
+- **🧠 UGC Strategies** — Community-driven strategy templates with map overlays, hotspots (clickable markers), tags, and in-app moderation.
 - **🔐 Authentication** — Supabase Auth with automatic profile creation, Row-Level Security on all tables, and middleware-based route protection.
 - **📱 PWA** — Installable on mobile and desktop. Service worker caching via `@ducanh2912/next-pwa`. Offline-aware UI with connection status banners.
 - **🎨 Dark-First UI** — Neutral-950/900 palette, Geist font, subtle shadows, and a clean tactical aesthetic.
@@ -47,7 +46,6 @@ r6hub is a progressive web application that turns a phone or tablet into a real-
 | **PWA** | [`@ducanh2912/next-pwa`](https://github.com/DuCanh29/next-pwa) |
 | **Font** | [Geist](https://vercel.com/font) (via `next/font`) |
 | **CSS Utility** | `clsx` + `tailwind-merge` (via `cn()` helper) |
-| **Validation** | HMAC-SHA256 (Node `crypto`) |
 | **Linting** | ESLint 9 + `eslint-config-next` |
 
 ---
@@ -81,12 +79,6 @@ cp .env.local.example .env.local
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
-
-# ── Discord Webhook (optional, for strategy moderation) ──
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your-webhook-id/your-webhook-token
-
-# ── Validation HMAC Secret (required for strategy moderation) ──
-VALIDATION_HMAC_SECRET=your-hmac-secret-here
 ```
 
 ### Development
@@ -105,8 +97,8 @@ r6hub uses 5 sequential migration files located in `supabase/migrations/`. Run t
 
 | # | File | Purpose |
 |---|------|---------|
-| 1 | `00001_setup_schema.sql` | Creates all tables (`profiles`, `maps`, `sites`, `operators`, `operator_tags`, `lobbies`, `lobby_members`, `rounds`, `lobby_bans`, `lobby_selections`, `strategy_templates`, `strategy_tags`, `strategy_hotspots`, `task_assignments`, `validation_queue`) with foreign keys, constraints, and indexes. |
-| 2 | `00002_rls_policies.sql` | Enables Row-Level Security on every table. Grants authenticated users minimal access (read own lobbies, insert own selections, etc.). Locks down `validation_queue` to server-side only. |
+| 1 | `00001_setup_schema.sql` | Creates all tables (`profiles`, `maps`, `sites`, `operators`, `operator_tags`, `lobbies`, `lobby_members`, `rounds`, `lobby_bans`, `lobby_selections`, `strategy_templates`, `strategy_tags`, `strategy_hotspots`, `task_assignments`) with foreign keys, constraints, and indexes. |
+| 2 | `00002_rls_policies.sql` | Enables Row-Level Security on every table. Grants authenticated users minimal access (read own lobbies, insert own selections, etc.). |
 | 3 | `00003_seed_reference.sql` | Seeds 5 maps (Oregon, Bank, Clubhouse, Kafe, Border), 20 bomb sites, 15 operators (attackers + defenders) with archetype tags. |
 | 4 | `00004_seed_strategies.sql` | Seeds 25 approved strategy templates across maps with tags and map hotspots. |
 | 5 | `00005_auth_triggers.sql` | Creates auth triggers: auto-creates `profiles` row on user signup, updates `lobbies.updated_at` on member changes, marks lobby closed when leader leaves. |
@@ -151,8 +143,6 @@ r6hub/
 │   │   ├── strategies/
 │   │   │   ├── route.ts               # GET/POST /api/strategies — List & submit
 │   │   │   └── [id]/approve/route.ts  # POST /api/strategies/[id]/approve — Internal approval
-│   │   └── validate/
-│   │       └── route.ts               # GET /api/validate — Handle Discord validation links
 │   ├── lobby/
 │   │   └── [code]/
 │   │       ├── page.tsx               # Lobby dashboard (members, bans, rounds)
@@ -160,8 +150,6 @@ r6hub/
 │   │       ├── select/page.tsx        # Operator selection UI
 │   │       ├── tasks/page.tsx         # Task assignment view
 │   │       └── submit/page.tsx        # Strategy submission form
-│   ├── validate/
-│   │   └── page.tsx                   # Validation result page (from Discord link)
 │   ├── layout.tsx                     # Root layout with Geist font, PWA manifest
 │   ├── page.tsx                       # Landing page (create / join lobby)
 │   └── globals.css                    # Tailwind CSS v4 global styles
@@ -237,14 +225,8 @@ r6hub/
 | Method | Route | Description | Auth | Body / Params |
 |--------|-------|-------------|------|---------------|
 | `GET` | `/api/strategies` | List strategies (filter by `map_id`, `site_id`, `status`) | Required | Query params |
-| `POST` | `/api/strategies` | Submit a new strategy (sends Discord webhook) | Required | `{ title, map_id, site_id, image_url, description?, tags?, hotspots? }` |
+| `POST` | `/api/strategies` | Submit a new strategy | Required | `{ title, map_id, site_id, image_url, description?, tags?, hotspots? }` |
 | `POST` | `/api/strategies/[id]/approve` | Approve a strategy (internal) | Required | — |
-
-### Validation Endpoint
-
-| Method | Route | Description | Auth | Params |
-|--------|-------|-------------|------|--------|
-| `GET` | `/api/validate` | Handle Discord approve/reject links (returns HTML page) | Public | `token`, `strategyId`, `action` |
 
 ---
 
@@ -263,19 +245,12 @@ vercel
 vercel env add NEXT_PUBLIC_SUPABASE_URL
 vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 vercel env add SUPABASE_SERVICE_ROLE_KEY
-vercel env add DISCORD_WEBHOOK_URL
-vercel env add VALIDATION_HMAC_SECRET
 
 # Deploy to production
 vercel --prod
 ```
 
 Make sure your Supabase project's **Row-Level Security** policies are applied (migration `00002`) and that your Supabase URL and anon key are correctly set in the production environment.
-
-For the Discord webhook integration:
-1. Create a webhook in your Discord server (Server Settings → Integrations → Webhooks).
-2. Set `DISCORD_WEBHOOK_URL` in your environment.
-3. Set `VALIDATION_HMAC_SECRET` to a long random string (used to sign approve/reject URLs).
 
 ### PWA Notes
 

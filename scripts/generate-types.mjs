@@ -79,7 +79,6 @@ function build() {
     strategy_templates: "StrategyTemplate",
     task_assignments: "TaskAssignment",
     task_votes: "TaskVote",
-    validation_queue: "ValidationQueueItem",
   };
 
   const enumFields = {

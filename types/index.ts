@@ -138,16 +138,6 @@ export interface TaskVote {
   created_at: string | null;
 }
 
-export interface ValidationQueueItem {
-  id: string;
-  strategy_id: string | null;
-  token_hash: string;
-  action: string;
-  expires_at: string;
-  used_at: string | null;
-  created_at: string | null;
-}
-
 // ── Virtual / computed fields ──
 
 export interface TaskAssignmentWithVotes extends TaskAssignment {

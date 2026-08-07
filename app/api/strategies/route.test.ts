@@ -234,16 +234,11 @@ describe("POST /api/strategies", () => {
       insert: vi.fn(() => Promise.resolve({ error: null })),
     };
 
-    const adminQueueInsert = {
-      insert: vi.fn(() => Promise.resolve({ error: null })),
-    };
-
     mockAdminClient.from.mockImplementation((table: string) => {
       if (table === "strategy_templates") return adminStrategyInsert;
       if (table === "strategy_tags") return adminTagsInsert;
       if (table === "strategy_hotspots") return adminHotspotsInsert;
       if (table === "strategy_images") return adminImagesInsert;
-      if (table === "validation_queue") return adminQueueInsert;
       return { insert: vi.fn(), select: vi.fn(), single: vi.fn() };
     });
 

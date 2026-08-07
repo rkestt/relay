@@ -10,8 +10,6 @@ const publicPaths = [
   "/favicon.ico",
   "/icons",
   "/maps",
-  "/api/validate",
-  "/validate",
   "/manifest.json",
 ];
 

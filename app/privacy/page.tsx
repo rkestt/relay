@@ -164,17 +164,6 @@ const sections = [
           <Card className="border-border/50">
             <CardContent className="p-4">
               <h3 className="font-semibold text-foreground text-sm mb-1">
-                Discord (Webhook)
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Notifiche opzionali delle attività di lobby. Solo dati
-                strettamente necessari.
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-border/50">
-            <CardContent className="p-4">
-              <h3 className="font-semibold text-foreground text-sm mb-1">
                 PostHog
               </h3>
               <p className="text-xs text-muted-foreground">
