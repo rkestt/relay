@@ -24,11 +24,13 @@ export default function HomePage() {
   // Read stored room code on client only (hydration-safe)
   useEffect(() => {
     const stored = localStorage.getItem(ROOM_CODE_KEY);
-    if (stored) {
-      setRejoinCode(stored);
-      logger.info("Landing", "Rejoin code found in storage", { code: stored });
-    }
     logger.info("Landing", "Landing mount");
+    if (stored) {
+      logger.info("Landing", "Rejoin code found in storage", { code: stored });
+      // defer setState so it isn't called synchronously in the effect body
+      const t = setTimeout(() => setRejoinCode(stored), 0);
+      return () => clearTimeout(t);
+    }
   }, []);
 
   const handleCreate = useCallback(async () => {

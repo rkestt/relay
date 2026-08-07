@@ -13,6 +13,13 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "volumes/**",
+    // Generated / tooling (not source):
+    "supabase/.temp/**",
+    ".lwts/**",
+    ".taskman/**",
+    "playwright-report/**",
+    "test-results/**",
+    "tmp_*.txt",
   ]),
 ]);
 

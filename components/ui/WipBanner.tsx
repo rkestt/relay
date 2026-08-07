@@ -10,19 +10,18 @@ export function WipBanner() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const stored = localStorage.getItem(WIP_STORAGE_KEY);
-    if (stored !== "true") setDismissed(false);
+    // defer setState outside the synchronous effect body (React Compiler rule)
+    const t = setTimeout(() => {
+      setMounted(true);
+      if (stored !== "true") setDismissed(false);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const handleDismiss = () => {
     setDismissed(true);
     localStorage.setItem(WIP_STORAGE_KEY, "true");
-  };
-
-  const handleReset = () => {
-    localStorage.removeItem(WIP_STORAGE_KEY);
-    setDismissed(false);
   };
 
   if (!mounted || dismissed) return null;
