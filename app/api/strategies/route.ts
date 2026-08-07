@@ -205,30 +205,17 @@ export async function POST(request: Request) {
           ? tags.filter((t): t is string => typeof t === "string").join(", ")
           : "None";
 
-        const description = Object.entries(validationLinks)
-          .map(([action, url]) => {
-            const emoji = action === "approve" ? "✅" : "❌";
-            const label =
-              action.charAt(0).toUpperCase() + action.slice(1);
-            return `${emoji} [${label}](${url})`;
-          })
-          .join("\n");
-
         const embed: Record<string, unknown> = {
           title: "New Strategy Submitted",
           color: 0x5865f2,
           fields: [
             { name: "Title", value: String(title), inline: true },
-            { name: "Status", value: "Pending", inline: true },
+            { name: "Status", value: "Pending — in-app moderation", inline: true },
             { name: "Submitted by", value: user.id, inline: true },
             { name: "Tags", value: tagList || "None" },
           ],
           timestamp: new Date().toISOString(),
         };
-
-        if (description) {
-          embed.description = description;
-        }
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);

@@ -8,6 +8,7 @@ import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu() {
   const [user, setUser] = useState<User | null>(null);
+  const [isModerator, setIsModerator] = useState(false);
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -22,6 +23,11 @@ export default function UserMenu() {
       supabase.auth.getUser().then(({ data }) => {
         setUser(data.user ?? null);
       });
+      // Cosmetic gate (not security — /moderate page re-checks server-side)
+      fetch("/api/auth/me", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((me) => setIsModerator(Boolean(me?.isModerator)))
+        .catch(() => {});
     };
 
     loadUser();
@@ -81,6 +87,15 @@ export default function UserMenu() {
           >
             Account settings
           </Link>
+          {isModerator && (
+            <Link
+              href="/moderate"
+              className="block w-full px-4 py-2.5 text-left text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              ⚖ Moderate
+            </Link>
+          )}
           <button
             onClick={handleSignOut}
             className="w-full px-4 py-2.5 text-left text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-b-lg"

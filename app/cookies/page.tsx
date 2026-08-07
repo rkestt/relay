@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackArrowIcon } from "@/components/icons";
 import { RelayLogo } from "@/components/ui/RelayLogo";
@@ -10,76 +8,40 @@ import { RelayLogo } from "@/components/ui/RelayLogo";
 const cookieCategories = [
   {
     id: "tecnici",
-    title: "Cookie tecnici (necessari)",
+    title: "Technical cookies (required)",
     description:
-      "Questi cookie sono essenziali per il funzionamento della piattaforma. Non possono essere disabilitati.",
+      "These cookies are essential for the platform to function. They cannot be disabled.",
     cookies: [
       {
         name: "sb-{project-ref}-auth-token",
-        purpose: "Autenticazione e gestione sessione utente (Supabase)",
-        duration: "Sessione",
+        purpose: "Authentication and user session management (Supabase)",
+        duration: "Session",
       },
       {
         name: "sb-{project-ref}-auth-token-code-verifier",
-        purpose: "Verifica del flusso di autenticazione OAuth",
-        duration: "Sessione",
-      },
-      {
-        name: "__clerk_session",
-        purpose: "Identificatore di sessione utente",
-        duration: "Sessione",
-      },
-    ],
-  },
-  {
-    id: "funzionali",
-    title: "Cookie funzionali",
-    description:
-      "Questi cookie permettono di ricordare le preferenze dell'utente per migliorare l'esperienza.",
-    cookies: [
-      {
-        name: "Relay_theme",
-        purpose: "Preferenza tema (chiaro/scuro)",
-        duration: "1 anno",
-      },
-      {
-        name: "Relay_lang",
-        purpose: "Preferenza lingua interfaccia",
-        duration: "1 anno",
+        purpose: "OAuth authentication flow verification",
+        duration: "Session",
       },
     ],
   },
   {
     id: "analytics",
-    title: "Cookie analytics",
+    title: "Analytics cookies",
     description:
-      "Questi cookie raccolgono dati anonimizzati sull'utilizzo della piattaforma. Sono attivati solo previo consenso.",
+      "These cookies collect anonymized data about platform usage. They are only activated with your consent.",
     cookies: [
       {
         name: "ph_*",
-        purpose: "Analytics di navigazione (PostHog) — pagine visitate, durata sessione",
-        duration: "1 anno",
-      },
-      {
-        name: "ga_*",
-        purpose: "Analytics di navigazione (Google Analytics) — solo se configurato",
-        duration: "Fino a 2 anni",
+        purpose: "Navigation analytics (PostHog) — visited pages, session duration",
+        duration: "1 year",
       },
     ],
   },
 ];
 
+const LAST_UPDATED = "August 5, 2026";
+
 export default function CookiesPage() {
-  const mounted = useIsClient();
-
-  const lastUpdated = mounted
-    ? new Date().toLocaleDateString("it-IT", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-
   return (
     <main className="min-h-dvh bg-background">
       {/* Back navigation */}
@@ -127,38 +89,28 @@ export default function CookiesPage() {
             Cookie Policy
           </h1>
           <p className="text-muted-foreground">
-            Ultimo aggiornamento:{" "}
-            <span
-              className={cn(
-                "inline-block transition-opacity duration-300",
-                mounted ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {lastUpdated}
-            </span>
+            Last updated: {LAST_UPDATED}
           </p>
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-            Questa Cookie Policy spiega cosa sono i cookie, come li utilizziamo
-            e come puoi gestire le tue preferenze.
+            This Cookie Policy explains what cookies are, how we use them, and
+            how you can manage your preferences.
           </p>
         </div>
 
         {/* Intro section */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">Cosa sono i cookie</CardTitle>
+            <CardTitle className="text-lg">What are cookies</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground leading-relaxed space-y-2">
             <p>
-              I cookie sono piccoli file di testo che i siti web salvano sul
-              dispositivo dell&apos;utente durante la navigazione. Permettono al sito
-              di ricordare azioni e preferenze (come login, lingua, tema) nel
-              tempo.
+              Cookies are small text files that websites save on the user&apos;s
+              device during browsing. They allow the site to remember actions
+              and preferences (such as login, language, theme) over time.
             </p>
             <p>
-              Utilizziamo cookie di prima parte (impostati direttamente da Relay)
-              e, solo con il tuo consenso, cookie di terze parti per analisi
-              statistiche.
+              We use first-party cookies (set directly by Relay) and, only with
+              your consent, third-party cookies for statistical analysis.
             </p>
           </CardContent>
         </Card>
@@ -179,13 +131,13 @@ export default function CookiesPage() {
                     <thead>
                       <tr className="border-b border-border">
                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                          Nome cookie
+                          Cookie name
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                          Finalità
+                          Purpose
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap">
-                          Durata
+                          Duration
                         </th>
                       </tr>
                     </thead>
@@ -214,41 +166,40 @@ export default function CookiesPage() {
           ))}
         </div>
 
-        {/* Gestione preferenze */}
+        {/* Managing preferences */}
         <Card className="mt-6">
           <CardHeader>
             <CardTitle className="text-lg">
-              Gestione delle preferenze
+              Managing your preferences
             </CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground leading-relaxed space-y-3">
-            <p>Puoi gestire le tue preferenze sui cookie in qualsiasi momento:</p>
+            <p>You can manage your cookie preferences at any time:</p>
             <ul className="space-y-2 list-disc pl-5">
               <li>
                 <span className="text-foreground font-medium">
-                  Dalla piattaforma:
+                  From the platform:
                 </span>{" "}
-                visita{" "}
+                visit{" "}
                 <Link
                   href="/settings/cookies"
                   className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
                 >
-                  Impostazioni cookie
+                  Cookie settings
                 </Link>{" "}
-                per attivare o disattivare i cookie analytics
+                to enable or disable analytics cookies
               </li>
               <li>
                 <span className="text-foreground font-medium">
-                  Dal browser:
+                  From the browser:
                 </span>{" "}
-                puoi configurare il tuo browser per bloccare o eliminare i
-                cookie. Consulta la guida del tuo browser per le istruzioni
-                specifiche
+                you can configure your browser to block or delete cookies.
+                Consult your browser&apos;s guide for specific instructions
               </li>
             </ul>
             <p className="text-sm text-muted-foreground">
-              La disabilitazione dei cookie tecnici potrebbe compromettere il
-              corretto funzionamento della piattaforma.
+              Disabling technical cookies may compromise the correct
+              functioning of the platform.
             </p>
           </CardContent>
         </Card>
@@ -260,13 +211,13 @@ export default function CookiesPage() {
               href="/privacy"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              Leggi la Privacy Policy
+              Read the Privacy Policy
             </Link>
             <Link
               href="/terms"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              Leggi i Termini di Servizio
+              Read the Terms of Service
             </Link>
           </div>
         </div>

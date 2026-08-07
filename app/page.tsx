@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -112,7 +113,7 @@ export default function HomePage() {
     <div className="flex flex-col flex-1 min-h-dvh bg-background text-foreground">
 
       {/* ── Hero ──────────────────────────────────────── */}
-      <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 sm:py-32 gap-12 sm:gap-20">
+      <main className="flex flex-col flex-1 items-center justify-center px-6 py-16 pb-28 sm:py-32 sm:pb-28 gap-12 sm:gap-20">
 
         {/* Logomark + Title */}
         <div className="flex flex-col items-center gap-5 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
@@ -302,6 +303,35 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* ── Legal Footer ──────────────────────────────── */}
+      <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-border/20 bg-background/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-6 gap-y-2 px-6 py-3">
+          <span className="text-xs text-muted-foreground/50">
+            © {new Date().getFullYear()} Relay
+          </span>
+          <nav className="flex items-center gap-6" aria-label="Legal">
+            <Link
+              href="/terms"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Terms of Service
+            </Link>
+            <Link
+              href="/privacy"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/cookies"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Cookie Policy
+            </Link>
+          </nav>
+        </div>
+      </footer>
 
       {/* ── Join Modal ──────────────────────────────────── */}
       {showJoinModal && (

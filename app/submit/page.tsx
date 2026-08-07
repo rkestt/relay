@@ -11,7 +11,15 @@ import { apiFetch } from "@/lib/fetch";
 import { Badge } from "@/components/ui/badge";
 import type { Map, Site, Operator } from "@/types";
 import imageCompression from "browser-image-compression";
-import { AlertIcon, BackArrowIcon, CheckIcon, XIcon } from "@/components/icons";
+import { AlertIcon, BackArrowIcon, CheckIcon, PlusIcon, XIcon } from "@/components/icons";
+
+type MyStrategy = {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+  rejected_reason: string | null;
+};
 
 function uid(): string {
   return Math.random().toString(36).substring(2, 9);
@@ -88,6 +96,8 @@ export default function SubmitStrategyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [myStrategies, setMyStrategies] = useState<MyStrategy[]>([]);
+  const [myReload, setMyReload] = useState(0);
 
   // ── Mount log ──────────────────────────────────────
   useEffect(() => {
@@ -295,6 +305,35 @@ export default function SubmitStrategyPage() {
     }
   }, [title, side, selectedMapId, selectedSiteId, selectedOperatorId, auxOperatorIds, rawFiles, userId, tagsInput, description, validate]);
 
+  // Reset form to submit another strategy ─────────
+  const resetForm = () => {
+    setTitle("");
+    setSide(null);
+    setSelectedMapId("");
+    setSelectedSiteId("");
+    setDescription("");
+    setTagsInput("");
+    setRawFiles([]);
+    setImagePreviews([]);
+    setSelectedOperatorId("");
+    setAuxOperatorIds([]);
+    setAuxSearch("");
+    setCompressing(false);
+    setValidationErrors({});
+    setError(null);
+    setSuccess(false);
+    setMyReload((t) => t + 1);
+  };
+
+  // ── Load my submissions ────────────────────────
+  useEffect(() => {
+    if (!userId) return;
+    apiFetch("/api/strategies/mine", { retries: 0 })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setMyStrategies(data?.strategies ?? []))
+      .catch(() => {});
+  }, [userId, myReload]);
+
   // ── Loading state ────────────────────────────────
   // ── Auxiliary operators toggle ────────────────
   const toggleAux = useCallback((id: string) => {
@@ -341,15 +380,26 @@ export default function SubmitStrategyPage() {
             Your strategy has been queued for community review.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="lg"
-          className="h-12 rounded-xl mt-2"
-          onClick={() => router.push("/")}
-        >
-          <BackArrowIcon className="size-4 mr-2" />
-          Back Home
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-2">
+          <Button
+            variant="default"
+            size="lg"
+            className="h-12 rounded-xl"
+            onClick={resetForm}
+          >
+            <PlusIcon className="size-4 mr-2" />
+            Add More
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="h-12 rounded-xl"
+            onClick={() => router.push("/")}
+          >
+            <BackArrowIcon className="size-4 mr-2" />
+            Back Home
+          </Button>
+        </div>
       </div>
     );
   }
@@ -859,6 +909,47 @@ export default function SubmitStrategyPage() {
               />
             </div>
           </div>
+
+          {/* ═══════ My submissions ═══════ */}
+          {userId && myStrategies.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <h2 className="flex items-center gap-2 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                <span className="size-1.5 rounded-full bg-primary/40" />
+                My submissions
+              </h2>
+              <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+                {myStrategies.map((s) => (
+                  <div
+                    key={s.id}
+                    className="flex items-start justify-between gap-3 rounded-lg border border-border/60 bg-background/40 p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{s.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(s.created_at).toLocaleDateString()}
+                      </p>
+                      {s.status === "rejected" && s.rejected_reason && (
+                        <p className="mt-1.5 rounded-md bg-destructive/10 border border-destructive/20 px-2 py-1 text-xs text-destructive">
+                          Rejected: {s.rejected_reason}
+                        </p>
+                      )}
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "shrink-0 text-xs",
+                        s.status === "approved" && "text-success",
+                        s.status === "pending" && "text-warning",
+                        s.status === "rejected" && "text-destructive",
+                      )}
+                    >
+                      {s.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── Submit ──────────────────────────────── */}
           <div className="sticky bottom-0 pt-4 pb-3 bg-background border-t border-border/30 mt-2">

@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { useIsClient } from "@/hooks/useIsClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackArrowIcon, LockIcon } from "@/components/icons";
 import { RelayLogo } from "@/components/ui/RelayLogo";
@@ -10,89 +8,89 @@ import { RelayLogo } from "@/components/ui/RelayLogo";
 const sections = [
   {
     id: "1",
-    title: "Titolare del trattamento",
+    title: "Data Controller",
     content: (
       <div className="space-y-2">
         <p>
-           Il titolare del trattamento dei dati è Relay (di seguito, &ldquo;piattaforma&rdquo;).
-          Per qualsiasi richiesta relativa ai tuoi dati personali, puoi contattarci
-          all&rsquo;indirizzo email:{" "}
+          The data controller is Relay (hereinafter, &ldquo;platform&rdquo;).
+          For any request regarding your personal data, you can contact us at
+          the email address:{" "}
           <a
-            href="mailto:privacy@Relay.app"
+            href="mailto:andrea.fiori.ff@gmail.com"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
           >
-            privacy@Relay.app
+            andrea.fiori.ff@gmail.com
           </a>
         </p>
         <p className="text-muted-foreground text-sm">
-          Relay è una piattaforma second-screen per Rainbow Six Siege, dedicata
-          alla gestione di lobby, strategie e coordinamento di squadra.
+          Relay is a second-screen platform for Rainbow Six Siege, dedicated
+          to managing lobbies, strategies, and team coordination.
         </p>
       </div>
     ),
   },
   {
     id: "2",
-    title: "Dati raccolti",
+    title: "Data Collected",
     content: (
       <div className="space-y-3">
         <p>
-          Durante l&rsquo;utilizzo della piattaforma, raccogliamo i seguenti dati
-          personali:
+          While using the platform, we collect the following personal data:
         </p>
         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
           <li>
-            <span className="text-foreground font-medium">Dati di registrazione:</span>{" "}
-            email, username, avatar (se fornito tramite OAuth Discord)
+            <span className="text-foreground font-medium">Registration data:</span>{" "}
+            email, username, avatar (if provided via Discord OAuth)
           </li>
           <li>
-            <span className="text-foreground font-medium">Dati di utilizzo:</span>{" "}
-            lobby create, strategie salvate, task assegnati, preferenze di lingua e tema
+            <span className="text-foreground font-medium">Usage data:</span>{" "}
+            created lobbies, saved strategies, assigned tasks, language and
+            theme preferences
           </li>
           <li>
-            <span className="text-foreground font-medium">Dati tecnici:</span>{" "}
-            indirizzo IP, user agent, tipo di dispositivo, pagine visitate
+            <span className="text-foreground font-medium">Technical data:</span>{" "}
+            IP address, user agent, device type, visited pages
           </li>
           <li>
-            <span className="text-foreground font-medium">Dati di autenticazione:</span>{" "}
-            token di sessione, provider OAuth utilizzato (email/password o Discord)
+            <span className="text-foreground font-medium">Authentication data:</span>{" "}
+            session tokens, OAuth provider used (email/password or Discord)
           </li>
         </ul>
         <p className="text-sm text-muted-foreground">
-          Non raccogliamo dati sensibili (origine razziale, opinioni politiche,
-          religione, salute, ecc.) né dati di genealogia genetica.
+          We do not collect sensitive data (racial origin, political opinions,
+          religion, health, etc.) or genetic data.
         </p>
       </div>
     ),
   },
   {
     id: "3",
-    title: "Finalità del trattamento",
+    title: "Purpose of Processing",
     content: (
       <div className="space-y-3">
-        <p>I dati raccolti vengono utilizzati per le seguenti finalità:</p>
+        <p>Collected data is used for the following purposes:</p>
         <ol className="space-y-2 list-decimal pl-5 text-muted-foreground">
           <li>
             <span className="text-foreground font-medium">
-              Fornitura del servizio:
+              Provision of the service:
             </span>{" "}
-            creazione e gestione di lobby, salvataggio strategie, coordinamento
-            task di squadra
+            creating and managing lobbies, saving strategies, coordinating team
+            tasks
           </li>
           <li>
-            <span className="text-foreground font-medium">Autenticazione:</span>{" "}
-            login via email/password o OAuth Discord, gestione sessione utente
+            <span className="text-foreground font-medium">Authentication:</span>{" "}
+            login via email/password or Discord OAuth, user session management
           </li>
           <li>
             <span className="text-foreground font-medium">
-              Comunicazioni di servizio:
+              Service communications:
             </span>{" "}
-            notifiche relative a modifiche dei Termini di Servizio o della
+            notifications regarding changes to the Terms of Service or
             Privacy Policy
           </li>
           <li>
-            <span className="text-foreground font-medium">Supporto:</span>{" "}
-            risposta a richieste di assistenza o esercizio dei diritti privacy
+            <span className="text-foreground font-medium">Support:</span>{" "}
+            responding to assistance requests or the exercise of privacy rights
           </li>
         </ol>
       </div>
@@ -100,31 +98,31 @@ const sections = [
   },
   {
     id: "4",
-    title: "Base giuridica",
+    title: "Legal Basis",
     content: (
       <div className="space-y-3">
         <p>
-          Il trattamento dei dati si basa sulle seguenti basi giuridiche, ai
-          sensi dell&apos;Art. 6 del GDPR:
+          Data processing is based on the following legal bases, under Art. 6
+          of the GDPR:
         </p>
         <ul className="space-y-2 list-disc pl-5 text-muted-foreground">
           <li>
-            <span className="text-foreground font-medium">Consenso (Art. 6.1.a):</span>{" "}
-            al momento della registrazione, l&apos;utente acconsente al trattamento
-            dei propri dati per le finalità descritte
+            <span className="text-foreground font-medium">Consent (Art. 6.1.a):</span>{" "}
+            at registration, the user consents to the processing of their data
+            for the described purposes
           </li>
           <li>
             <span className="text-foreground font-medium">
-              Esecuzione del contratto (Art. 6.1.b):
+              Performance of a contract (Art. 6.1.b):
             </span>{" "}
-            il trattamento è necessario per fornire il servizio richiesto
-            (gestione lobby, strategie, coordinamento)
+            processing is necessary to provide the requested service (lobby
+            management, strategies, coordination)
           </li>
           <li>
             <span className="text-foreground font-medium">
-              Obbligo legale (Art. 6.1.c):
+              Legal obligation (Art. 6.1.c):
             </span>{" "}
-            adempimento di obblighi previsti dalla legge applicabile
+            compliance with obligations under applicable law
           </li>
         </ul>
       </div>
@@ -132,12 +130,12 @@ const sections = [
   },
   {
     id: "5",
-    title: "Servizi terzi",
+    title: "Third-Party Services",
     content: (
       <div className="space-y-3">
         <p>
-          La piattaforma si affida ai seguenti servizi terzi per il
-          funzionamento:
+          The platform relies on the following third-party services to
+          operate:
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <Card className="border-border/50">
@@ -146,19 +144,19 @@ const sections = [
                 Supabase
               </h3>
               <p className="text-xs text-muted-foreground">
-                Database, autenticazione e storage. I dati sono ospitati su
-                server in UE.
+                Database, authentication, and storage. Data is hosted on
+                servers in the EU.
               </p>
             </CardContent>
           </Card>
           <Card className="border-border/50">
             <CardContent className="p-4">
               <h3 className="font-semibold text-foreground text-sm mb-1">
-                Vercel
+                Hetzner
               </h3>
               <p className="text-xs text-muted-foreground">
-                Hosting della piattaforma. Log di accesso anonimizzati per 30
-                giorni.
+                Platform hosting (dedicated EU server). Access logs kept for 30
+                days.
               </p>
             </CardContent>
           </Card>
@@ -168,8 +166,8 @@ const sections = [
                 Discord (Webhook)
               </h3>
               <p className="text-xs text-muted-foreground">
-                Notifiche opzionali delle attività di lobby. Solo dati
-                strettamente necessari.
+                Optional notifications for lobby activity. Only strictly
+                necessary data.
               </p>
             </CardContent>
           </Card>
@@ -179,52 +177,64 @@ const sections = [
                 PostHog
               </h3>
               <p className="text-xs text-muted-foreground">
-                Analytics anonimizzati (se abilitato). Dati non venduti a terzi.
+                Navigation analytics — visited pages, session duration. Data
+                not sold to third parties.
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-foreground text-sm mb-1">
+                Sentry
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Error and crash monitoring for the operation of the service.
+                No personal data, only technical logs.
               </p>
             </CardContent>
           </Card>
         </div>
         <p className="text-sm text-muted-foreground">
-          Ciascun servizio terzo opera come responsabile del trattamento ai
-          sensi dell&apos;Art. 28 GDPR. Per maggiori informazioni, consulta le
-          rispettive privacy policy.
+          Each third-party service acts as a data processor under Art. 28
+          GDPR. For more information, consult their respective privacy
+          policies.
         </p>
       </div>
     ),
   },
   {
     id: "6",
-    title: "Diritti dell'utente",
+    title: "User Rights",
     content: (
       <div className="space-y-3">
         <p>
-          Ai sensi del GDPR (Regolamento UE 2016/679), hai diritto a:
+          Under the GDPR (EU Regulation 2016/679), you have the right to:
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {[
             {
-              right: "Accesso",
-              desc: "Ottenere conferma se i tuoi dati sono in nostro possesso e accedervi",
+              right: "Access",
+              desc: "Obtain confirmation of whether your data is held by us and to access it",
             },
             {
-              right: "Rettifica",
-              desc: "Correggere dati inesatti o incompleti",
+              right: "Rectification",
+              desc: "Correct inaccurate or incomplete data",
             },
             {
-              right: "Cancellazione",
-              desc: "Richiedere la cancellazione dei tuoi dati (diritto all'oblio)",
+              right: "Erasure",
+              desc: "Request the deletion of your data (right to be forgotten)",
             },
             {
-              right: "Portabilità",
-              desc: "Ricevere i tuoi dati in formato strutturato e leggibile",
+              right: "Portability",
+              desc: "Receive your data in a structured, machine-readable format",
             },
             {
-              right: "Limitazione",
-              desc: "Limitare il trattamento in determinate circostanze",
+              right: "Restriction",
+              desc: "Restrict processing in certain circumstances",
             },
             {
-              right: "Opposizione",
-              desc: "Opporti al trattamento per motivi legittimi",
+              right: "Objection",
+              desc: "Object to processing for legitimate reasons",
             },
           ].map((item) => (
             <Card key={item.right} className="border-border/50">
@@ -240,77 +250,68 @@ const sections = [
           ))}
         </div>
         <p className="text-sm text-muted-foreground mt-3">
-          Per esercitare i tuoi diritti, scrivici a{" "}
+          To exercise your rights, write to us at{" "}
           <a
-            href="mailto:privacy@Relay.app"
+            href="mailto:andrea.fiori.ff@gmail.com"
             className="text-primary hover:text-primary/80 underline underline-offset-2 transition-colors"
           >
-            privacy@Relay.app
+            andrea.fiori.ff@gmail.com
           </a>
-          . Risponderemo entro 30 giorni.
+          . We will respond within 30 days.
         </p>
       </div>
     ),
   },
   {
     id: "7",
-    title: "Conservazione dei dati",
+    title: "Data Retention",
     content: (
       <div className="space-y-2">
         <p>
-          I dati personali vengono conservati per tutta la durata
-          dell&apos;account. Alla richiesta di cancellazione dell&apos;account o dopo 12
-          mesi di inattività, i dati vengono eliminati entro 30 giorni, salvo
-          obblighi di legge che richiedano una conservazione più lunga.
+          Personal data is retained for the entire duration of the account.
+          Upon a deletion request or after 12 months of inactivity, data is
+          removed within 30 days, except where legal obligations require
+          longer retention.
         </p>
         <p className="text-sm text-muted-foreground">
-          I log di accesso tecnici (Vercel) vengono conservati per 30 giorni in
-          forma anonimizzata.
+          Technical access logs (Hetzner) are kept for 30 days.
         </p>
       </div>
     ),
   },
   {
     id: "8",
-    title: "Trasferimento dati internazionale",
+    title: "International Data Transfer",
     content: (
       <div className="space-y-2">
         <p>
-          I dati sono principalmente ospitati su server situati nell&apos;Unione
-          Europea. Qualora fosse necessario trasferire dati al di fuori del SEE,
-          adotteremo garanzie adeguate come le Clausole Contrattuali Standard
-          (SCC) approvate dalla Commissione Europea.
+          Data is primarily hosted on servers located in the European Union.
+          Should it become necessary to transfer data outside the EEA, we will
+          adopt adequate safeguards such as the Standard Contractual Clauses
+          (SCC) approved by the European Commission.
         </p>
       </div>
     ),
   },
   {
     id: "9",
-    title: "Reclamo all'autorità di controllo",
+    title: "Complaints to a Supervisory Authority",
     content: (
       <div className="space-y-2">
         <p>
-          Se ritieni che il trattamento dei tuoi dati violi il GDPR, hai il
-          diritto di proporre un reclamo all&apos;autorità di controllo competente
-          (in Italia, il Garante per la Protezione dei Dati Personali -
-          www.garanteprivacy.it).
+          If you believe that the processing of your data violates the GDPR,
+          you have the right to lodge a complaint with the competent
+          supervisory authority (in Italy, the Garante per la Protezione dei
+          Dati Personali - www.garanteprivacy.it).
         </p>
       </div>
     ),
   },
 ];
 
+const LAST_UPDATED = "August 5, 2026";
+
 export default function PrivacyPage() {
-  const mounted = useIsClient();
-
-  const lastUpdated = mounted
-    ? new Date().toLocaleDateString("it-IT", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "";
-
   return (
     <main className="min-h-dvh bg-background">
       {/* Back navigation */}
@@ -334,34 +335,26 @@ export default function PrivacyPage() {
           <div className="flex items-center gap-2 text-primary mb-4">
             <LockIcon className="size-5" />
             <span className="text-xs font-medium uppercase tracking-wider">
-              Informativa Privacy
+              Privacy Policy
             </span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground mb-3">
             Privacy Policy
           </h1>
           <p className="text-muted-foreground">
-            Ultimo aggiornamento:{" "}
-            <span
-              className={cn(
-                "inline-block transition-opacity duration-300",
-                mounted ? "opacity-100" : "opacity-0",
-              )}
-            >
-              {lastUpdated}
-            </span>
+            Last updated: {LAST_UPDATED}
           </p>
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">
-            Questa Privacy Policy descrive come Relay raccoglie, utilizza e
-            protegge i dati personali degli utenti. L&apos;utilizzo della
-            piattaforma implica l&apos;accettazione di questa policy.
+            This Privacy Policy describes how Relay collects, uses, and
+            protects the personal data of users. Use of the platform implies
+            acceptance of this policy.
           </p>
         </div>
 
         {/* Sections */}
         <div className="space-y-6">
           {sections.map((section) => (
-            <Card key={section.id} id={`section-${section.id}`}>
+            <Card key={section.id} id={`section-${section.id}`} className="border-border/50">
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary">
@@ -384,13 +377,13 @@ export default function PrivacyPage() {
               href="/terms"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              Leggi i Termini di Servizio
+              Read the Terms of Service
             </Link>
             <Link
               href="/cookies"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50"
             >
-              Leggi la Cookie Policy
+              Read the Cookie Policy
             </Link>
           </div>
         </div>
