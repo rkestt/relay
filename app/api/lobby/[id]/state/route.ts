@@ -42,7 +42,7 @@ export async function GET(
     const { data: members } = await withTimeout(
       supabase
         .from("lobby_members")
-        .select("id, user_id, joined_at, profiles (id, username, avatar_url)")
+        .select("id, user_id, joined_at, profiles (id, username, avatar_url, is_pro, is_verified_contributor)")
         .eq("lobby_id", id),
       10000,
       "fetch lobby members"

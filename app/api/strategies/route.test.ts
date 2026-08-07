@@ -41,16 +41,26 @@ vi.mock("crypto", () => ({
 import { GET, POST } from "@/app/api/strategies/route";
 
 describe("GET /api/strategies", () => {
+  function makeQuery(finalResolver: () => Promise<any>) {
+    const q: Record<string, any> = {
+      select: vi.fn(() => q),
+      eq: vi.fn(() => q),
+      contains: vi.fn(() => q),
+      or: vi.fn(() => q),
+      order: vi.fn(() => q),
+      range: vi.fn(() => finalResolver()),
+    };
+    return q;
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("returns strategies successfully", async () => {
-    const strategiesQuery = {
-      select: vi.fn(() => strategiesQuery),
-      eq: vi.fn(() => strategiesQuery),
-      order: vi.fn(() => Promise.resolve({ data: [{ id: "s1", title: "Test", status: "approved" }], error: null })),
-    };
+    const strategiesQuery = makeQuery(() =>
+      Promise.resolve({ data: [{ id: "s1", title: "Test", status: "approved" }], error: null, count: 1 }),
+    );
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "strategy_templates") return strategiesQuery;
@@ -64,18 +74,25 @@ describe("GET /api/strategies", () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body.strategies).toHaveLength(1);
+    expect(body.pagination.total).toBe(1);
+    expect(body.pagination.page).toBe(1);
+    expect(body.pagination.pageSize).toBe(20);
+    expect(body.pagination.totalPages).toBe(1);
   });
 
-  it("filters by map_id and site_id", async () => {
+  it("filters by map_id, site_id, operator_id, tag, q", async () => {
     const usedFilters: string[] = [];
-    const strategiesQuery = {
-      select: vi.fn(() => strategiesQuery),
-      eq: vi.fn((field: string) => {
-        usedFilters.push(field);
-        return strategiesQuery;
-      }),
-      order: vi.fn(() => Promise.resolve({ data: [], error: null })),
-    };
+    const strategiesQuery = makeQuery(() =>
+      Promise.resolve({ data: [], error: null, count: 0 }),
+    );
+    strategiesQuery.eq.mockImplementation((field: string) => {
+      usedFilters.push(`eq:${field}`);
+      return strategiesQuery;
+    });
+    strategiesQuery.or.mockImplementation((expr: string) => {
+      usedFilters.push(`or:${expr}`);
+      return strategiesQuery;
+    });
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "strategy_templates") return strategiesQuery;
@@ -83,19 +100,39 @@ describe("GET /api/strategies", () => {
     });
 
     await GET(
-      new Request("http://localhost/api/strategies?map_id=map-1&site_id=site-1"),
+      new Request(
+        "http://localhost/api/strategies?map_id=map-1&site_id=site-1&operator_id=op-1&tag=fast&q=ash&page=2&page_size=10",
+      ),
     );
 
-    expect(usedFilters).toContain("map_id");
-    expect(usedFilters).toContain("site_id");
+    expect(usedFilters).toContain("eq:map_id");
+    expect(usedFilters).toContain("eq:site_id");
+    expect(usedFilters).toContain("eq:operator_id");
+    expect(usedFilters.some((f) => f.startsWith("or:"))).toBe(true);
+  });
+
+  it("respects page_size max cap at 100", async () => {
+    const strategiesQuery = makeQuery(() =>
+      Promise.resolve({ data: [], error: null, count: 0 }),
+    );
+
+    mockSupabaseClient.from.mockImplementation((table: string) => {
+      if (table === "strategy_templates") return strategiesQuery;
+      return { select: vi.fn(), eq: vi.fn(), order: vi.fn() };
+    });
+
+    const response = await GET(
+      new Request("http://localhost/api/strategies?page_size=500"),
+    );
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.pagination.pageSize).toBe(100);
   });
 
   it("returns empty array when no strategies", async () => {
-    const strategiesQuery = {
-      select: vi.fn(() => strategiesQuery),
-      eq: vi.fn(() => strategiesQuery),
-      order: vi.fn(() => Promise.resolve({ data: null, error: null })),
-    };
+    const strategiesQuery = makeQuery(() =>
+      Promise.resolve({ data: null, error: null, count: 0 }),
+    );
 
     mockSupabaseClient.from.mockImplementation((table: string) => {
       if (table === "strategy_templates") return strategiesQuery;

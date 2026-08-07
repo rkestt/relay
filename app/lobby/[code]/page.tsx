@@ -597,8 +597,24 @@ export default function LobbyPage({
                         </div>
                         {/* Name + badge */}
                         <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-semibold text-foreground truncate">
+                          <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground truncate">
                             {member.profiles?.username ?? "Unknown"}
+                            {member.profiles?.is_pro && (
+                              <span
+                                title="Pro"
+                                className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-px text-[9px] font-bold text-primary"
+                              >
+                                PRO
+                              </span>
+                            )}
+                            {member.profiles?.is_verified_contributor && (
+                              <span
+                                title="Verified Contributor"
+                                className="rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-400"
+                              >
+                                ✓
+                              </span>
+                            )}
                           </span>
                           {isMemberLeader && (
                             <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-warning uppercase">
@@ -856,8 +872,24 @@ export default function LobbyPage({
                         </div>
                         {/* Name + badge */}
                         <div className="flex flex-col min-w-0">
-                          <span className="text-sm font-semibold text-foreground truncate">
+                          <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground truncate">
                             {member.profiles?.username ?? "Unknown"}
+                            {member.profiles?.is_pro && (
+                              <span
+                                title="Pro"
+                                className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-px text-[9px] font-bold text-primary"
+                              >
+                                PRO
+                              </span>
+                            )}
+                            {member.profiles?.is_verified_contributor && (
+                              <span
+                                title="Verified Contributor"
+                                className="rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-400"
+                              >
+                                ✓
+                              </span>
+                            )}
                           </span>
                           {isMemberLeader && (
                             <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider text-warning uppercase">

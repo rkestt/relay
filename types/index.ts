@@ -65,6 +65,9 @@ export interface Profile {
   username: string | null;
   avatar_url: string | null;
   created_at: string | null;
+  is_pro?: boolean | null;
+  is_verified_contributor?: boolean | null;
+  contributed_count?: number | null;
 }
 
 export interface Round {

@@ -11,7 +11,14 @@ import type {
 
 interface StrategyCardProps {
   assignment: TaskAssignment & {
-    strategy: StrategyTemplateWithRelations | null;
+    strategy: (StrategyTemplateWithRelations & {
+      creator?: {
+        id: string;
+        username: string | null;
+        is_verified_contributor?: boolean | null;
+        is_pro?: boolean | null;
+      } | null;
+    }) | null;
     user_vote?: "up" | "down" | null;
     upvotes?: number;
     downvotes?: number;
@@ -126,6 +133,14 @@ export function StrategyCard({
         {/* Footer */}
         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
           <span>{username ?? "Unknown"}</span>
+          {strategy.creator?.is_verified_contributor && (
+            <span
+              title="Verified Contributor"
+              className="rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[9px] font-bold text-amber-400"
+            >
+              ✓ Verified
+            </span>
+          )}
           {imageCount > 1 && (
             <>
               <span className="text-muted-foreground">·</span>

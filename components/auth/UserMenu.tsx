@@ -74,6 +74,13 @@ export default function UserMenu() {
           >
             Impostazioni account
           </Link>
+          <Link
+            href="/upgrade"
+            className="block w-full px-4 py-2.5 text-left text-sm text-amber-400 hover:text-amber-300 hover:bg-neutral-800 transition-colors"
+            onClick={() => setOpen(false)}
+          >
+            r6hub Pro
+          </Link>
           <button
             onClick={handleSignOut}
             className="w-full px-4 py-2.5 text-left text-sm text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 transition-colors rounded-b-lg"

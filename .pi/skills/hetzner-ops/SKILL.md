@@ -122,6 +122,7 @@ hcloud server shutdown r6hub-vps     # spegni (graceful)
 4. **IP dinamico locale**: la macchina locale (pi) ha IP pubblico dinamico — se il firewall restringe per IP, l'accesso può rompersi al cambio IP.
 5. **Blocked = quota traffico**: se `blocked:true` su IPv4/IPv6, la rete del server è tagliata a monte da Hetzner — non è un problema di sshd/firewall/container. Solo l'utente può sbloccare dal console (o attesa reset ciclo di fatturazione).
 6. **Porta 3001 è aperta al mondo** (dev) — non esporre dati sensibili; valutare chiusura in produzione.
+7. **Token hcloud può essere revocato**: verificato 2026-08-07 — token in `pi-full-access` invalido (`unauthorized`) e server 142.132.176.234 non risponde su 22/443 (probabile quota traffico). Se l'API risponde `the token you have provided is invalid`, il token va rigenerato dal console Hetzner (Progetti → r6hub → Security → API tokens) e riscritto in `~/.config/hcloud/contexts/pi-full-access` (solo l'utente può farlo, non è automatizzabile).
 
 ## Troubleshooting rapido
 

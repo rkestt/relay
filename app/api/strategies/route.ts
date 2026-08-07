@@ -190,6 +190,8 @@ export async function POST(request: Request) {
 
 // ──────────────────────────────────────────────
 // GET /api/strategies — list strategies
+// Filtri: map_id, site_id, operator_id, tag, q (search), status
+// Paginazione: page (default 1), page_size (default 20, max 100)
 // ──────────────────────────────────────────────
 export async function GET(request: Request) {
   try {
@@ -198,23 +200,53 @@ export async function GET(request: Request) {
 
     const map_id = searchParams.get("map_id");
     const site_id = searchParams.get("site_id");
+    const operator_id = searchParams.get("operator_id");
+    const tag = searchParams.get("tag");
+    const q = searchParams.get("q")?.trim();
     const status = searchParams.get("status") || "approved";
 
-    logger.info("API", "GET /api/strategies start", { map_id, site_id, status });
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(searchParams.get("page_size") || "20", 10) || 20),
+    );
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    logger.info("API", "GET /api/strategies start", {
+      map_id, site_id, operator_id, tag, q, status, page, pageSize,
+    });
 
     let query = supabase
       .from("strategy_templates")
       .select(
         "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags(*), strategy_hotspots(*), strategy_images(*)",
+        { count: "exact" },
       );
+
+    if (tag) {
+      // Filtro su relazione to-many: inner join + eq per count corretto
+      query = supabase
+        .from("strategy_templates")
+        .select(
+          "id, title, description, image_url, status, map_id, site_id, operator_id, created_by, created_at, strategy_tags!inner(*), strategy_hotspots(*), strategy_images(*)",
+          { count: "exact" },
+        )
+        .eq("strategy_tags.tag", tag);
+    }
 
     if (map_id) query = query.eq("map_id", map_id);
     if (site_id) query = query.eq("site_id", site_id);
+    if (operator_id) query = query.eq("operator_id", operator_id);
+    if (q && q.length <= 100) {
+      const pattern = `%${q}%`;
+      query = query.or(`title.ilike.${pattern},description.ilike.${pattern}`);
+    }
     query = query.eq("status", status).order("created_at", {
       ascending: false,
-    });
+    }).range(from, to);
 
-    const { data: strategies, error } = await withTimeout(
+    const { data: strategies, error, count } = await withTimeout(
       query,
       10000,
       "fetch strategies"
@@ -228,13 +260,24 @@ export async function GET(request: Request) {
       );
     }
 
-    logger.debug("API", "GET /api/strategies response", { strategyCount: strategies?.length ?? 0 });
-    return NextResponse.json({ strategies: strategies ?? [] }, {
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-        "CDN-Cache-Control": "public, s-maxage=60",
-      },
+    const total = count ?? strategies?.length ?? 0;
+    const totalPages = Math.ceil(total / pageSize);
+
+    logger.debug("API", "GET /api/strategies response", {
+      strategyCount: strategies?.length ?? 0, total, page, totalPages,
     });
+    return NextResponse.json(
+      {
+        strategies: strategies ?? [],
+        pagination: { page, pageSize, total, totalPages },
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "CDN-Cache-Control": "public, s-maxage=60",
+        },
+      },
+    );
   } catch (error) {
     logger.error("API", "Strategy fetch unexpected error", error);
     return NextResponse.json(

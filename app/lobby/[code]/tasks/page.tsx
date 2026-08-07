@@ -129,7 +129,7 @@ export default function TasksPage({
       const { data: assignments } = await supabase
         .from("task_assignments")
         .select(
-          "*, strategy:strategy_templates(*, images:strategy_images(*)), user:profiles(*)",
+          "*, strategy:strategy_templates(*, images:strategy_images(*), creator:profiles!strategy_templates_created_by_fkey(id, username, is_verified_contributor, is_pro)), user:profiles(*)",
         )
         .eq("lobby_id", id)
         .eq("round_id", stateData.currentRound.id);
