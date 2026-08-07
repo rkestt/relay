@@ -1,16 +1,14 @@
 -- ============================================================
--- 00036_strategy_owner_select.sql
--- LWTS-20: my-submissions / own visibility.
--- Additive ONLY — never replaces existing select_approved policies.
--- Gives an author visibility of their OWN strategies (any status)
--- across templates/tags/images/operators, plus UPDATE/DELETE parity
--- on tags+operators (gap vs strategy_images from 00012, G5).
--- Also adds moderation audit columns (rejected_reason, moderated_by,
--- moderated_at) used by the in-app moderation flow.
+-- 00036_strategy_owner_select.sql  (idempotent revision)
+-- LWTS-20: my-submissions / own visibility + moderation audit cols.
+-- Additive ONLY — never touches existing select_approved policies.
+-- Every CREATE POLICY is guarded by DROP POLICY IF EXISTS on the
+-- SAME policy, so the file can be re-run safely at any time
+-- (fixes 42710 "policy already exists" on a partial prior apply).
 -- ============================================================
 
 -- --------------------------------
--- 1. Audit columns on strategy_templates
+-- 1. Audit columns on strategy_templates (idempotent)
 -- --------------------------------
 ALTER TABLE strategy_templates
     ADD COLUMN IF NOT EXISTS rejected_reason TEXT NULL,
@@ -18,10 +16,9 @@ ALTER TABLE strategy_templates
     ADD COLUMN IF NOT EXISTS moderated_at    TIMESTAMPTZ NULL;
 
 -- --------------------------------
--- 2. strategy_templates: owner own-select (additive)
+-- 2. strategy_templates: owner own-select
 -- --------------------------------
--- Authors can read their own strategies in ANY status (pending/approved/rejected).
--- This enables "my submissions" without exposing others' pending work.
+DROP POLICY IF EXISTS "strategy_templates_select_own" ON strategy_templates;
 CREATE POLICY "strategy_templates_select_own"
     ON strategy_templates FOR SELECT
     USING (created_by = auth.uid());
@@ -29,6 +26,7 @@ CREATE POLICY "strategy_templates_select_own"
 -- --------------------------------
 -- 3. strategy_tags: owner select + update/delete parity
 -- --------------------------------
+DROP POLICY IF EXISTS "strategy_tags_select_own" ON strategy_tags;
 CREATE POLICY "strategy_tags_select_own"
     ON strategy_tags FOR SELECT
     USING (
@@ -39,6 +37,7 @@ CREATE POLICY "strategy_tags_select_own"
         )
     );
 
+DROP POLICY IF EXISTS "strategy_tags_update_own" ON strategy_tags;
 CREATE POLICY "strategy_tags_update_own"
     ON strategy_tags FOR UPDATE
     USING (
@@ -49,6 +48,7 @@ CREATE POLICY "strategy_tags_update_own"
         )
     );
 
+DROP POLICY IF EXISTS "strategy_tags_delete_own" ON strategy_tags;
 CREATE POLICY "strategy_tags_delete_own"
     ON strategy_tags FOR DELETE
     USING (
@@ -62,6 +62,7 @@ CREATE POLICY "strategy_tags_delete_own"
 -- --------------------------------
 -- 4. strategy_images: owner select (update/delete own already exist, 00012)
 -- --------------------------------
+DROP POLICY IF EXISTS "strategy_images_select_own" ON strategy_images;
 CREATE POLICY "strategy_images_select_own"
     ON strategy_images FOR SELECT
     USING (
@@ -75,6 +76,7 @@ CREATE POLICY "strategy_images_select_own"
 -- --------------------------------
 -- 5. strategy_operators: owner select + update/delete parity
 -- --------------------------------
+DROP POLICY IF EXISTS "strategy_operators_select_own" ON strategy_operators;
 CREATE POLICY "strategy_operators_select_own"
     ON strategy_operators FOR SELECT
     USING (
@@ -85,6 +87,7 @@ CREATE POLICY "strategy_operators_select_own"
         )
     );
 
+DROP POLICY IF EXISTS "strategy_operators_update_own" ON strategy_operators;
 CREATE POLICY "strategy_operators_update_own"
     ON strategy_operators FOR UPDATE
     USING (
@@ -95,6 +98,7 @@ CREATE POLICY "strategy_operators_update_own"
         )
     );
 
+DROP POLICY IF EXISTS "strategy_operators_delete_own" ON strategy_operators;
 CREATE POLICY "strategy_operators_delete_own"
     ON strategy_operators FOR DELETE
     USING (
