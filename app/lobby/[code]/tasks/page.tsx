@@ -13,6 +13,7 @@ import { SkeletonGrid } from "@/components/ui/SkeletonCard";
 import { StrategyCard } from "@/components/tasks/StrategyCard";
 import type {
   StrategyTemplate,
+  StrategyTemplateWithRelations,
   StrategyHotspot,
   TaskAssignment,
   Profile,
@@ -23,7 +24,7 @@ type SortMode = "score" | "newest";
 
 interface FeedTask {
   assignment: TaskAssignment & {
-    strategy: StrategyTemplate | null;
+    strategy: StrategyTemplateWithRelations | null;
     user: Profile | null;
     upvotes: number;
     downvotes: number;
@@ -199,6 +200,7 @@ export default function TasksPage({
           .in("strategy_id", strategyIds);
 
         for (const h of (hotspots ?? []) as StrategyHotspot[]) {
+          if (!h.strategy_id) continue;
           const existing = hotspotsByStrategy.get(h.strategy_id) ?? [];
           existing.push(h);
           hotspotsByStrategy.set(h.strategy_id, existing);
@@ -220,7 +222,9 @@ export default function TasksPage({
               user_vote: userVoteMap.get(assignment.id) ?? null,
             },
             hotspots:
-              hotspotsByStrategy.get(assignment.strategy_id) ?? [],
+              assignment.strategy_id
+                ? hotspotsByStrategy.get(assignment.strategy_id) ?? []
+                : [],
           };
         })
         .sort((a, b) => {
@@ -360,10 +364,13 @@ export default function TasksPage({
   // Sort tasks based on sort mode
   const sortedTasks = [...tasks].sort((a, b) => {
     if (sortMode === "newest") {
-      return (
-        new Date(b.assignment.assigned_at).getTime() -
-        new Date(a.assignment.assigned_at).getTime()
-      );
+      const bTime = b.assignment.assigned_at
+        ? new Date(b.assignment.assigned_at).getTime()
+        : 0;
+      const aTime = a.assignment.assigned_at
+        ? new Date(a.assignment.assigned_at).getTime()
+        : 0;
+      return bTime - aTime;
     }
     // Default: by score (already sorted, but re-sort for safety)
     const scoreA =

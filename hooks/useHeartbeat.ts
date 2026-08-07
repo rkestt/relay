@@ -93,7 +93,7 @@ export function useHeartbeat(lobbyId: string | null) {
         );
 
         for (const m of data.members) {
-          if (m.profiles) {
+          if (m.profiles && m.user_id) {
             setMemberProfile(m.user_id, {
               username: m.profiles.username,
               avatar_url: m.profiles.avatar_url,

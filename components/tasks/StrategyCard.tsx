@@ -5,13 +5,13 @@ import { VoteButtons } from "./VoteButtons";
 import Image from "next/image";
 import type {
   TaskAssignment,
-  StrategyTemplate,
+  StrategyTemplateWithRelations,
   StrategyHotspot,
 } from "@/types";
 
 interface StrategyCardProps {
   assignment: TaskAssignment & {
-    strategy: StrategyTemplate | null;
+    strategy: StrategyTemplateWithRelations | null;
     user_vote?: "up" | "down" | null;
     upvotes?: number;
     downvotes?: number;
@@ -22,7 +22,7 @@ interface StrategyCardProps {
   onClick: () => void;
 }
 
-function getFirstImage(strategy: StrategyTemplate): string | null {
+function getFirstImage(strategy: StrategyTemplateWithRelations): string | null {
   if (strategy.images && strategy.images.length > 0) {
     const sorted = [...strategy.images].sort(
       (a, b) => a.sort_order - b.sort_order,

@@ -550,12 +550,14 @@ export default function TaskDetailPage({
               </span>
               <span className="text-muted-foreground">·</span>
               <span>
-                {new Date(assignment.assigned_at).toLocaleDateString(undefined, {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {assignment.assigned_at
+                  ? new Date(assignment.assigned_at).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "—"}
               </span>
             </div>
 

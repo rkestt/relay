@@ -414,35 +414,41 @@ describe("useLobbyRealtime", () => {
     expect(storeActions.setConnectionStatus).toHaveBeenLastCalledWith("connected");
   });
 
-  it("caps reconnect delay at 30 seconds", () => {
+  it("stops retrying after 3 reconnect attempts", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
 
-    // Simulate many errors to push delay to max
     let callCount = 0;
     mockChannel.subscribe.mockReset();
     mockChannel.subscribe.mockImplementation((cb) => {
       callCount++;
-      if (callCount <= 6) cb("CHANNEL_ERROR");
-      else cb("SUBSCRIBED");
+      cb("CHANNEL_ERROR"); // always error
       return mockChannel;
     });
 
     renderHook(() => useLobbyRealtime("lobby-1"));
 
-    // After 6 errors the delay should be capped at 30s
-    // error 1→ 1s, error 2→ 2s, error 3→ 4s, error 4→ 8s, error 5→ 16s, error 6→ 30s
-    for (let i = 0; i < 5; i++) {
-      const delay = Math.min(1000 * 2 ** i, 30000);
-      act(() => {
-        vi.advanceTimersByTime(delay);
-      });
-    }
-    // 6th reconnect (succeeds), waiting 30s
+    // retry 1 → delay 1s (retryCount 0 → 1)
+    act(() => {
+      vi.advanceTimersByTime(1_000);
+    });
+    // retry 2 → delay 2s (retryCount 1 → 2)
+    act(() => {
+      vi.advanceTimersByTime(2_000);
+    });
+    // retry 3 → delay 4s (retryCount 2 → 3)
+    act(() => {
+      vi.advanceTimersByTime(4_000);
+    });
+
+    // At retryCount >= 3, no more reconnects scheduled — falls back to disconnected
     act(() => {
       vi.advanceTimersByTime(30_000);
     });
 
-    expect(mockSupabaseClient.channel).toHaveBeenCalledTimes(7);
-    expect(storeActions.setConnectionStatus).toHaveBeenLastCalledWith("connected");
+    // Initial subscribe + 3 retries = 4 channel calls
+    expect(mockSupabaseClient.channel).toHaveBeenCalledTimes(4);
+    expect(storeActions.setConnectionStatus).toHaveBeenLastCalledWith(
+      "disconnected",
+    );
   });
 });
