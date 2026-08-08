@@ -46,8 +46,7 @@ NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL=https://your-store.lemonsqueezy.com/check
 5. **Configura il webhook** → `Settings → Webhooks → Add webhook`:
    - URL: `https://<dominio>/api/webhooks/lemon-squeezy`
    - Eventi: **`order_created`** e **`order_refunded`** (per OTP bastano questi)
-   - Il signing secret mostrato da LS va in `LEMON_SQUEEZY_WEBHOOK_SECRET`.
-   - LS firma il body con HMAC SHA-256 nell'header `X-Signature` — già verificato dal codice.
+   - Il signing secret va in `LEMON_SQUEEZY_WEBHOOK_SECRET` e in LS (campo Signing secret): **LS impone max 40 char** — generare con `openssl rand -hex 20`. Firmato con HMAC SHA-256 nell'header `X-Signature` — già verificato dal codice.
 
 ## Note implementative
 
