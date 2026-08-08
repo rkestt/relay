@@ -32,7 +32,7 @@ Niente abbonamenti mensili, niente rinnovi, niente dunning.
 2. **Crea il prodotto**:
    - Nome: `r6hub Pro`
    - Tipo: **One-time purchase** (NON subscription)
-   - Prezzo: **€19.99** una tantum
+   - Prezzo: **€14.99** una tantum
 3. **Genera le API key** → Settings → API → New API key (Read & Write).
 4. **Copia le 4 variabili** in `.env.local` (e in Vercel per prod):
 

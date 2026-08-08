@@ -106,7 +106,7 @@ export default function UpgradePage() {
         <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card">
           <div className="border-b border-border p-6 text-center">
             <div className="text-4xl font-bold">
-              €19.99
+              €14.99
               <span className="text-base font-normal text-muted-foreground">una tantum · per sempre</span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">Paghi una volta. Pro è tuo. Niente abbonamento.</p>

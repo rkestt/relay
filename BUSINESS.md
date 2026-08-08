@@ -12,14 +12,14 @@ r6hub è un **second-screen tactical companion** per Rainbow Six Siege: lobby re
 **Il modello è: free = strumento, Pro = knowledge base eseguibile.**
 
 - **Free (completo, sempre)**: coordinamento live della lobby, strategie contestuali assegnate dall'engine, link condivisi view-only. Niente limiti, niente paywall sul flusso di gioco.
-- **Pro — €19.99 una tantum (lifetime)**: la biblioteca completa di strategie cercabile (mappa/sito/operatore/tag), dettaglio esecutivo fuori lobby, profilo pubblico, playbook/favoriti, badge Verified Contributor, validazione prioritaria.
+- **Pro — €14.99 una tantum (lifetime)**: la biblioteca completa di strategie cercabile (mappa/sito/operatore/tag), dettaglio esecutivo fuori lobby, profilo pubblico, playbook/favoriti, badge Verified Contributor, validazione prioritaria.
 - **Il paywall è sulla scoperta, non sull'esecuzione.** In lobby tutto è gratis e completo; Pro è "scopri e costruisci oltre il tuo stack".
 
 **Modello OTP (one-time purchase)**: paghi una volta, Pro attivo per sempre. Niente abbonamenti mensili — scelta deliberata contro il modello subscription delle app moderne.
 
 La rottura del circolo contenuti-utenti avviene per seeding: semini tu le prime 50-100 strategie core, poi il flywheel contributor li sostituisce.
 
-**Realtà dei numeri:** è un progetto portfolio prima che un business da ricavi. L'OTP a €19.99 lifetime semplifica tutto: zero dunning, zero churn, zero stanze di cancellazione; l'upside è semplicemente il numero di utenti attivi lifetime × 19.99.
+**Realtà dei numeri:** è un progetto portfolio prima che un business da ricavi. L'OTP a €14.99 lifetime semplifica tutto: zero dunning, zero churn, zero stanze di cancellazione; l'upside è semplicemente il numero di utenti attivi lifetime × 14.99.
 
 ---
 
@@ -77,7 +77,7 @@ FREE (strumento, sempre completo)
 ├── Link condivisi view-only (regola ferrea, vedi §8.1)
 └── Auth, profilo base
 
-PRO — €19.99 una tantum (lifetime, knowledge base + identità)
+PRO — €14.99 una tantum (lifetime, knowledge base + identità)
 ├── Biblioteca completa: browse, search, filtri (mappa/sito/operatore/tag)
 ├── Dettaglio esecutivo FUORI lobby (hotspot, task, image)
 ├── Profilo pubblico + Verified Contributor + playbook/favoriti
@@ -152,7 +152,7 @@ Il loop si rompe in **un solo punto controllabile al 100%: il seeding**. Il fond
 
 | Voce | Decisione |
 |---|---|
-| Prezzo | **€19.99 una tantum** (lifetime, un solo tier) |
+| Prezzo | **€14.99 una tantum** (lifetime, un solo tier) |
 | Prodotto | **One-time purchase** (no abbonamento) |
 | Processore | **Lemon Squeezy** (Merchant of Record) |
 | Perché MoR | Gestisce IVA UE + sales tax globale + ricevute. Zero sbatti fiscale, zero partita IVA necessaria. Costo ~5%+0.50€/transazione. |
@@ -162,7 +162,7 @@ Il loop si rompe in **un solo punto controllabile al 100%: il seeding**. Il fond
 ### 7.1 Economia del lifetime
 
 - **CAC = ~0**: la crescita è organica (loop di condivisione, §8). Con CAC=0, qualunque prezzo positivo è profitto. Questo è il punto di forza del modello: non c'è spend in acquisizione.
-- **LTV = €19.99 fisso** (lifetime, niente rinnovo). Trade-off accettato: niente revenue ricorrente, in cambio di zero dunning, zero churn, zero gestione abbonamenti.
+- **LTV = €14.99 fisso** (lifetime, niente rinnovo). Trade-off accettato: niente revenue ricorrente, in cambio di zero dunning, zero churn, zero gestione abbonamenti.
 - Upside a regime: 30-100 Pro lifetime → **€600-1.600 una tantum**, più il segnale di qualità del prodotto (gente che paga = prodotto che vale).
 
 ---
