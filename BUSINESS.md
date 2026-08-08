@@ -12,12 +12,14 @@ r6hub è un **second-screen tactical companion** per Rainbow Six Siege: lobby re
 **Il modello è: free = strumento, Pro = knowledge base eseguibile.**
 
 - **Free (completo, sempre)**: coordinamento live della lobby, strategie contestuali assegnate dall'engine, link condivisi view-only. Niente limiti, niente paywall sul flusso di gioco.
-- **Pro — €3.99/mese**: la biblioteca completa di strategie cercabile (mappa/sito/operatore/tag), dettaglio esecutivo fuori lobby, profilo pubblico, playbook/favoriti, badge Verified Contributor, validazione prioritaria.
+- **Pro — €19.99 una tantum (lifetime)**: la biblioteca completa di strategie cercabile (mappa/sito/operatore/tag), dettaglio esecutivo fuori lobby, profilo pubblico, playbook/favoriti, badge Verified Contributor, validazione prioritaria.
 - **Il paywall è sulla scoperta, non sull'esecuzione.** In lobby tutto è gratis e completo; Pro è "scopri e costruisci oltre il tuo stack".
 
-**La rottura del circolo contenuti-utenti** avviene per seeding: semini tu le prime 50-100 strategie core, poi il flywheel contributor li sostituisce.
+**Modello OTP (one-time purchase)**: paghi una volta, Pro attivo per sempre. Niente abbonamenti mensili — scelta deliberata contro il modello subscription delle app moderne.
 
-**Realtà dei numeri:** tetto realistico €200-800/mese con 500-2000 MAU. Il valore vero del progetto oggi è la qualità del prodotto e il portfolio, non i ricavi. Kill criteria espliciti al §9.
+La rottura del circolo contenuti-utenti avviene per seeding: semini tu le prime 50-100 strategie core, poi il flywheel contributor li sostituisce.
+
+**Realtà dei numeri:** è un progetto portfolio prima che un business da ricavi. L'OTP a €19.99 lifetime semplifica tutto: zero dunning, zero churn, zero stanze di cancellazione; l'upside è semplicemente il numero di utenti attivi lifetime × 19.99.
 
 ---
 
@@ -75,7 +77,7 @@ FREE (strumento, sempre completo)
 ├── Link condivisi view-only (regola ferrea, vedi §8.1)
 └── Auth, profilo base
 
-PRO — €3.99/mese (knowledge base + identità)
+PRO — €19.99 una tantum (lifetime, knowledge base + identità)
 ├── Biblioteca completa: browse, search, filtri (mappa/sito/operatore/tag)
 ├── Dettaglio esecutivo FUORI lobby (hotspot, task, image)
 ├── Profilo pubblico + Verified Contributor + playbook/favoriti
@@ -150,17 +152,18 @@ Il loop si rompe in **un solo punto controllabile al 100%: il seeding**. Il fond
 
 | Voce | Decisione |
 |---|---|
-| Prezzo | **€3.99/mese**, un solo tier |
-| Prodotto | Abbonamento (knowledge base viva) |
+| Prezzo | **€19.99 una tantum** (lifetime, un solo tier) |
+| Prodotto | **One-time purchase** (no abbonamento) |
 | Processore | **Lemon Squeezy** (Merchant of Record) |
-| Perché MoR | Gestisce IVA UE + sales tax globale + ricevute + dunning. Zero sbatti fiscale, zero partita IVA necessaria. Costo ~5%+0.50€/transazione. |
+| Perché MoR | Gestisce IVA UE + sales tax globale + ricevute. Zero sbatti fiscale, zero partita IVA necessaria. Costo ~5%+0.50€/transazione. |
 | Diritto recesso UE | 14 giorni (con consenso all'erogazione immediata del servizio) — gestito dal MoR |
 | Licenza | License key + verifica in-app (API Lemon Squeezy) |
 
-### 7.1 Economia dell'abbonamento
+### 7.1 Economia del lifetime
 
-- Churn atteso: 8-12%/mese (nicchia, stagionale) → **LTV ≈ €40-50** (€3.99 × 1/churn).
-- **CAC = ~0**: la crescita è organica (loop di condivisione, §8). Con CAC=0, qualunque LTV positivo è profitto. Questo è il punto di forza del modello: non c'è spend in acquisizione.
+- **CAC = ~0**: la crescita è organica (loop di condivisione, §8). Con CAC=0, qualunque prezzo positivo è profitto. Questo è il punto di forza del modello: non c'è spend in acquisizione.
+- **LTV = €19.99 fisso** (lifetime, niente rinnovo). Trade-off accettato: niente revenue ricorrente, in cambio di zero dunning, zero churn, zero gestione abbonamenti.
+- Upside a regime: 30-100 Pro lifetime → **€600-1.600 una tantum**, più il segnale di qualità del prodotto (gente che paga = prodotto che vale).
 
 ---
 
@@ -202,7 +205,7 @@ Obiettivo realistico: **5-15% di conversione awareness→MAU**, **10-15% degli s
 | Metrica | Obiettivo | Ricavo atteso |
 |---|---|---|
 | MAU | 500-2.000 | — |
-| Sub | 50-200 | €200-800/mese |
+| Pro lifetime | 50-200 | €1.000-4.000 (una tantum) |
 | Strategie validate | 300+ | — |
 | Contributor attivi | 10-30 | — |
 | Lobby/mese | 500-1.000 | (gate per Meta Insights) |
@@ -213,7 +216,7 @@ Se dopo il lancio e una spinta di distribuzione ragionevole:
 - **MAU < 100** dopo 3 mesi → il prodotto non attacca. Stop monetizzazione, resta portfolio.
 - **Sub < 10** con 300+ strategie e 500+ MAU → il modello non converte. Testare prezzo/offerta una volta; se fallisce, chiudere.
 
-Il progetto non ha costi variabili rilevanti (solo server, €5-15/mese): **il downside è quasi zero, l'upside è €200-800/mese**. È un'opzione reale, non una scommessa.
+Il progetto non ha costi variabili rilevanti (solo server, €5-15/mese): **il downside è quasi zero, l'upside è €600-1.600 una tantum dai Pro lifetime**. È un'opzione reale, non una scommessa.
 
 ---
 

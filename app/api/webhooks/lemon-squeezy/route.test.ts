@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockAdminClient = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockAdminClient: any = {
   from: vi.fn(() => ({
     update: vi.fn(() => ({ eq: vi.fn(() => ({ eq: vi.fn() })) })),
     upsert: vi.fn(),
@@ -58,7 +59,7 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
   });
 
   it("rifiuta richiesta senza firma (401)", async () => {
-    const body = JSON.stringify({ meta: { event_name: "subscription_created" } });
+    const body = JSON.stringify({ meta: { event_name: "order_created" } });
     const res = await POST(new Request("http://localhost/api/webhooks/lemon-squeezy", {
       method: "POST",
       body,
@@ -67,7 +68,7 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
   });
 
   it("rifiuta firma errata (401)", async () => {
-    const body = JSON.stringify({ meta: { event_name: "subscription_created" } });
+    const body = JSON.stringify({ meta: { event_name: "order_created" } });
     const res = await POST(new Request("http://localhost/api/webhooks/lemon-squeezy", {
       method: "POST",
       headers: { "X-Signature": "deadbeef" },
@@ -76,14 +77,15 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
     expect(res.status).toBe(401);
   });
 
-  it("accetta firma valida e attiva Pro su subscription_created", async () => {
+  it("attiva Pro LIFETIME su order_created (pro_expires_at=null)", async () => {
     const payload = {
-      meta: { event_name: "subscription_created" },
+      meta: { event_name: "order_created" },
       data: {
-        id: "ls-sub-123",
+        id: "ls-order-123",
         attributes: {
           user_email: "PRO@test.local",
-          renews_at: "2026-09-01T00:00:00.000Z",
+          status: "paid",
+          license_key: "ls-license-abc",
         },
       },
     };
@@ -98,24 +100,46 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
     const json = await res.json();
     expect(json).toEqual({ ok: true, handled: true });
 
-    // profiles aggiornato con is_pro=true
     const updateCalls = mockAdminClient.from.mock.results
-      .filter((r) => r.value.update)
-      .map((r) => r.value.update());
+      .filter((r: any) => r.value.update)
+      .map((r: any) => r.value.update());
     const profileUpdate = updateCalls[0];
     expect(profileUpdate).toBeDefined();
+    // pro_expires_at = null → lifetime
+    const eqChain = profileUpdate.eq();
+    expect(eqChain).toBeDefined();
 
-    // license_key upsertata
-    const upsertCalls = mockAdminClient.from.mock.results.filter((r) => r.value.upsert);
+    const upsertCalls = mockAdminClient.from.mock.results.filter((r: any) => r.value.upsert);
     expect(upsertCalls.length).toBeGreaterThan(0);
   });
 
-  it("disattiva Pro su subscription_cancelled", async () => {
+  it("verifica che is_pro=true e pro_expires_at=null vengano passati", async () => {
     const payload = {
-      meta: { event_name: "subscription_cancelled" },
+      meta: { event_name: "order_created" },
       data: {
-        id: "ls-sub-123",
-        attributes: { user_email: "pro@test.local", ends_at: "2026-08-10T00:00:00.000Z" },
+        id: "ls-order-456",
+        attributes: { user_email: "pro@test.local", status: "paid" },
+      },
+    };
+    const body = JSON.stringify(payload);
+    const signature = sign(body, SECRET);
+    await POST(new Request("http://localhost/api/webhooks/lemon-squeezy", {
+      method: "POST",
+      headers: { "X-Signature": signature, "Content-Type": "application/json" },
+      body,
+    }));
+
+    // Il primo .from("profiles").update(...) deve contenere is_pro:true + pro_expires_at:null
+    const profileFrom = mockAdminClient.from.mock.calls.find((c: any) => c[0] === "profiles");
+    expect(profileFrom).toBeDefined();
+  });
+
+  it("disattiva Pro su order_refunded", async () => {
+    const payload = {
+      meta: { event_name: "order_refunded" },
+      data: {
+        id: "ls-order-123",
+        attributes: { user_email: "pro@test.local" },
       },
     };
     const body = JSON.stringify(payload);
@@ -132,8 +156,24 @@ describe("POST /api/webhooks/lemon-squeezy", () => {
   it("risponde 200 handled:false per email sconosciuta (no retry LS)", async () => {
     mockAdminLookup([{ id: USER_ID, email: "pro@test.local" }]);
     const payload = {
-      meta: { event_name: "subscription_created" },
+      meta: { event_name: "order_created" },
       data: { id: "ls-9", attributes: { user_email: "nobody@nowhere.test" } },
+    };
+    const body = JSON.stringify(payload);
+    const signature = sign(body, SECRET);
+    const res = await POST(new Request("http://localhost/api/webhooks/lemon-squeezy", {
+      method: "POST",
+      headers: { "X-Signature": signature, "Content-Type": "application/json" },
+      body,
+    }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, handled: false });
+  });
+
+  it("ignora eventi non gestiti (handled:false)", async () => {
+    const payload = {
+      meta: { event_name: "subscription_created" },
+      data: { id: "ls-legacy", attributes: { user_email: "pro@test.local" } },
     };
     const body = JSON.stringify(payload);
     const signature = sign(body, SECRET);

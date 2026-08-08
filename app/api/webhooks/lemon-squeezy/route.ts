@@ -4,19 +4,17 @@ import { NextResponse } from "next/server";
 import { createHmac, timingSafeEqual } from "crypto";
 
 // ──────────────────────────────────────────────
-// POST /api/webhooks/lemon-squeezy — Pro subscription webhook
+// POST /api/webhooks/lemon-squeezy — Pro one-time purchase webhook
 // Merchant of Record aggiorna lo stato Pro via eventi.
+// Modello: OTP (one-time purchase). is_pro lifetime (pro_expires_at = NULL).
 // Firma: HMAC SHA-256 del body grezzo, header X-Signature.
 // ──────────────────────────────────────────────
 
-const PRO_EXPIRY_DAYS = 30; // fallback per subscription_created senza ends_at
-
-type LSSubscriptionAttributes = {
+type LSOrderAttributes = {
   user_email?: string;
   user_name?: string;
   status?: string;
-  ends_at?: string | null;
-  renews_at?: string | null;
+  license_key?: string;
   created_at?: string;
 };
 
@@ -46,7 +44,7 @@ export async function POST(request: Request) {
     meta?: { event_name?: string; custom_data?: Record<string, unknown> };
     data?: {
       id?: string;
-      attributes?: LSSubscriptionAttributes;
+      attributes?: LSOrderAttributes;
       relationships?: Record<string, unknown>;
     };
   };
@@ -111,17 +109,11 @@ export async function POST(request: Request) {
     (payload.data?.id ? `ls_${payload.data.id}` : `ls_${eventName}_${Date.now()}`);
 
   switch (eventName) {
-    case "subscription_created":
-    case "subscription_updated":
-    case "subscription_resumed": {
-      const endsAt = attrs.ends_at ?? attrs.renews_at ?? null;
-      const proExpiresAt = endsAt
-        ? new Date(endsAt)
-        : new Date(Date.now() + PRO_EXPIRY_DAYS * 86400_000);
-
+    case "order_created": {
+      // One-time purchase: Pro LIFETIME. pro_expires_at = null → mai scaduto.
       await adminClient
         .from("profiles")
-        .update({ is_pro: true, pro_expires_at: proExpiresAt.toISOString() })
+        .update({ is_pro: true, pro_expires_at: null })
         .eq("id", userId);
 
       await adminClient.from("license_keys").upsert(
@@ -130,19 +122,15 @@ export async function POST(request: Request) {
           provider: "lemon-squeezy",
           key: licenseKey,
           status: "active",
-          expires_at: proExpiresAt.toISOString(),
+          expires_at: null,
         },
         { onConflict: "key" },
       );
       break;
     }
 
-    case "subscription_cancelled":
-    case "subscription_expired":
-    case "subscription_paused": {
-      const endsAt =
-        attrs.ends_at ?? new Date(Date.now()).toISOString();
-
+    case "order_refunded": {
+      // Rimborso: revoca Pro lifetime.
       await adminClient
         .from("profiles")
         .update({ is_pro: false, pro_expires_at: null })
@@ -150,36 +138,9 @@ export async function POST(request: Request) {
 
       await adminClient
         .from("license_keys")
-        .update({ status: "cancelled", expires_at: endsAt as string })
+        .update({ status: "refunded", expires_at: null })
         .eq("user_id", userId)
         .eq("provider", "lemon-squeezy");
-      break;
-    }
-
-    case "subscription_payment_success": {
-      // Rinnovo riuscito: riattiva se non era già attiva
-      const endsAt = attrs.renews_at ?? null;
-      const proExpiresAt = endsAt
-        ? new Date(endsAt)
-        : new Date(Date.now() + PRO_EXPIRY_DAYS * 86400_000);
-
-      await adminClient
-        .from("profiles")
-        .update({ is_pro: true, pro_expires_at: proExpiresAt.toISOString() })
-        .eq("id", userId);
-
-      await adminClient
-        .from("license_keys")
-        .upsert(
-          {
-            user_id: userId,
-            provider: "lemon-squeezy",
-            key: licenseKey,
-            status: "active",
-            expires_at: proExpiresAt.toISOString(),
-          },
-          { onConflict: "key" },
-        );
       break;
     }
 

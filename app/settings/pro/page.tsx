@@ -24,7 +24,6 @@ export default function ProSettingsPage() {
   const [state, setState] = useState<ProState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [cancelling, setCancelling] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -70,21 +69,6 @@ export default function ProSettingsPage() {
     (!state?.pro_expires_at ||
       new Date(state.pro_expires_at).getTime() > Date.now());
 
-  async function handleCancel() {
-    setCancelling(true);
-    try {
-      const res = await fetch("/api/pro/cancel", { method: "POST" });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Cancel failed");
-      await load();
-    } catch (e) {
-      logger.error("ProSettings", "cancel failed", e);
-      setError("Cancellazione non riuscita");
-    } finally {
-      setCancelling(false);
-    }
-  }
-
   if (loading) {
     return (
       <div className="container max-w-2xl py-8 space-y-4 animate-pulse">
@@ -118,8 +102,8 @@ export default function ProSettingsPage() {
             <p className="mt-1 text-sm text-muted-foreground">
               {isActive
                 ? state?.pro_expires_at
-                  ? `Rinnovo: ${new Date(state.pro_expires_at).toLocaleDateString("it-IT")}`
-                  : "Abbonamento attivo senza scadenza."
+                  ? `Scadenza: ${new Date(state.pro_expires_at).toLocaleDateString("it-IT")}`
+                  : "Attivato per sempre — nessun rinnovo."
                 : "Attiva Pro per la biblioteca completa."}
             </p>
           </div>
@@ -132,15 +116,6 @@ export default function ProSettingsPage() {
             </Link>
           )}
         </div>
-        {isActive && (
-          <button
-            onClick={handleCancel}
-            disabled={cancelling}
-            className="mt-4 rounded-lg border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
-          >
-            {cancelling ? "Annullamento…" : "Annulla abbonamento"}
-          </button>
-        )}
       </div>
 
       {/* History licenze */}

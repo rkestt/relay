@@ -74,7 +74,7 @@ export default function UpgradePage() {
         <div className="mt-8 rounded-2xl border border-success/30 bg-success/10 p-6 text-center">
           <h2 className="text-lg font-semibold text-success">Benvenuto in Pro! 🎉</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            L&apos;abbonamento è attivo. La biblioteca completa è sbloccata.
+            Pro è attivo e resterà tuo per sempre. La biblioteca completa è sbloccata.
           </p>
           <div className="mt-4 flex justify-center">
             <Link
@@ -91,7 +91,7 @@ export default function UpgradePage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {status?.pro_expires_at
               ? `Scade il ${new Date(status.pro_expires_at).toLocaleDateString("it-IT")}.`
-              : "Abbonamento attivo."}
+              : "Attivato per sempre — nessun rinnovo, nessuna scadenza."}
           </p>
           <div className="mt-4 flex justify-center gap-3">
             <Link
@@ -100,22 +100,16 @@ export default function UpgradePage() {
             >
               Vai alla biblioteca
             </Link>
-            <Link
-              href="/settings/pro"
-              className="rounded-lg border border-border bg-card px-4 py-2 text-sm hover:border-primary/50"
-            >
-              Gestisci abbonamento
-            </Link>
           </div>
         </div>
       ) : (
         <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card">
           <div className="border-b border-border p-6 text-center">
             <div className="text-4xl font-bold">
-              €3.99
-              <span className="text-base font-normal text-muted-foreground">/mese</span>
+              €19.99
+              <span className="text-base font-normal text-muted-foreground">una tantum · per sempre</span>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">Un solo tier. Tutto incluso.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Paghi una volta. Pro è tuo. Niente abbonamento.</p>
           </div>
           <ul className="space-y-2 p-6 text-sm">
             <li className="flex items-center gap-2">
